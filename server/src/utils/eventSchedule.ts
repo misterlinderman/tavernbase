@@ -26,12 +26,45 @@ const DAY_NAMES = [
   'Saturday',
 ] as const;
 
-export function getTodayBounds(now = new Date()) {
-  const startOfToday = new Date(now);
-  startOfToday.setHours(0, 0, 0, 0);
+export function parseCalendarDate(value: string): Date {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
 
-  const endOfToday = new Date(now);
-  endOfToday.setHours(23, 59, 59, 999);
+  if (match) {
+    const year = Number(match[1]);
+    const month = Number(match[2]) - 1;
+    const day = Number(match[3]);
+    const parsed = new Date(year, month, day);
+
+    if (
+      parsed.getFullYear() !== year ||
+      parsed.getMonth() !== month ||
+      parsed.getDate() !== day
+    ) {
+      throw new Error('Invalid date');
+    }
+
+    return parsed;
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error('Invalid date');
+  }
+
+  return parsed;
+}
+
+export function getTodayBounds(now = new Date()) {
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const endOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    59,
+    999
+  );
 
   return { startOfToday, endOfToday, now };
 }
@@ -42,18 +75,30 @@ export function resolveScheduleType(event: EventScheduleFields): EventScheduleTy
 
 export function isWeeklyEventActive(event: EventScheduleFields, now = new Date()): boolean {
   if (resolveScheduleType(event) !== 'weekly') return false;
-  if (event.dayOfWeek === undefined || !event.startDate || !event.endDate) return false;
+  if (event.dayOfWeek === undefined || !event.endDate) return false;
 
-  const { endOfToday, startOfToday } = getTodayBounds(now);
-  const startDate = new Date(event.startDate);
+  const { startOfToday } = getTodayBounds(now);
   const endDate = new Date(event.endDate);
 
-  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) return false;
+  if (Number.isNaN(endDate.getTime())) return false;
 
-  startDate.setHours(0, 0, 0, 0);
   endDate.setHours(23, 59, 59, 999);
 
-  return startDate <= endOfToday && endDate >= startOfToday;
+  // Visible through the end of the season so recurring items can populate the grid
+  // before their first occurrence (start date is informational for staff).
+  return endDate >= startOfToday;
+}
+
+export function isWeeklyEventStarted(event: EventScheduleFields, now = new Date()): boolean {
+  if (!event.startDate) return true;
+
+  const { startOfToday } = getTodayBounds(now);
+  const startDate = new Date(event.startDate);
+
+  if (Number.isNaN(startDate.getTime())) return true;
+
+  startDate.setHours(0, 0, 0, 0);
+  return startDate <= startOfToday;
 }
 
 export function isDatedEventActive(event: EventScheduleFields, now = new Date()): boolean {
@@ -88,7 +133,7 @@ export function isEventPast(event: EventScheduleFields, now = new Date()): boole
 }
 
 export function getActiveEventsFilter(now = new Date()) {
-  const { startOfToday, endOfToday } = getTodayBounds(now);
+  const { startOfToday } = getTodayBounds(now);
 
   return {
     $or: [
@@ -98,7 +143,6 @@ export function getActiveEventsFilter(now = new Date()) {
       },
       {
         scheduleType: 'weekly',
-        startDate: { $lte: endOfToday },
         endDate: { $gte: startOfToday },
       },
     ],
@@ -140,12 +184,11 @@ function parseDateInput(value: unknown, fieldName: string): Date {
     throw new Error(`${fieldName} is required`);
   }
 
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
+  try {
+    return parseCalendarDate(value);
+  } catch {
     throw new Error(`Invalid ${fieldName}`);
   }
-
-  return parsed;
 }
 
 export function parseEventScheduleInput(body: Record<string, unknown>): ParsedEventSchedule {

@@ -144,6 +144,14 @@
   color: var(--gold);
 }
 
+.livePill {
+  color: var(--green-bright);
+}
+
+.upcomingPill {
+  color: var(--amber);
+}
+
 .eventTime {
   font-family: 'Oswald', sans-serif;
   font-size: 0.75rem;

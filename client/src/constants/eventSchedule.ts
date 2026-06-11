@@ -42,20 +42,49 @@ export function formatDateRange(startDate?: string, endDate?: string): string | 
   return `${formatter.format(start)} – ${formatter.format(end)}`;
 }
 
+function startOfToday(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
 export function isEventPast(event: {
   scheduleType?: EventScheduleType;
   date: string;
   endDate?: string;
 }): boolean {
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
+  const today = startOfToday();
 
   if (event.scheduleType === 'weekly') {
     if (!event.endDate) return false;
     const endDate = new Date(event.endDate);
     endDate.setHours(23, 59, 59, 999);
-    return endDate < startOfToday;
+    return endDate < today;
   }
 
-  return new Date(event.date) < startOfToday;
+  const eventDate = new Date(event.date);
+  eventDate.setHours(0, 0, 0, 0);
+  return eventDate < today;
+}
+
+export function isWeeklyEventStarted(event: {
+  scheduleType?: EventScheduleType;
+  startDate?: string;
+}): boolean {
+  if (event.scheduleType !== 'weekly' || !event.startDate) return true;
+
+  const startDate = new Date(event.startDate);
+  startDate.setHours(0, 0, 0, 0);
+  return startDate <= startOfToday();
+}
+
+export function isWeeklyEventLive(event: {
+  scheduleType?: EventScheduleType;
+  endDate?: string;
+}): boolean {
+  if (event.scheduleType !== 'weekly' || !event.endDate) return false;
+
+  const today = startOfToday();
+  const endDate = new Date(event.endDate);
+  endDate.setHours(23, 59, 59, 999);
+  return endDate >= today;
 }

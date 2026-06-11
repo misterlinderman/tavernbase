@@ -5,6 +5,8 @@ import {
   DAY_OF_WEEK_OPTIONS,
   formatDateRange,
   isEventPast,
+  isWeeklyEventLive,
+  isWeeklyEventStarted,
 } from '../../constants/eventSchedule';
 import {
   EVENT_TYPE_LABELS,
@@ -153,7 +155,7 @@ function EventsPage() {
             </div>
             <p className={styles.help}>
               {form.scheduleType === 'weekly'
-                ? 'Shows every week on the chosen day between the start and end dates. The day label appears on the public site.'
+                ? 'Shows on the public site through the end date (including before the start date). The day label appears on each weekly card.'
                 : 'A one-time event on a single date. No day-of-week label on the public site.'}
             </p>
           </div>
@@ -320,6 +322,8 @@ function EventsPage() {
                 ? { month: 'WK', day: DAY_OF_WEEK_OPTIONS.find((d) => d.value === item.dayOfWeek)?.label.slice(0, 3).toUpperCase() ?? '—' }
                 : formatEventDate(item.date);
               const scheduleRange = isWeekly ? formatDateRange(item.startDate, item.endDate) : null;
+              const weeklyLive = isWeekly && isWeeklyEventLive(item);
+              const weeklyStarted = isWeekly && isWeeklyEventStarted(item);
 
               return (
                 <li key={item._id} className={`${styles.eventRow} ${past ? styles.past : ''}`}>
@@ -334,6 +338,12 @@ function EventsPage() {
                         {EVENT_TYPE_LABELS[item.type]}
                       </span>
                       {isWeekly ? <span className={`pill ${styles.schedulePill}`}>Weekly</span> : null}
+                      {weeklyLive && !weeklyStarted ? (
+                        <span className={`pill ${styles.upcomingPill}`}>On site · starts later</span>
+                      ) : null}
+                      {weeklyLive && weeklyStarted ? (
+                        <span className={`pill ${styles.livePill}`}>Live on site</span>
+                      ) : null}
                       {past ? <span className={`pill past ${styles.pastPill}`}>Past · hidden</span> : null}
                     </div>
                     <p className={styles.eventTime}>{item.timeLabel}</p>
