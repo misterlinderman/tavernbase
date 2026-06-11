@@ -1,0 +1,13 @@
+---
+description: Base MERN template — stack, layout, and where to extend client vs server
+alwaysApply: true
+---
+
+# Base MERN template
+
+- **Layout**: `client/` (Vite React) and `server/` (Express) are **siblings at the repo root**.
+- **Auth**: Auth0 on the client; JWT validation on the server (`server/src/middleware/auth.ts`). API calls go through `client/src/services/api.ts`.
+- **API**: Routes live under `server/src/routes/` and are mounted in `server/src/index.ts` under `/api`.
+- **Data**: Mongoose models in `server/src/models/`.
+
+For diagrams, env split, and request flow, read `docs/architecture/ARCHITECTURE.md`. For longer patterns and snippets, read the repo root `.cursorrules`.

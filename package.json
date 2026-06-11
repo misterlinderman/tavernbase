@@ -1,0 +1,41 @@
+{
+  "name": "baseapp",
+  "version": "1.0.0",
+  "description": "Modern MERN stack starter with TypeScript, Auth0, and Tailwind CSS",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n server,client -c magenta,cyan \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "start": "cd server && npm start",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+    "lint": "cd client && npm run lint && cd ../server && npm run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "clean": "rm -rf client/dist server/dist client/node_modules server/node_modules node_modules"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prettier": "^3.2.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/misterlinderman/baseapp.git"
+  },
+  "keywords": [
+    "mern",
+    "typescript",
+    "react",
+    "express",
+    "mongodb",
+    "auth0",
+    "tailwind"
+  ],
+  "author": "",
+  "license": "MIT"
+}
