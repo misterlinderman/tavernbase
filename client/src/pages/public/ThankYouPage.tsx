@@ -35,7 +35,7 @@ function ThankYouPage() {
   return (
     <>
       <Nav />
-      <main className={`section ${styles.main}`}>
+      <main id="main" className={`section ${styles.main}`}>
         <div className="wrap">
           <div className={styles.card}>
             <CheckIcon />

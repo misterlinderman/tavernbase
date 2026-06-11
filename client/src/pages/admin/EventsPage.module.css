@@ -123,6 +123,18 @@
   color: var(--muted);
 }
 
+.skeletonBlock {
+  min-height: 4rem;
+  border-color: var(--line);
+}
+
+.skeletonBody {
+  flex: 1;
+  min-height: 4rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
 @media (max-width: 900px) {
   .formGrid {
     grid-template-columns: 1fr;

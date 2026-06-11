@@ -31,6 +31,19 @@
   transform: translateY(-1px);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn-green,
+  .btn-outline {
+    transition: none;
+  }
+
+  .btn-green:hover,
+  .btn-outline:hover {
+    transform: none;
+  }
+}
+
 .btn-outline {
   background: transparent;
   color: var(--green-bright);
@@ -113,7 +126,8 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--text);
-  white-space: nowrap;
+  white-space: normal;
+  text-wrap: balance;
 }
 
 .sec-head::before,
@@ -131,4 +145,32 @@
 
 .sec-head::after {
   background: linear-gradient(90deg, var(--line), transparent);
+}
+
+.skeletonPulse {
+  background: linear-gradient(
+    90deg,
+    var(--panel) 0%,
+    var(--panel-2) 50%,
+    var(--panel) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonPulse {
+    animation: none;
+    background: var(--panel);
+  }
 }

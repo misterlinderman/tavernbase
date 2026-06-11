@@ -8,35 +8,10 @@
   min-height: 9.5rem;
   border-radius: 8px;
   border: 1px solid var(--line);
-  background: linear-gradient(
-    90deg,
-    var(--panel) 0%,
-    var(--panel-2) 50%,
-    var(--panel) 100%
-  );
-  background-size: 200% 100%;
-  animation: pulse 1.4s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0% {
-    background-position: 100% 0;
-  }
-
-  100% {
-    background-position: -100% 0;
-  }
-}
-
-@media (max-width: 900px) {
+@media (max-width: 560px) {
   .skeletonGrid {
     grid-template-columns: 1fr;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skeletonCard {
-    animation: none;
-    background: var(--panel);
   }
 }

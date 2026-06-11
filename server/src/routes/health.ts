@@ -7,8 +7,7 @@ const router = Router();
 router.get('/', (_req: Request, res: Response) => {
   res.json({
     status: 'ok',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
+    timestamp: Date.now(),
   });
 });
 

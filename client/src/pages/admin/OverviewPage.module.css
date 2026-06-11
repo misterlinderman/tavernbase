@@ -142,6 +142,15 @@
   font-weight: 600;
 }
 
+.skeletonStat {
+  min-height: 5.5rem;
+  pointer-events: none;
+}
+
+.skeletonPanel {
+  min-height: 8rem;
+}
+
 @media (max-width: 900px) {
   .statGrid {
     grid-template-columns: repeat(2, 1fr);
@@ -155,5 +164,15 @@
 
   .attentionItem {
     flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .statCard {
+    transition: none;
+  }
+
+  .statCard:hover {
+    transform: none;
   }
 }

@@ -18,7 +18,7 @@ function linkTargetToHash(linkTarget: string): string {
   const anchors: Record<string, string> = {
     Events: 'events',
     'Christmas Party': 'christmas',
-    Menu: 'menu',
+    Menu: 'contact',
     Contact: 'contact',
   };
 

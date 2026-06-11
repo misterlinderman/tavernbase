@@ -20,11 +20,13 @@ function ShamrockWatermark() {
 
 function EvergreenPanel() {
   return (
-    <div className={styles.panel}>
+    <section className={styles.panel} aria-labelledby="evergreen-heading">
       <ShamrockWatermark />
       <div className={styles.content}>
         <p className={styles.kicker}>★ The Usual ★</p>
-        <h3 className={styles.headline}>Nothing big on the books — we&apos;re still open</h3>
+        <h3 id="evergreen-heading" className={styles.headline}>
+          Nothing big on the books — we&apos;re still open
+        </h3>
         <p className={styles.lead}>
           No watch party or special event lined up right now. But the games are on every screen,
           the pints are cold, and there&apos;s always a stool with your name on it.
@@ -48,7 +50,7 @@ function EvergreenPanel() {
           </a>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 

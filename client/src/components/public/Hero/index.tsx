@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import styles from './Hero.module.css';
 
 export interface HeroProps {
@@ -26,7 +26,18 @@ function CloverIcon() {
 function Hero({ videoUrl, posterUrl }: HeroProps) {
   const [muted, setMuted] = useState(true);
   const [videoFailed, setVideoFailed] = useState(false);
-  const showVideo = Boolean(videoUrl) && !videoFailed;
+  const [reduceMotion, setReduceMotion] = useState(() =>
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const onChange = () => setReduceMotion(mediaQuery.matches);
+    mediaQuery.addEventListener('change', onChange);
+    return () => mediaQuery.removeEventListener('change', onChange);
+  }, []);
+
+  const showVideo = Boolean(videoUrl) && !videoFailed && !reduceMotion;
 
   const toggleMute = useCallback(() => {
     setMuted((prev) => !prev);
@@ -45,6 +56,7 @@ function Hero({ videoUrl, posterUrl }: HeroProps) {
           muted={muted}
           loop
           playsInline
+          aria-hidden="true"
           onError={() => setVideoFailed(true)}
         />
       )}

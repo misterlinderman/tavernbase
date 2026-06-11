@@ -276,6 +276,17 @@
   font-family: 'Barlow', sans-serif;
 }
 
+.skeletonThumb {
+  border: 1px solid var(--line);
+}
+
+.skeletonBody {
+  flex: 1;
+  min-height: 5rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
 @media (max-width: 760px) {
   .item {
     grid-template-columns: 72px 1fr;

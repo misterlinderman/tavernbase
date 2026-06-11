@@ -7,10 +7,36 @@ export interface GalleryProps {
   enabled?: boolean;
 }
 
+function GallerySkeleton() {
+  return (
+    <div className={styles.grid} aria-hidden="true">
+      {[0, 1, 2, 3, 4].map((key) => (
+        <div key={key} className={`${styles.skeletonTile} skeletonPulse`} />
+      ))}
+    </div>
+  );
+}
+
 function Gallery({ instagramHandle = '', enabled = true }: GalleryProps) {
   const { photos, loading } = useGallery();
 
-  if (!enabled || loading || photos.length === 0) {
+  if (!enabled) {
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <section id="gallery" className="section" aria-busy="true">
+        <div className="wrap">
+          <h2 className="sec-head">From the Pub</h2>
+          <p className="sr-only">Loading gallery…</p>
+          <GallerySkeleton />
+        </div>
+      </section>
+    );
+  }
+
+  if (photos.length === 0) {
     return null;
   }
 

@@ -175,3 +175,14 @@
     flex-direction: column;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .ticketBtn {
+    transition: none;
+  }
+
+  .ticketBtn:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}

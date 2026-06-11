@@ -5,9 +5,9 @@ import styles from './EventsSection.module.css';
 
 function EventsSkeleton() {
   return (
-    <div className={styles.skeletonGrid} aria-hidden="true">
+    <div className={styles.skeletonGrid}>
       {[0, 1].map((key) => (
-        <div key={key} className={styles.skeletonCard} />
+        <div key={key} className={`${styles.skeletonCard} skeletonPulse`} />
       ))}
     </div>
   );
@@ -17,12 +17,15 @@ function EventsSection() {
   const { events, loading } = useEvents();
 
   return (
-    <section id="events" className="section">
+    <section id="events" className="section" aria-busy={loading}>
       <div className="wrap">
         <h2 className="sec-head">What&apos;s On at Barry O&apos;s</h2>
 
         {loading ? (
-          <EventsSkeleton />
+          <>
+            <p className="sr-only">Loading events…</p>
+            <EventsSkeleton />
+          </>
         ) : events.length > 0 ? (
           <EventsGrid events={events} />
         ) : (

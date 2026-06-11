@@ -52,7 +52,8 @@
 .input:focus,
 .select:focus,
 .textarea:focus {
-  outline: none;
+  outline: 2px solid var(--green-bright);
+  outline-offset: 2px;
   border-color: var(--green-line);
 }
 

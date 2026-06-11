@@ -1,0 +1,19 @@
+# Railway deploys the API only (client goes to Vercel).
+# Overrides Railpack's default root `npm run build` (which tries to build the client).
+
+[variables]
+NIXPACKS_INSTALL_DEV_DEPENDENCIES = "true"
+
+[phases.setup]
+nixPkgs = ["nodejs_18"]
+
+[phases.install]
+dependsOn = ["setup"]
+cmds = ["cd server && npm ci --include=dev"]
+
+[phases.build]
+dependsOn = ["install"]
+cmds = ["cd server && npm run build"]
+
+[start]
+cmd = "cd server && npm start"

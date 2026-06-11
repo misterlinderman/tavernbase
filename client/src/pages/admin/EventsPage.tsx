@@ -194,7 +194,14 @@ function EventsPage() {
       <section className={`${formStyles.panel} ${styles.section}`}>
         <h2 className={formStyles.sectionTitle}>All events</h2>
         {loading ? (
-          <p className={styles.empty}>Loading events…</p>
+          <ul className={styles.eventList} aria-busy="true">
+            {[0, 1, 2].map((key) => (
+              <li key={key} className={styles.eventRow} aria-hidden="true">
+                <div className={`${styles.dateBlock} ${styles.skeletonBlock} skeletonPulse`} />
+                <div className={`${styles.eventBody} ${styles.skeletonBody} skeletonPulse`} />
+              </li>
+            ))}
+          </ul>
         ) : events.length === 0 ? (
           <p className={styles.empty}>No events yet.</p>
         ) : (
@@ -223,6 +230,7 @@ function EventsPage() {
                   <button
                     type="button"
                     className={formStyles.btnDanger}
+                    aria-label={`Delete event: ${item.title}`}
                     onClick={() => handleDelete(item._id, item.title)}
                   >
                     Delete

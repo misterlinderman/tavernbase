@@ -13,6 +13,20 @@ function formatChristmasLabel(christmas: OverviewStats['christmas']): string {
   return `${christmas.daysUntil} days`;
 }
 
+function OverviewSkeleton() {
+  return (
+    <div aria-busy="true">
+      <div className={styles.statGrid}>
+        {[0, 1, 2, 3].map((key) => (
+          <div key={key} className={`${styles.statCard} ${styles.skeletonStat} skeletonPulse`} />
+        ))}
+      </div>
+      <div className={`${formStyles.panel} ${styles.section} ${styles.skeletonPanel} skeletonPulse`} />
+      <div className={`${formStyles.panel} ${styles.section} ${styles.skeletonPanel} skeletonPulse`} />
+    </div>
+  );
+}
+
 function OverviewPage() {
   const { adminFetch } = useAdminApi();
   const [stats, setStats] = useState<OverviewStats | null>(null);
@@ -36,11 +50,23 @@ function OverviewPage() {
   }, [adminFetch]);
 
   if (loading) {
-    return <p className={styles.loading}>Loading overview…</p>;
+    return (
+      <div>
+        <h1 className={formStyles.pageTitle}>Overview</h1>
+        <OverviewSkeleton />
+      </div>
+    );
   }
 
   if (!stats) {
-    return <p className={styles.loading}>Unable to load overview.</p>;
+    return (
+      <div>
+        <h1 className={formStyles.pageTitle}>Overview</h1>
+        <p className={styles.loading} role="alert">
+          Unable to load overview. Try refreshing the page.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -81,7 +107,11 @@ function OverviewPage() {
             {pending.map((item) => (
               <li key={item._id} className={styles.attentionItem}>
                 {item.thumbnailUrl ? (
-                  <img src={item.thumbnailUrl} alt="" className={styles.thumb} />
+                  <img
+                    src={item.thumbnailUrl}
+                    alt={`Photo from ${item.submitterName}`}
+                    className={styles.thumb}
+                  />
                 ) : (
                   <div className={styles.thumbPlaceholder} />
                 )}
@@ -89,7 +119,11 @@ function OverviewPage() {
                   <p className={styles.attentionName}>{item.submitterName}</p>
                   <p className={styles.attentionCaption}>{item.caption || 'No caption'}</p>
                 </div>
-                <Link to="/admin/submissions" className="btn btn-outline">
+                <Link
+                  to="/admin/submissions"
+                  className="btn btn-outline"
+                  aria-label={`Review photo from ${item.submitterName}`}
+                >
                   Review
                 </Link>
               </li>

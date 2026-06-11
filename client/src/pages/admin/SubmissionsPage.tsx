@@ -92,6 +92,7 @@ function SubmissionsPage() {
   };
 
   const activeEmpty = TABS.find((tab) => tab.status === activeTab)?.empty ?? '';
+  const panelId = `submissions-panel-${activeTab}`;
 
   return (
     <div>
@@ -103,7 +104,9 @@ function SubmissionsPage() {
             key={tab.status}
             type="button"
             role="tab"
+            id={`tab-${tab.status}`}
             aria-selected={activeTab === tab.status}
+            aria-controls={panelId}
             className={activeTab === tab.status ? `${styles.tab} ${styles.tabActive}` : styles.tab}
             onClick={() => setActiveTab(tab.status)}
           >
@@ -116,9 +119,21 @@ function SubmissionsPage() {
         ))}
       </div>
 
-      <section className={`${formStyles.panel} ${styles.listPanel}`}>
+      <section
+        className={`${formStyles.panel} ${styles.listPanel}`}
+        role="tabpanel"
+        id={panelId}
+        aria-labelledby={`tab-${activeTab}`}
+      >
         {loading ? (
-          <p className={styles.empty}>Loading submissions…</p>
+          <ul className={styles.list} aria-busy="true">
+            {[0, 1, 2].map((key) => (
+              <li key={key} className={styles.item} aria-hidden="true">
+                <div className={`${styles.thumb} ${styles.skeletonThumb} skeletonPulse`} />
+                <div className={`${styles.skeletonBody} skeletonPulse`} />
+              </li>
+            ))}
+          </ul>
         ) : submissions.length === 0 ? (
           <p className={styles.empty}>{activeEmpty}</p>
         ) : (
@@ -163,6 +178,7 @@ function SubmissionsPage() {
                         type="button"
                         className={styles.approveBtn}
                         disabled={updatingId === submission._id}
+                        aria-label={`Approve photo from ${submission.submitterName}`}
                         onClick={() => updateStatus(submission._id, 'approved')}
                       >
                         Approve
@@ -171,6 +187,7 @@ function SubmissionsPage() {
                         type="button"
                         className={styles.rejectBtn}
                         disabled={updatingId === submission._id}
+                        aria-label={`Reject photo from ${submission.submitterName}`}
                         onClick={() => updateStatus(submission._id, 'rejected')}
                       >
                         Reject
@@ -185,6 +202,7 @@ function SubmissionsPage() {
                         type="button"
                         className={styles.secondaryBtn}
                         disabled={updatingId === submission._id}
+                        aria-label={`Move photo from ${submission.submitterName} back to pending`}
                         onClick={() => updateStatus(submission._id, 'pending')}
                       >
                         Move back to pending
@@ -193,6 +211,7 @@ function SubmissionsPage() {
                         type="button"
                         className={styles.deleteBtn}
                         disabled={updatingId === submission._id}
+                        aria-label={`Delete photo from ${submission.submitterName}`}
                         onClick={() => handleDelete(submission._id, submission.submitterName)}
                       >
                         Delete

@@ -108,7 +108,6 @@
 .dropzone:focus-visible {
   border-color: var(--green-bright);
   background: rgba(39, 184, 92, 0.04);
-  outline: none;
 }
 
 .dropzoneActive {
@@ -214,6 +213,11 @@
   margin-top: 0.15rem;
   accent-color: var(--green-bright);
   flex-shrink: 0;
+}
+
+.checkbox:focus-visible {
+  outline: 2px solid var(--green-bright);
+  outline-offset: 2px;
 }
 
 .consentLabel {

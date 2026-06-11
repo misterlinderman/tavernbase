@@ -4,6 +4,9 @@ import styles from './Nav.module.css';
 function Nav() {
   return (
     <header className={styles.nav}>
+      <a href="#main" className="skip-link">
+        Skip to main content
+      </a>
       <div className={styles.inner}>
         <Link to="/" className={styles.brand}>
           <span className={`script ${styles.brandName}`}>Barry O&apos;s</span>

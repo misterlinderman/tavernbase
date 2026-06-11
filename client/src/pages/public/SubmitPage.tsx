@@ -138,7 +138,7 @@ function SubmitPage() {
   return (
     <>
       <Nav />
-      <main className={`section ${styles.main}`}>
+      <main id="main" className={`section ${styles.main}`}>
         <div className="wrap">
           <header className={styles.header}>
             <h1 className={styles.title}>Share a photo of Barry O&apos;s</h1>
@@ -232,7 +232,7 @@ function SubmitPage() {
 
                 {previewUrl ? (
                   <div className={styles.preview}>
-                    <img src={previewUrl} alt="" />
+                    <img src={previewUrl} alt="Preview of selected photo" />
                     <div className={styles.previewMeta}>
                       <p className={styles.fileName}>{file?.name}</p>
                       {file ? <p className={styles.fileSize}>{formatFileSize(file.size)}</p> : null}
