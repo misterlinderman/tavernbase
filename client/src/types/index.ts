@@ -27,12 +27,15 @@ export interface SiteSettings {
   hero: {
     videoUrl?: string;
     posterUrl?: string;
+    headline: string;
+    subheadline: string;
   };
   hours: Array<{ label: string; value: string; order: number }>;
   contact: {
     address: string;
     phone: string;
   };
+  tagline: string;
   about: string;
   instagram: {
     handle: string;

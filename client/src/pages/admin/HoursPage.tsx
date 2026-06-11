@@ -25,8 +25,11 @@ function HoursPage() {
   const { adminFetch } = useAdminApi();
   const { toast } = useToast();
   const [rows, setRows] = useState<HourRow[]>([]);
+  const [headline, setHeadline] = useState('');
+  const [subheadline, setSubheadline] = useState('');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
+  const [tagline, setTagline] = useState('');
   const [about, setAbout] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -35,8 +38,11 @@ function HoursPage() {
     adminFetch<SiteSettings>('/admin/site')
       .then((settings) => {
         setRows(normalizeRows(settings.hours));
+        setHeadline(settings.hero?.headline ?? 'A Neighborhood Tradition');
+        setSubheadline(settings.hero?.subheadline ?? 'Old Market Tavern');
         setAddress(settings.contact.address ?? '');
         setPhone(settings.contact.phone ?? '');
+        setTagline(settings.tagline ?? 'Good Times. Cold Drinks. Great People.');
         setAbout(settings.about ?? '');
       })
       .catch(() => toast('Could not load hours and info', 'error'))
@@ -74,6 +80,12 @@ function HoursPage() {
 
   const handleSave = async (event: FormEvent) => {
     event.preventDefault();
+
+    if (!headline.trim()) {
+      toast('Hero headline is required', 'error');
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -85,7 +97,12 @@ function HoursPage() {
             value: row.value.trim(),
             order: index + 1,
           })),
+          hero: {
+            headline: headline.trim(),
+            subheadline: subheadline.trim() || 'Old Market Tavern',
+          },
           contact: { address: address.trim(), phone: phone.trim() },
+          tagline: tagline.trim(),
           about: about.trim(),
         }),
       });
@@ -106,6 +123,44 @@ function HoursPage() {
       <h1 className={formStyles.pageTitle}>Hours &amp; Info</h1>
 
       <form onSubmit={handleSave}>
+        <section className={`${formStyles.panel} ${styles.section}`}>
+          <h2 className={formStyles.sectionTitle}>Homepage hero</h2>
+          <p className={styles.help}>
+            The large headline and green subtitle visitors see over the hero video.
+          </p>
+          <div className={styles.contactGrid}>
+            <div className={styles.fullWidth}>
+              <label className={formStyles.fieldLabel} htmlFor="hero-headline">
+                Hero headline
+              </label>
+              <input
+                id="hero-headline"
+                type="text"
+                className={formStyles.input}
+                maxLength={120}
+                value={headline}
+                onChange={(e) => setHeadline(e.target.value)}
+                required
+              />
+              <p className={formStyles.charCount}>{headline.length}/120</p>
+            </div>
+            <div className={styles.fullWidth}>
+              <label className={formStyles.fieldLabel} htmlFor="hero-subheadline">
+                Hero subtitle
+              </label>
+              <input
+                id="hero-subheadline"
+                type="text"
+                className={formStyles.input}
+                maxLength={80}
+                value={subheadline}
+                onChange={(e) => setSubheadline(e.target.value)}
+              />
+              <p className={formStyles.charCount}>{subheadline.length}/80</p>
+            </div>
+          </div>
+        </section>
+
         <section className={`${formStyles.panel} ${styles.section}`}>
           <h2 className={formStyles.sectionTitle}>Hours</h2>
           <ul className={styles.rowList}>
@@ -161,7 +216,7 @@ function HoursPage() {
         </section>
 
         <section className={`${formStyles.panel} ${styles.section}`}>
-          <h2 className={formStyles.sectionTitle}>Contact &amp; about</h2>
+          <h2 className={formStyles.sectionTitle}>Contact, tagline &amp; about</h2>
           <div className={styles.contactGrid}>
             <div>
               <label className={formStyles.fieldLabel} htmlFor="contact-address">
@@ -188,6 +243,20 @@ function HoursPage() {
               />
             </div>
             <div className={styles.fullWidth}>
+              <label className={formStyles.fieldLabel} htmlFor="tagline-text">
+                Tagline
+              </label>
+              <input
+                id="tagline-text"
+                type="text"
+                className={formStyles.input}
+                maxLength={200}
+                value={tagline}
+                onChange={(e) => setTagline(e.target.value)}
+              />
+              <p className={formStyles.charCount}>{tagline.length}/200</p>
+            </div>
+            <div className={styles.fullWidth}>
               <label className={formStyles.fieldLabel} htmlFor="about-text">
                 About
               </label>
@@ -195,9 +264,11 @@ function HoursPage() {
                 id="about-text"
                 className={formStyles.textarea}
                 rows={4}
+                maxLength={400}
                 value={about}
                 onChange={(e) => setAbout(e.target.value)}
               />
+              <p className={formStyles.charCount}>{about.length}/400</p>
             </div>
           </div>
         </section>

@@ -13,9 +13,15 @@ export interface ISiteSettings extends Document {
     note: string;
     ticketUrl: string;
   };
-  hero: { videoUrl?: string; posterUrl?: string };
+  hero: {
+    videoUrl?: string;
+    posterUrl?: string;
+    headline: string;
+    subheadline: string;
+  };
   hours: Array<{ label: string; value: string; order: number }>;
   contact: { address: string; phone: string };
+  tagline: string;
   about: string;
   instagram: { handle: string; showApprovedInGallery: boolean };
 }
@@ -38,10 +44,20 @@ const SiteSettingsSchema = new Schema<ISiteSettings>(
       note: { type: String, default: '' },
       ticketUrl: { type: String, default: '' },
     },
-    hero: { videoUrl: String, posterUrl: String },
+    hero: {
+      videoUrl: String,
+      posterUrl: String,
+      headline: { type: String, default: 'A Neighborhood Tradition', maxlength: 120 },
+      subheadline: { type: String, default: 'Old Market Tavern', maxlength: 80 },
+    },
     hours: [{ label: String, value: String, order: Number }],
     contact: { address: String, phone: String },
-    about: { type: String, default: '' },
+    tagline: {
+      type: String,
+      default: 'Good Times. Cold Drinks. Great People.',
+      maxlength: 200,
+    },
+    about: { type: String, default: '', maxlength: 400 },
     instagram: {
       handle: { type: String, default: '' },
       showApprovedInGallery: { type: Boolean, default: true },

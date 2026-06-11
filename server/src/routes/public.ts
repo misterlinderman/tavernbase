@@ -24,12 +24,15 @@ function toPublicSiteSettings(doc: ISiteSettings) {
     hero: {
       videoUrl: doc.hero?.videoUrl,
       posterUrl: doc.hero?.posterUrl,
+      headline: doc.hero?.headline ?? 'A Neighborhood Tradition',
+      subheadline: doc.hero?.subheadline ?? 'Old Market Tavern',
     },
     hours: hours.map(({ label, value, order }) => ({ label, value, order })),
     contact: {
       address: doc.contact?.address,
       phone: doc.contact?.phone,
     },
+    tagline: doc.tagline ?? 'Good Times. Cold Drinks. Great People.',
     about: doc.about,
     instagram: {
       handle: doc.instagram.handle,

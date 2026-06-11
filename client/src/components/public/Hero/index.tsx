@@ -5,9 +5,11 @@ import styles from './Hero.module.css';
 export interface HeroProps {
   videoUrl?: string;
   posterUrl?: string;
+  headline: string;
+  subheadline: string;
 }
 
-function Hero({ videoUrl, posterUrl }: HeroProps) {
+function Hero({ videoUrl, posterUrl, headline, subheadline }: HeroProps) {
   const [muted, setMuted] = useState(true);
   const [videoFailed, setVideoFailed] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(() =>
@@ -58,11 +60,11 @@ function Hero({ videoUrl, posterUrl }: HeroProps) {
         />
 
         <h1 className={`${styles.title} ${styles.animate}`} style={{ animationDelay: '0.2s' }}>
-          A Neighborhood Tradition
+          {headline}
         </h1>
 
         <p className={`${styles.sub} ${styles.animate}`} style={{ animationDelay: '0.3s' }}>
-          Old Market Tavern
+          {subheadline}
         </p>
 
         <a

@@ -103,6 +103,17 @@ function mergeSiteSettings(
     if (typeof body.hero !== 'object' || body.hero === null) {
       throw createError('hero must be an object', 400);
     }
+
+    const hero = body.hero as Record<string, unknown>;
+
+    if (hero.headline !== undefined && typeof hero.headline !== 'string') {
+      throw createError('hero.headline must be a string', 400);
+    }
+
+    if (hero.subheadline !== undefined && typeof hero.subheadline !== 'string') {
+      throw createError('hero.subheadline must be a string', 400);
+    }
+
     Object.assign(settings.hero, body.hero);
   }
 
@@ -118,6 +129,13 @@ function mergeSiteSettings(
       throw createError('contact must be an object', 400);
     }
     Object.assign(settings.contact, body.contact);
+  }
+
+  if (body.tagline !== undefined) {
+    if (typeof body.tagline !== 'string') {
+      throw createError('tagline must be a string', 400);
+    }
+    settings.tagline = body.tagline;
   }
 
   if (body.about !== undefined) {

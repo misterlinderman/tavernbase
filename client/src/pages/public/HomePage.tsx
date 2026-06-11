@@ -63,7 +63,12 @@ function HomePage() {
     <>
       <Nav />
       <main id="main">
-        <Hero videoUrl={settings.hero?.videoUrl} posterUrl={settings.hero?.posterUrl} />
+        <Hero
+          videoUrl={settings.hero?.videoUrl}
+          posterUrl={settings.hero?.posterUrl}
+          headline={settings.hero.headline}
+          subheadline={settings.hero.subheadline}
+        />
         <AnnouncementBar {...settings.announcement} />
         <EventsSection />
         <ChristmasCTA christmasParty={settings.christmasParty} />

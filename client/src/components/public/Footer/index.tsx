@@ -78,7 +78,7 @@ function Footer({ settings }: FooterProps) {
           <div id="instagram" className={styles.col}>
             <h3 className={styles.colTitle}>Tagline</h3>
             <p className={styles.tagline}>
-              Good Times. Cold Drinks. Great People.
+              {settings.tagline}
               <ShamrockIcon />
             </p>
             {settings.about ? <p className={styles.about}>{settings.about}</p> : null}
