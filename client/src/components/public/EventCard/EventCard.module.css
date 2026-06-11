@@ -40,6 +40,11 @@
   min-height: 5.5rem;
 }
 
+.iconWrapNoDay {
+  margin-top: 0.5rem;
+  min-height: 6.5rem;
+}
+
 .icon {
   display: block;
   width: 4.5rem;

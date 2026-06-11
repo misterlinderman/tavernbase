@@ -1,4 +1,5 @@
 import { getEventIconPath, usesColoredEventIcon } from '../../../constants/eventTypes';
+import { formatWeeklyDayLabel } from '../../../constants/eventSchedule';
 import type { Event } from '../../../types';
 import styles from './EventCard.module.css';
 
@@ -6,22 +7,16 @@ export interface EventCardProps {
   event: Event;
 }
 
-function formatWeekdayLabel(dateStr: string): string {
-  const weekday = new Date(dateStr).toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase();
-
-  return `${weekday}S`;
-}
-
 function EventCard({ event }: EventCardProps) {
-  const weekdayLabel = formatWeekdayLabel(event.date);
+  const isWeekly = event.scheduleType === 'weekly' && event.dayOfWeek !== undefined;
   const iconPath = getEventIconPath(event.type);
   const coloredIcon = usesColoredEventIcon(event.type);
 
   return (
     <article className={styles.card}>
-      <p className={styles.day}>{weekdayLabel}</p>
+      {isWeekly ? <p className={styles.day}>{formatWeeklyDayLabel(event.dayOfWeek!)}</p> : null}
 
-      <div className={styles.iconWrap}>
+      <div className={`${styles.iconWrap} ${isWeekly ? '' : styles.iconWrapNoDay}`}>
         <img
           src={iconPath}
           alt=""

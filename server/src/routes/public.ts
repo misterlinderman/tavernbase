@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { Event, SiteSettings, Submission } from '../models';
 import type { ISiteSettings } from '../models/SiteSettings';
 import { asyncHandler, createError } from '../middleware/errorHandler';
+import { getActiveEventsFilter, sortEventsForDisplay } from '../utils/eventSchedule';
 
 const router = Router();
 
@@ -57,13 +58,15 @@ router.get(
 router.get(
   '/events',
   asyncHandler(async (_req, res: Response) => {
-    const now = new Date();
-    const events = await Event.find({ date: { $gte: now } })
-      .sort({ date: 1 })
-      .select('type title description date timeLabel')
+    const events = await Event.find(getActiveEventsFilter())
+      .select(
+        'type scheduleType title description date dayOfWeek startDate endDate timeLabel'
+      )
       .lean();
 
-    res.json({ data: events, meta: { count: events.length } });
+    const sorted = sortEventsForDisplay(events);
+
+    res.json({ data: sorted, meta: { count: sorted.length } });
   })
 );
 

@@ -1,6 +1,11 @@
 import { Router, Response } from 'express';
 import mongoose from 'mongoose';
 import { EVENT_TYPES, type EventType } from '../constants/eventTypes';
+import {
+  getActiveEventsFilter,
+  parseEventScheduleInput,
+  sortEventsForDisplay,
+} from '../utils/eventSchedule';
 import { checkJwt, extractAuth0Sub } from '../middleware/auth';
 import { heroVideoUpload } from '../middleware/uploadHero';
 import { asyncHandler, createError } from '../middleware/errorHandler';
@@ -181,7 +186,7 @@ router.get(
 
     const [pendingSubmissions, upcomingEvents] = await Promise.all([
       Submission.countDocuments({ status: 'pending' }),
-      Event.countDocuments({ date: { $gte: now } }),
+      Event.countDocuments(getActiveEventsFilter(now)),
     ]);
 
     res.json({
@@ -306,34 +311,47 @@ router.delete(
 router.get(
   '/events',
   asyncHandler(async (_req, res: Response) => {
-    const events = await Event.find().sort({ date: 1 }).lean();
-    res.json({ data: events });
+    const events = await Event.find().lean();
+    res.json({ data: sortEventsForDisplay(events) });
   })
 );
 
 router.post(
   '/events',
   asyncHandler(async (req, res: Response) => {
-    const { type, title, description, date, timeLabel } = req.body as {
-      type?: EventType;
-      title?: string;
-      description?: string;
-      date?: string;
-      timeLabel?: string;
-    };
+    const { type, title, description, timeLabel, scheduleType, date, dayOfWeek, startDate, endDate } =
+      req.body as {
+        type?: EventType;
+        title?: string;
+        description?: string;
+        timeLabel?: string;
+        scheduleType?: string;
+        date?: string;
+        dayOfWeek?: number;
+        startDate?: string;
+        endDate?: string;
+      };
 
-    if (!type || !title || !date) {
-      throw createError('type, title, and date are required', 400);
+    if (!type || !title?.trim()) {
+      throw createError('type and title are required', 400);
     }
 
     if (!EVENT_TYPES.includes(type)) {
       throw createError('Invalid event type', 400);
     }
 
-    const eventDate = new Date(date);
+    let schedule;
 
-    if (Number.isNaN(eventDate.getTime())) {
-      throw createError('Invalid date', 400);
+    try {
+      schedule = parseEventScheduleInput({
+        scheduleType,
+        date,
+        dayOfWeek,
+        startDate,
+        endDate,
+      });
+    } catch (error) {
+      throw createError(error instanceof Error ? error.message : 'Invalid schedule', 400);
     }
 
     const auth0Sub = extractAuth0Sub(req);
@@ -348,9 +366,13 @@ router.post(
 
     const event = await Event.create({
       type,
+      scheduleType: schedule.scheduleType,
       title: title.trim(),
       description: description?.trim() ?? '',
-      date: eventDate,
+      date: schedule.date,
+      dayOfWeek: schedule.dayOfWeek,
+      startDate: schedule.startDate,
+      endDate: schedule.endDate,
       timeLabel: timeLabel?.trim() ?? 'TBD',
       createdBy,
     });

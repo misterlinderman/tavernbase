@@ -2,12 +2,18 @@ import type { EventType } from '../constants/eventTypes';
 
 export type { EventType };
 
+export type EventScheduleType = 'weekly' | 'dated';
+
 export interface Event {
   _id: string;
   type: EventType;
+  scheduleType: EventScheduleType;
   title: string;
   description: string;
-  date: string;
+  date?: string;
+  dayOfWeek?: number;
+  startDate?: string;
+  endDate?: string;
   timeLabel: string;
 }
 

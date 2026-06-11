@@ -2,36 +2,45 @@ import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useAdminApi } from '../../hooks/useAdminApi';
 import { useToast } from '../../components/admin/shared/Toast';
 import {
+  DAY_OF_WEEK_OPTIONS,
+  formatDateRange,
+  isEventPast,
+} from '../../constants/eventSchedule';
+import {
   EVENT_TYPE_LABELS,
   EVENT_TYPE_OPTIONS,
   getEventTypeCategory,
   type EventType,
   type EventTypeGroup,
 } from '../../constants/eventTypes';
-import type { Event } from '../../types';
+import type { Event, EventScheduleType } from '../../types';
 import formStyles from '../../components/admin/shared/adminForm.module.css';
 import styles from './EventsPage.module.css';
 
 const EVENT_TYPE_GROUPS: EventTypeGroup[] = ['Watch parties', 'Game-day shuttles', 'Other'];
 
 const EMPTY_FORM = {
+  scheduleType: 'dated' as EventScheduleType,
   type: 'watch_party_football' as EventType,
   date: '',
+  dayOfWeek: 1,
+  startDate: '',
+  endDate: '',
   timeLabel: '',
   title: '',
   description: '',
 };
 
-function formatEventDate(dateStr: string) {
+function formatEventDate(dateStr?: string) {
+  if (!dateStr) {
+    return { month: '—', day: '—' };
+  }
+
   const date = new Date(dateStr);
   return {
     month: date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
     day: date.getDate(),
   };
-}
-
-function isPastEvent(dateStr: string): boolean {
-  return new Date(dateStr) < new Date();
 }
 
 function EventsPage() {
@@ -56,8 +65,18 @@ function EventsPage() {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
-    if (!form.date || !form.title.trim()) {
-      toast('Date and title are required', 'error');
+    if (!form.title.trim()) {
+      toast('Title is required', 'error');
+      return;
+    }
+
+    if (form.scheduleType === 'dated' && !form.date) {
+      toast('Date is required for a specific event', 'error');
+      return;
+    }
+
+    if (form.scheduleType === 'weekly' && (!form.startDate || !form.endDate)) {
+      toast('Start and end dates are required for weekly events', 'error');
       return;
     }
 
@@ -68,7 +87,11 @@ function EventsPage() {
         method: 'POST',
         body: JSON.stringify({
           type: form.type,
-          date: form.date,
+          scheduleType: form.scheduleType,
+          date: form.scheduleType === 'dated' ? form.date : undefined,
+          dayOfWeek: form.scheduleType === 'weekly' ? form.dayOfWeek : undefined,
+          startDate: form.scheduleType === 'weekly' ? form.startDate : undefined,
+          endDate: form.scheduleType === 'weekly' ? form.endDate : undefined,
           timeLabel: form.timeLabel.trim() || 'TBD',
           title: form.title.trim(),
           description: form.description.trim(),
@@ -104,6 +127,37 @@ function EventsPage() {
       <section className={`${formStyles.panel} ${styles.section}`}>
         <h2 className={formStyles.sectionTitle}>Add event</h2>
         <form className={styles.formGrid} onSubmit={handleSubmit}>
+          <div className={styles.fullWidth}>
+            <span className={formStyles.fieldLabel}>Schedule</span>
+            <div className={styles.scheduleOptions}>
+              <label className={styles.scheduleOption}>
+                <input
+                  type="radio"
+                  name="schedule-type"
+                  value="dated"
+                  checked={form.scheduleType === 'dated'}
+                  onChange={() => setForm({ ...form, scheduleType: 'dated' })}
+                />
+                <span>Specific date</span>
+              </label>
+              <label className={styles.scheduleOption}>
+                <input
+                  type="radio"
+                  name="schedule-type"
+                  value="weekly"
+                  checked={form.scheduleType === 'weekly'}
+                  onChange={() => setForm({ ...form, scheduleType: 'weekly' })}
+                />
+                <span>Weekly</span>
+              </label>
+            </div>
+            <p className={styles.help}>
+              {form.scheduleType === 'weekly'
+                ? 'Shows every week on the chosen day between the start and end dates. The day label appears on the public site.'
+                : 'A one-time event on a single date. No day-of-week label on the public site.'}
+            </p>
+          </div>
+
           <div>
             <label className={formStyles.fieldLabel} htmlFor="event-type">
               Type
@@ -126,19 +180,69 @@ function EventsPage() {
             </select>
           </div>
 
-          <div>
-            <label className={formStyles.fieldLabel} htmlFor="event-date">
-              Date
-            </label>
-            <input
-              id="event-date"
-              type="date"
-              className={formStyles.input}
-              value={form.date}
-              onChange={(e) => setForm({ ...form, date: e.target.value })}
-              required
-            />
-          </div>
+          {form.scheduleType === 'dated' ? (
+            <div>
+              <label className={formStyles.fieldLabel} htmlFor="event-date">
+                Date
+              </label>
+              <input
+                id="event-date"
+                type="date"
+                className={formStyles.input}
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                required
+              />
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className={formStyles.fieldLabel} htmlFor="event-day">
+                  Day of week
+                </label>
+                <select
+                  id="event-day"
+                  className={formStyles.select}
+                  value={form.dayOfWeek}
+                  onChange={(e) =>
+                    setForm({ ...form, dayOfWeek: Number(e.target.value) })
+                  }
+                >
+                  {DAY_OF_WEEK_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={formStyles.fieldLabel} htmlFor="event-start-date">
+                  Start date
+                </label>
+                <input
+                  id="event-start-date"
+                  type="date"
+                  className={formStyles.input}
+                  value={form.startDate}
+                  onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label className={formStyles.fieldLabel} htmlFor="event-end-date">
+                  End date
+                </label>
+                <input
+                  id="event-end-date"
+                  type="date"
+                  className={formStyles.input}
+                  value={form.endDate}
+                  onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+                  required
+                />
+              </div>
+            </>
+          )}
 
           <div>
             <label className={formStyles.fieldLabel} htmlFor="event-time">
@@ -206,12 +310,20 @@ function EventsPage() {
         ) : (
           <ul className={styles.eventList}>
             {events.map((item) => {
-              const { month, day } = formatEventDate(item.date);
-              const past = isPastEvent(item.date);
+              const isWeekly = item.scheduleType === 'weekly';
+              const past = isEventPast({
+                scheduleType: item.scheduleType ?? 'dated',
+                date: item.date ?? item.startDate ?? '',
+                endDate: item.endDate,
+              });
+              const { month, day } = isWeekly
+                ? { month: 'WK', day: DAY_OF_WEEK_OPTIONS.find((d) => d.value === item.dayOfWeek)?.label.slice(0, 3).toUpperCase() ?? '—' }
+                : formatEventDate(item.date);
+              const scheduleRange = isWeekly ? formatDateRange(item.startDate, item.endDate) : null;
 
               return (
                 <li key={item._id} className={`${styles.eventRow} ${past ? styles.past : ''}`}>
-                  <div className={styles.dateBlock}>
+                  <div className={`${styles.dateBlock} ${isWeekly ? styles.weeklyBlock : ''}`}>
                     <span className={styles.month}>{month}</span>
                     <span className={styles.day}>{day}</span>
                   </div>
@@ -221,9 +333,11 @@ function EventsPage() {
                       <span className={`pill ${styles[`type_${getEventTypeCategory(item.type)}`]}`}>
                         {EVENT_TYPE_LABELS[item.type]}
                       </span>
+                      {isWeekly ? <span className={`pill ${styles.schedulePill}`}>Weekly</span> : null}
                       {past ? <span className={`pill past ${styles.pastPill}`}>Past · hidden</span> : null}
                     </div>
                     <p className={styles.eventTime}>{item.timeLabel}</p>
+                    {scheduleRange ? <p className={styles.eventSchedule}>{scheduleRange}</p> : null}
                     {item.description ? <p className={styles.eventDesc}>{item.description}</p> : null}
                   </div>
                   <button
