@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useAdminApi } from '../../hooks/useAdminApi';
 import { useToast } from '../../components/admin/shared/Toast';
 import {
@@ -7,6 +7,7 @@ import {
   isEventPast,
   isWeeklyEventLive,
   isWeeklyEventStarted,
+  toInputDate,
 } from '../../constants/eventSchedule';
 import {
   EVENT_TYPE_LABELS,
@@ -21,9 +22,21 @@ import styles from './EventsPage.module.css';
 
 const EVENT_TYPE_GROUPS: EventTypeGroup[] = ['Watch parties', 'Game-day shuttles', 'Other'];
 
-const EMPTY_FORM = {
-  scheduleType: 'dated' as EventScheduleType,
-  type: 'watch_party_football' as EventType,
+interface EventFormState {
+  scheduleType: EventScheduleType;
+  type: EventType;
+  date: string;
+  dayOfWeek: number;
+  startDate: string;
+  endDate: string;
+  timeLabel: string;
+  title: string;
+  description: string;
+}
+
+const EMPTY_FORM: EventFormState = {
+  scheduleType: 'dated',
+  type: 'watch_party_football',
   date: '',
   dayOfWeek: 1,
   startDate: '',
@@ -45,11 +58,43 @@ function formatEventDate(dateStr?: string) {
   };
 }
 
+function eventToForm(event: Event): EventFormState {
+  const scheduleType = event.scheduleType === 'weekly' ? 'weekly' : 'dated';
+
+  return {
+    scheduleType,
+    type: event.type,
+    date: toInputDate(event.date),
+    dayOfWeek: event.dayOfWeek ?? 1,
+    startDate: toInputDate(event.startDate),
+    endDate: toInputDate(event.endDate),
+    timeLabel: event.timeLabel ?? '',
+    title: event.title,
+    description: event.description ?? '',
+  };
+}
+
+function buildEventPayload(form: EventFormState) {
+  return {
+    type: form.type,
+    scheduleType: form.scheduleType,
+    date: form.scheduleType === 'dated' ? form.date : undefined,
+    dayOfWeek: form.scheduleType === 'weekly' ? form.dayOfWeek : undefined,
+    startDate: form.scheduleType === 'weekly' ? form.startDate : undefined,
+    endDate: form.scheduleType === 'weekly' ? form.endDate : undefined,
+    timeLabel: form.timeLabel.trim() || 'TBD',
+    title: form.title.trim(),
+    description: form.description.trim(),
+  };
+}
+
 function EventsPage() {
   const { adminFetch } = useAdminApi();
   const { toast } = useToast();
+  const formRef = useRef<HTMLElement>(null);
   const [events, setEvents] = useState<Event[]>([]);
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState<EventFormState>(EMPTY_FORM);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -63,6 +108,17 @@ function EventsPage() {
       .catch(() => toast('Could not load events', 'error'))
       .finally(() => setLoading(false));
   }, [loadEvents, toast]);
+
+  const resetForm = () => {
+    setForm(EMPTY_FORM);
+    setEditingId(null);
+  };
+
+  const handleEdit = (item: Event) => {
+    setEditingId(item._id);
+    setForm(eventToForm(item));
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -85,26 +141,33 @@ function EventsPage() {
     setSubmitting(true);
 
     try {
-      await adminFetch<Event>('/admin/events', {
-        method: 'POST',
-        body: JSON.stringify({
-          type: form.type,
-          scheduleType: form.scheduleType,
-          date: form.scheduleType === 'dated' ? form.date : undefined,
-          dayOfWeek: form.scheduleType === 'weekly' ? form.dayOfWeek : undefined,
-          startDate: form.scheduleType === 'weekly' ? form.startDate : undefined,
-          endDate: form.scheduleType === 'weekly' ? form.endDate : undefined,
-          timeLabel: form.timeLabel.trim() || 'TBD',
-          title: form.title.trim(),
-          description: form.description.trim(),
-        }),
-      });
+      const payload = buildEventPayload(form);
 
-      setForm(EMPTY_FORM);
+      if (editingId) {
+        await adminFetch<Event>(`/admin/events/${editingId}`, {
+          method: 'PATCH',
+          body: JSON.stringify(payload),
+        });
+        toast('Event updated', 'success');
+      } else {
+        await adminFetch<Event>('/admin/events', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        toast('Event added', 'success');
+      }
+
+      resetForm();
       await loadEvents();
-      toast('Event added', 'success');
     } catch (error) {
-      toast(error instanceof Error ? error.message : 'Could not add event', 'error');
+      toast(
+        error instanceof Error
+          ? error.message
+          : editingId
+            ? 'Could not update event'
+            : 'Could not add event',
+        'error'
+      );
     } finally {
       setSubmitting(false);
     }
@@ -115,6 +178,9 @@ function EventsPage() {
 
     try {
       await adminFetch(`/admin/events/${eventId}`, { method: 'DELETE' });
+      if (editingId === eventId) {
+        resetForm();
+      }
       await loadEvents();
       toast('Event deleted', 'success');
     } catch (error) {
@@ -126,8 +192,13 @@ function EventsPage() {
     <div>
       <h1 className={formStyles.pageTitle}>Events</h1>
 
-      <section className={`${formStyles.panel} ${styles.section}`}>
-        <h2 className={formStyles.sectionTitle}>Add event</h2>
+      <section
+        ref={formRef}
+        className={`${formStyles.panel} ${styles.section} ${editingId ? styles.editingPanel : ''}`}
+      >
+        <h2 className={formStyles.sectionTitle}>
+          {editingId ? 'Edit event' : 'Add event'}
+        </h2>
         <form className={styles.formGrid} onSubmit={handleSubmit}>
           <div className={styles.fullWidth}>
             <span className={formStyles.fieldLabel}>Schedule</span>
@@ -288,10 +359,21 @@ function EventsPage() {
             <p className={formStyles.charCount}>{form.description.length}/400</p>
           </div>
 
-          <div className={styles.fullWidth}>
+          <div className={`${styles.fullWidth} ${styles.formActions}`}>
             <button type="submit" className="btn btn-green" disabled={submitting}>
-              {submitting ? 'Adding…' : 'Add event'}
+              {submitting
+                ? editingId
+                  ? 'Saving…'
+                  : 'Adding…'
+                : editingId
+                  ? 'Save changes'
+                  : 'Add event'}
             </button>
+            {editingId ? (
+              <button type="button" className="btn btn-outline" onClick={resetForm}>
+                Cancel edit
+              </button>
+            ) : null}
           </div>
         </form>
       </section>
@@ -319,14 +401,24 @@ function EventsPage() {
                 endDate: item.endDate,
               });
               const { month, day } = isWeekly
-                ? { month: 'WK', day: DAY_OF_WEEK_OPTIONS.find((d) => d.value === item.dayOfWeek)?.label.slice(0, 3).toUpperCase() ?? '—' }
+                ? {
+                    month: 'WK',
+                    day:
+                      DAY_OF_WEEK_OPTIONS.find((d) => d.value === item.dayOfWeek)
+                        ?.label.slice(0, 3)
+                        .toUpperCase() ?? '—',
+                  }
                 : formatEventDate(item.date);
               const scheduleRange = isWeekly ? formatDateRange(item.startDate, item.endDate) : null;
               const weeklyLive = isWeekly && isWeeklyEventLive(item);
               const weeklyStarted = isWeekly && isWeeklyEventStarted(item);
+              const isEditing = editingId === item._id;
 
               return (
-                <li key={item._id} className={`${styles.eventRow} ${past ? styles.past : ''}`}>
+                <li
+                  key={item._id}
+                  className={`${styles.eventRow} ${past ? styles.past : ''} ${isEditing ? styles.editingRow : ''}`}
+                >
                   <div className={`${styles.dateBlock} ${isWeekly ? styles.weeklyBlock : ''}`}>
                     <span className={styles.month}>{month}</span>
                     <span className={styles.day}>{day}</span>
@@ -350,14 +442,24 @@ function EventsPage() {
                     {scheduleRange ? <p className={styles.eventSchedule}>{scheduleRange}</p> : null}
                     {item.description ? <p className={styles.eventDesc}>{item.description}</p> : null}
                   </div>
-                  <button
-                    type="button"
-                    className={formStyles.btnDanger}
-                    aria-label={`Delete event: ${item.title}`}
-                    onClick={() => handleDelete(item._id, item.title)}
-                  >
-                    Delete
-                  </button>
+                  <div className={styles.rowActions}>
+                    <button
+                      type="button"
+                      className={styles.editBtn}
+                      aria-label={`Edit event: ${item.title}`}
+                      onClick={() => handleEdit(item)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className={formStyles.btnDanger}
+                      aria-label={`Delete event: ${item.title}`}
+                      onClick={() => handleDelete(item._id, item.title)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </li>
               );
             })}

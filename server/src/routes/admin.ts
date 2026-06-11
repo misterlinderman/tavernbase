@@ -2,9 +2,11 @@ import { Router, Response } from 'express';
 import mongoose from 'mongoose';
 import { EVENT_TYPES, type EventType } from '../constants/eventTypes';
 import {
+  buildEventFieldsFromBody,
   getActiveEventsFilter,
   parseEventScheduleInput,
   sortEventsForDisplay,
+  toMongoUpdatePayload,
 } from '../utils/eventSchedule';
 import { checkJwt, extractAuth0Sub } from '../middleware/auth';
 import { heroVideoUpload } from '../middleware/uploadHero';
@@ -390,33 +392,25 @@ router.patch(
       throw createError('Invalid event id', 400);
     }
 
-    const updates: Record<string, unknown> = { ...req.body };
+    const body = req.body as Record<string, unknown>;
 
-    if (updates.type !== undefined && !EVENT_TYPES.includes(updates.type as EventType)) {
+    if (body.type !== undefined && !EVENT_TYPES.includes(body.type as EventType)) {
       throw createError('Invalid event type', 400);
     }
 
-    if (updates.date !== undefined) {
-      const eventDate = new Date(String(updates.date));
-      if (Number.isNaN(eventDate.getTime())) {
-        throw createError('Invalid date', 400);
-      }
-      updates.date = eventDate;
+    let fields;
+
+    try {
+      fields = buildEventFieldsFromBody(body);
+    } catch (error) {
+      throw createError(error instanceof Error ? error.message : 'Invalid event data', 400);
     }
 
-    if (typeof updates.title === 'string') {
-      updates.title = updates.title.trim();
+    if (Object.keys(fields.set).length === 0 && fields.unset.length === 0) {
+      throw createError('No valid fields to update', 400);
     }
 
-    if (typeof updates.description === 'string') {
-      updates.description = updates.description.trim();
-    }
-
-    if (typeof updates.timeLabel === 'string') {
-      updates.timeLabel = updates.timeLabel.trim();
-    }
-
-    const event = await Event.findByIdAndUpdate(id, updates, {
+    const event = await Event.findByIdAndUpdate(id, toMongoUpdatePayload(fields), {
       new: true,
       runValidators: true,
     });

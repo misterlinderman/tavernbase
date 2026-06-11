@@ -228,3 +228,55 @@ export function parseEventScheduleInput(body: Record<string, unknown>): ParsedEv
     date: startDate,
   };
 }
+
+export interface EventWriteFields {
+  set: Record<string, unknown>;
+  unset: string[];
+}
+
+export function buildEventFieldsFromBody(body: Record<string, unknown>): EventWriteFields {
+  const set: Record<string, unknown> = {};
+  const unset: string[] = [];
+
+  if (body.type !== undefined) {
+    set.type = body.type;
+  }
+
+  if (typeof body.title === 'string') {
+    set.title = body.title.trim();
+  }
+
+  if (typeof body.description === 'string') {
+    set.description = body.description.trim();
+  }
+
+  if (typeof body.timeLabel === 'string') {
+    set.timeLabel = body.timeLabel.trim() || 'TBD';
+  }
+
+  if (body.scheduleType !== undefined) {
+    const schedule = parseEventScheduleInput(body);
+    set.scheduleType = schedule.scheduleType;
+    set.date = schedule.date;
+
+    if (schedule.scheduleType === 'dated') {
+      unset.push('dayOfWeek', 'startDate', 'endDate');
+    } else {
+      set.dayOfWeek = schedule.dayOfWeek;
+      set.startDate = schedule.startDate;
+      set.endDate = schedule.endDate;
+    }
+  }
+
+  return { set, unset };
+}
+
+export function toMongoUpdatePayload(fields: EventWriteFields): Record<string, unknown> {
+  const update: Record<string, unknown> = { $set: fields.set };
+
+  if (fields.unset.length > 0) {
+    update.$unset = Object.fromEntries(fields.unset.map((field) => [field, '']));
+  }
+
+  return update;
+}
