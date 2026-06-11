@@ -1,3 +1,4 @@
+import { BRAND_ASSETS } from '../../../constants/brandAssets';
 import type { SiteSettings } from '../../../types';
 import styles from './ChristmasCTA.module.css';
 
@@ -16,21 +17,6 @@ function formatPartyDate(dateStr?: string): string | null {
   });
 }
 
-function TicketGraphic() {
-  return (
-    <div className={styles.ticket} aria-hidden="true">
-      <div className={styles.ticketStub}>
-        <span>★</span>
-        <span>★</span>
-        <span>★</span>
-      </div>
-      <div className={styles.ticketBody}>
-        <span className={styles.ticketLabel}>Admit One</span>
-      </div>
-    </div>
-  );
-}
-
 function ChristmasCTA({ christmasParty }: ChristmasCTAProps) {
   if (!christmasParty.enabled) return null;
 
@@ -42,27 +28,39 @@ function ChristmasCTA({ christmasParty }: ChristmasCTAProps) {
       <div className="wrap">
         <div className={styles.banner}>
           <div className={styles.left}>
-            <span className={styles.label}>Barry O&apos;s</span>
-            <span className={`script ${styles.script}`}>Christmas</span>
-            <span className={styles.party}>Party</span>
+            <img
+              src={BRAND_ASSETS.christmasParty}
+              alt=""
+              aria-hidden="true"
+              className={styles.partyArt}
+              width={220}
+              height={220}
+            />
           </div>
 
           <div className={styles.center}>
             <h2 className={styles.title}>{christmasParty.title}</h2>
             {formattedDate ? <p className={styles.date}>{formattedDate}</p> : null}
             {christmasParty.note ? <p className={styles.note}>{christmasParty.note}</p> : null}
-          </div>
-
-          <div className={styles.right}>
-            <TicketGraphic />
             <a
               href={ticketHref}
-              className={styles.ticketBtn}
+              className={`btn btn-green ${styles.ticketBtn}`}
               target={christmasParty.ticketUrl ? '_blank' : undefined}
               rel={christmasParty.ticketUrl ? 'noopener noreferrer' : undefined}
             >
               Get Tickets
             </a>
+          </div>
+
+          <div className={styles.right}>
+            <img
+              src={BRAND_ASSETS.christmasTickets}
+              alt=""
+              aria-hidden="true"
+              className={styles.ticketArt}
+              width={280}
+              height={220}
+            />
           </div>
         </div>
       </div>

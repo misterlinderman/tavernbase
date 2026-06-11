@@ -1,5 +1,6 @@
 import { Router, Response } from 'express';
 import mongoose from 'mongoose';
+import { EVENT_TYPES, type EventType } from '../constants/eventTypes';
 import { checkJwt, extractAuth0Sub } from '../middleware/auth';
 import { heroVideoUpload } from '../middleware/uploadHero';
 import { asyncHandler, createError } from '../middleware/errorHandler';
@@ -13,10 +14,7 @@ const router = Router();
 
 router.use(checkJwt);
 
-const EVENT_TYPES = ['sports', 'holiday', 'shuttle', 'community'] as const;
 const LINK_TARGETS = ['Events', 'Christmas Party', 'Menu', 'Contact'] as const;
-
-type EventType = (typeof EVENT_TYPES)[number];
 type LinkTarget = (typeof LINK_TARGETS)[number];
 
 function isValidUrl(value: string): boolean {

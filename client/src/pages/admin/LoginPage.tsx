@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
+import { BRAND_ASSETS } from '../../constants/brandAssets';
 import styles from './LoginPage.module.css';
 
 function LoginPage() {
@@ -20,8 +21,13 @@ function LoginPage() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <p className={`script ${styles.brand}`}>Barry O&apos;s</p>
-        <p className={styles.sub}>Old Market Tavern</p>
+        <img
+          src={BRAND_ASSETS.headerLogo}
+          alt="Barry O's Old Market Tavern"
+          className={styles.logo}
+          width={240}
+          height={80}
+        />
         <h1 className={styles.title}>Staff Login</h1>
         <p className={styles.lead}>Sign in to manage site content, events, and submissions.</p>
         <button

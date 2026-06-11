@@ -135,16 +135,15 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--line);
+  background: var(--green-line);
 }
 
 .sec-head::before {
-  max-width: 48px;
-  background: linear-gradient(90deg, var(--green-line), var(--line));
+  background: linear-gradient(90deg, transparent, var(--green-line));
 }
 
 .sec-head::after {
-  background: linear-gradient(90deg, var(--line), transparent);
+  background: linear-gradient(90deg, var(--green-line), transparent);
 }
 
 .skeletonPulse {

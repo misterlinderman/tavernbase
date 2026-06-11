@@ -1,26 +1,21 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useAdminApi } from '../../hooks/useAdminApi';
 import { useToast } from '../../components/admin/shared/Toast';
-import type { Event, EventType } from '../../types';
+import {
+  EVENT_TYPE_LABELS,
+  EVENT_TYPE_OPTIONS,
+  getEventTypeCategory,
+  type EventType,
+  type EventTypeGroup,
+} from '../../constants/eventTypes';
+import type { Event } from '../../types';
 import formStyles from '../../components/admin/shared/adminForm.module.css';
 import styles from './EventsPage.module.css';
 
-const EVENT_TYPES: Array<{ value: EventType; label: string }> = [
-  { value: 'sports', label: 'Sports / Watch party' },
-  { value: 'holiday', label: 'Holiday' },
-  { value: 'shuttle', label: 'Game-day shuttle' },
-  { value: 'community', label: 'Community / Potluck' },
-];
-
-const TYPE_LABELS: Record<EventType, string> = {
-  sports: 'Sports',
-  holiday: 'Holiday',
-  shuttle: 'Shuttle',
-  community: 'Community',
-};
+const EVENT_TYPE_GROUPS: EventTypeGroup[] = ['Watch parties', 'Game-day shuttles', 'Other'];
 
 const EMPTY_FORM = {
-  type: 'sports' as EventType,
+  type: 'watch_party_football' as EventType,
   date: '',
   timeLabel: '',
   title: '',
@@ -119,10 +114,14 @@ function EventsPage() {
               value={form.type}
               onChange={(e) => setForm({ ...form, type: e.target.value as EventType })}
             >
-              {EVENT_TYPES.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
+              {EVENT_TYPE_GROUPS.map((group) => (
+                <optgroup key={group} label={group}>
+                  {EVENT_TYPE_OPTIONS.filter((option) => option.group === group).map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>
@@ -219,8 +218,8 @@ function EventsPage() {
                   <div className={styles.eventBody}>
                     <div className={styles.eventHeader}>
                       <h3 className={styles.eventTitle}>{item.title}</h3>
-                      <span className={`pill ${styles[`type_${item.type}`]}`}>
-                        {TYPE_LABELS[item.type]}
+                      <span className={`pill ${styles[`type_${getEventTypeCategory(item.type)}`]}`}>
+                        {EVENT_TYPE_LABELS[item.type]}
                       </span>
                       {past ? <span className={`pill past ${styles.pastPill}`}>Past · hidden</span> : null}
                     </div>

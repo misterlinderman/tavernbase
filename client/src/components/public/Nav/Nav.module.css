@@ -19,23 +19,16 @@
 
 .brand {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   text-decoration: none;
-  line-height: 1.1;
+  line-height: 0;
 }
 
-.brandName {
-  font-size: 1.5rem;
-  color: var(--gold);
-}
-
-.brandSub {
-  font-family: 'Oswald', sans-serif;
-  font-size: 0.625rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--muted);
+.logo {
+  display: block;
+  width: auto;
+  height: 3.25rem;
+  max-width: min(220px, 52vw);
 }
 
 .links {
@@ -68,7 +61,7 @@
     font-size: 0.6875rem;
   }
 
-  .brandSub {
-    display: none;
+  .logo {
+    height: 2.5rem;
   }
 }

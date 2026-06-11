@@ -1,26 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import { BRAND_ASSETS } from '../../../constants/brandAssets';
 import styles from './Hero.module.css';
 
 export interface HeroProps {
   videoUrl?: string;
   posterUrl?: string;
-}
-
-function CloverIcon() {
-  return (
-    <svg
-      className={styles.clover}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <circle cx="8" cy="8" r="4" />
-      <circle cx="16" cy="8" r="4" />
-      <circle cx="8" cy="16" r="4" />
-      <circle cx="16" cy="16" r="4" />
-      <circle cx="12" cy="12" r="2.5" fill="var(--bg)" />
-    </svg>
-  );
 }
 
 function Hero({ videoUrl, posterUrl }: HeroProps) {
@@ -64,10 +48,14 @@ function Hero({ videoUrl, posterUrl }: HeroProps) {
       <div className={styles.overlay} aria-hidden="true" />
 
       <div className={styles.content}>
-        <p className={`${styles.eyebrow} ${styles.animate}`} style={{ animationDelay: '0.1s' }}>
-          <CloverIcon />
-          <span>EST ★ 1985</span>
-        </p>
+        <img
+          src={BRAND_ASSETS.heroEst1985}
+          alt="Established 1985"
+          className={`${styles.eyebrow} ${styles.animate}`}
+          style={{ animationDelay: '0.1s' }}
+          width={320}
+          height={48}
+        />
 
         <h1 className={`${styles.title} ${styles.animate}`} style={{ animationDelay: '0.2s' }}>
           A Neighborhood Tradition

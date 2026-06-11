@@ -6,7 +6,7 @@ import styles from './EventsSection.module.css';
 function EventsSkeleton() {
   return (
     <div className={styles.skeletonGrid}>
-      {[0, 1].map((key) => (
+      {[0, 1, 2, 3, 4].map((key) => (
         <div key={key} className={`${styles.skeletonCard} skeletonPulse`} />
       ))}
     </div>

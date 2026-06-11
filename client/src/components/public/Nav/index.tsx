@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { BRAND_ASSETS } from '../../../constants/brandAssets';
 import styles from './Nav.module.css';
 
 function Nav() {
@@ -9,8 +10,13 @@ function Nav() {
       </a>
       <div className={styles.inner}>
         <Link to="/" className={styles.brand}>
-          <span className={`script ${styles.brandName}`}>Barry O&apos;s</span>
-          <span className={styles.brandSub}>Old Market Tavern</span>
+          <img
+            src={BRAND_ASSETS.headerLogo}
+            alt="Barry O's Old Market Tavern"
+            className={styles.logo}
+            width={220}
+            height={72}
+          />
         </Link>
 
         <nav className={styles.links} aria-label="Primary">

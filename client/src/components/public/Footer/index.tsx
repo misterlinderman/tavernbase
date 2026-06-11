@@ -1,3 +1,4 @@
+import { BRAND_ASSETS } from '../../../constants/brandAssets';
 import type { SiteSettings } from '../../../types';
 import styles from './Footer.module.css';
 
@@ -41,9 +42,13 @@ function Footer({ settings }: FooterProps) {
       <div className="wrap">
         <div className={styles.grid}>
           <div id="about" className={styles.col}>
-            <p className={`script ${styles.brand}`}>Barry O&apos;s</p>
-            <p className={styles.est}>EST. 1985</p>
-            <p className={styles.market}>Old Market Tavern</p>
+            <img
+              src={BRAND_ASSETS.headerLogo}
+              alt="Barry O's Old Market Tavern"
+              className={styles.logo}
+              width={220}
+              height={72}
+            />
           </div>
 
           <div className={styles.col}>

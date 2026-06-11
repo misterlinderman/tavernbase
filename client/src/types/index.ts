@@ -1,13 +1,15 @@
+import type { EventType } from '../constants/eventTypes';
+
+export type { EventType };
+
 export interface Event {
   _id: string;
-  type: 'sports' | 'holiday' | 'shuttle' | 'community';
+  type: EventType;
   title: string;
   description: string;
   date: string;
   timeLabel: string;
 }
-
-export type EventType = Event['type'];
 
 export interface SiteSettings {
   announcement: {

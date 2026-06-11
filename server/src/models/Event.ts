@@ -1,7 +1,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { EVENT_TYPES, type EventType } from '../constants/eventTypes';
 
 export interface IEvent extends Document {
-  type: 'sports' | 'holiday' | 'shuttle' | 'community';
+  type: EventType;
   title: string;
   description: string;
   date: Date;
@@ -13,7 +14,7 @@ export interface IEvent extends Document {
 
 const EventSchema = new Schema<IEvent>(
   {
-    type: { type: String, enum: ['sports', 'holiday', 'shuttle', 'community'], required: true },
+    type: { type: String, enum: EVENT_TYPES, required: true },
     title: { type: String, required: true, trim: true, maxlength: 120 },
     description: { type: String, default: '', maxlength: 400 },
     date: { type: Date, required: true },

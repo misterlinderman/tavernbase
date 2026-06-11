@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
+import { BRAND_ASSETS } from '../../../constants/brandAssets';
 import styles from './Sidebar.module.css';
 
 export interface SidebarProps {
@@ -22,7 +23,13 @@ function Sidebar({ pendingCount }: SidebarProps) {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.brand}>
-        <p className={`script ${styles.brandName}`}>Barry O&apos;s</p>
+        <img
+          src={BRAND_ASSETS.headerLogo}
+          alt="Barry O's Old Market Tavern"
+          className={styles.logo}
+          width={200}
+          height={64}
+        />
         <p className={styles.brandSub}>Staff Dashboard</p>
       </div>
 

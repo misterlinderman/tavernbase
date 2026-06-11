@@ -87,7 +87,7 @@
   color: var(--text);
 }
 
-.type_sports {
+.type_watch_party {
   color: var(--green-bright);
 }
 
@@ -97,6 +97,10 @@
 
 .type_shuttle {
   color: #6eb5ff;
+}
+
+.type_live_music {
+  color: var(--green-bright);
 }
 
 .type_community {
