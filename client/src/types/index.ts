@@ -46,6 +46,40 @@ export interface GallerySubmission {
   thumbnailUrl: string;
 }
 
+export interface PendingSubmission {
+  _id: string;
+  submitterName: string;
+  caption: string;
+  thumbnailUrl?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+}
+
+export type SubmissionStatus = 'pending' | 'approved' | 'rejected';
+
+export interface AdminSubmission {
+  _id: string;
+  submitterName: string;
+  caption: string;
+  thumbnailUrl?: string;
+  consent: boolean;
+  status: SubmissionStatus;
+  when: string;
+}
+
+export interface OverviewStats {
+  pendingSubmissions: number;
+  upcomingEvents: number;
+  announcement: {
+    enabled: boolean;
+    message: string;
+  };
+  christmas: {
+    enabled: boolean;
+    daysUntil: number | null;
+  };
+}
+
 export interface ApiListResponse<T> {
   data: T[];
   meta: { count: number };

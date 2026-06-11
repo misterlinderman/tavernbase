@@ -26,7 +26,6 @@ export const errorHandler = (
   _next: NextFunction
 ) => {
   const statusCode = err.statusCode || 500;
-  const status = err.status || 'error';
 
   // Log error in development
   if (process.env.NODE_ENV === 'development') {
@@ -37,10 +36,9 @@ export const errorHandler = (
     });
   }
 
-  // Send response
+  // Send response — { error } matches project API convention
   res.status(statusCode).json({
-    status,
-    message: err.message,
+    error: err.message,
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };

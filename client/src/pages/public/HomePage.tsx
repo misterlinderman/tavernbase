@@ -35,7 +35,10 @@ function HomePage() {
       <AnnouncementBar {...settings.announcement} />
       <EventsSection />
       <ChristmasCTA christmasParty={settings.christmasParty} />
-      <Gallery />
+      <Gallery
+        instagramHandle={settings.instagram?.handle}
+        enabled={settings.instagram?.showApprovedInGallery !== false}
+      />
       <Footer settings={settings} />
     </>
   );

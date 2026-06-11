@@ -5,14 +5,14 @@ function Nav() {
   return (
     <header className={styles.nav}>
       <div className={styles.inner}>
-        <a href="#" className={styles.brand}>
+        <Link to="/" className={styles.brand}>
           <span className={`script ${styles.brandName}`}>Barry O&apos;s</span>
           <span className={styles.brandSub}>Old Market Tavern</span>
-        </a>
+        </Link>
 
         <nav className={styles.links} aria-label="Primary">
-          <a href="#events">Events</a>
-          <a href="#contact">Contact</a>
+          <a href="/#events">Events</a>
+          <a href="/#contact">Contact</a>
           <Link to="/submit">Share a Photo</Link>
         </nav>
       </div>

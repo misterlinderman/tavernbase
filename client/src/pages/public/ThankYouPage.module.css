@@ -1,0 +1,51 @@
+.main {
+  min-height: calc(100vh - 120px);
+  min-height: calc(100dvh - 120px);
+  display: flex;
+  align-items: center;
+}
+
+.card {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.checkIcon {
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1.25rem;
+  color: var(--green-bright);
+}
+
+.title {
+  font-family: 'Anton', sans-serif;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+}
+
+.message {
+  font-family: 'Barlow', sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--muted);
+  margin-bottom: 1.75rem;
+}
+
+.card .btn {
+  min-width: 14rem;
+}
+
+@media (max-width: 560px) {
+  .card {
+    padding: 2rem 1.25rem;
+  }
+}

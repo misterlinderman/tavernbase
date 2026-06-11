@@ -13,7 +13,7 @@ export interface ISubmission extends Document {
   consentText: string;
   exifStripped: boolean;
   review?: {
-    reviewedBy: mongoose.Types.ObjectId;
+    reviewedBy?: mongoose.Types.ObjectId;
     reviewedAt: Date;
   };
   submitterIpHash?: string;

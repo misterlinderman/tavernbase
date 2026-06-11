@@ -11,6 +11,8 @@ import { ensureSettings } from './services/settings';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
 import publicRouter from './routes/public';
+import adminRouter from './routes/admin';
+import submissionsRouter from './routes/submissions';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -31,6 +33,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/health', healthRoutes);
 app.use('/api', publicRouter);
+app.use('/api/submissions', submissionsRouter);
+app.use('/api/admin', adminRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
