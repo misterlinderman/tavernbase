@@ -21,8 +21,12 @@ Production split: **Vercel** hosts the React client; **Railway** hosts the Expre
 ## 1. Vercel (client)
 
 1. Import the GitHub repo in [Vercel](https://vercel.com).
-2. Leave the **root directory** at the repo root — `vercel.json` sets build/output paths.
-3. Add environment variables (Production + Preview):
+2. **Set Root Directory to `client`** (Project Settings → General → Root Directory). This is required — the repo is a monorepo and the API lives on Railway.
+3. Leave **Framework Preset** as Vite (auto-detected). Default commands are fine:
+   - Install: `npm ci`
+   - Build: `npm run build`
+   - Output: `dist`
+4. Add environment variables (Production + Preview):
 
 | Variable | Example |
 |----------|---------|
@@ -31,7 +35,9 @@ Production split: **Vercel** hosts the React client; **Railway** hosts the Expre
 | `VITE_AUTH0_CLIENT_ID` | Production SPA client ID |
 | `VITE_AUTH0_AUDIENCE` | `https://api.barryostavern.com/api` |
 
-4. Deploy. `vercel.json` rewrites all non-asset routes to `index.html` for SPA routing.
+4. Deploy. `client/vercel.json` rewrites all routes to `index.html` for SPA routing.
+
+**If install fails with `npm ci --prefix client`:** the Root Directory is still set to the repo root. Change it to `client` and redeploy — do not use a custom install command at the repo root.
 
 **Local production build test:**
 
