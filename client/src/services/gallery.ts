@@ -1,9 +1,8 @@
+import { API_BASE_URL } from '../config/api';
 import type { GallerySubmission } from '../types';
 
-const BASE = import.meta.env.VITE_API_URL;
-
 export async function getGallery(): Promise<GallerySubmission[]> {
-  const res = await fetch(`${BASE}/gallery`);
+  const res = await fetch(`${API_BASE_URL}/gallery`);
 
   if (!res.ok) {
     throw new Error('Failed to load gallery');

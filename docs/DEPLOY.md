@@ -47,6 +47,24 @@ cd client && npm run build
 
 Template values live in `client/.env.production` — replace placeholders before deploying; never commit real secrets.
 
+**Important:** Vercel dashboard variables **override** `.env.production`. If you see `localhost:3001` errors in the browser console, delete or fix `VITE_API_URL` in Vercel — do not leave it set to `http://localhost:3001/api`. After changing env vars, **redeploy** (env vars are baked in at build time).
+
+Use your Railway public URL until custom DNS is ready, e.g. `https://your-service.up.railway.app/api` — **no trailing slash**.
+
+---
+
+## Environment variable checklist (no trailing slashes)
+
+| Where | Variable | Correct | Wrong |
+|-------|----------|---------|-------|
+| **Vercel** | `VITE_API_URL` | `https://api.barryostavern.com/api` | `http://localhost:3001/api` |
+| **Vercel** | `VITE_AUTH0_AUDIENCE` | Same as Auth0 API identifier | `http://localhost:3001/api` |
+| **Railway** | `AUTH0_AUDIENCE` | `https://api.barryostavern.com/api` | `http://localhost:3001/api` |
+| **Railway** | `CLIENT_URL` | `https://your-app.vercel.app` | `https://your-app.vercel.app/` ← slash breaks CORS |
+| **Railway** | `AUTH0_DOMAIN` | `dev-xxxxx.us.auth0.com` | (no `https://`, no slash) |
+
+`AUTH0_AUDIENCE` is the **Auth0 API identifier** you created in the Auth0 dashboard — not your Express server URL, though they are often the same string by convention.
+
 ---
 
 ## 2. Railway (server)
@@ -61,8 +79,8 @@ Template values live in `client/.env.production` — replace placeholders before
 | `PORT` | Railway sets this automatically |
 | `MONGODB_URI` | Atlas connection string |
 | `AUTH0_DOMAIN` | Auth0 tenant domain |
-| `AUTH0_AUDIENCE` | API identifier (matches client) |
-| `CLIENT_URL` | `https://barryostavern.com` (add preview URLs if needed) |
+| `AUTH0_AUDIENCE` | `https://api.barryostavern.com/api` — must match Auth0 API identifier and `VITE_AUTH0_AUDIENCE` |
+| `CLIENT_URL` | `https://barryostavern.com` — **no trailing slash**; use current Vercel URL for previews |
 | `CLOUDINARY_URL` | Full Cloudinary URL |
 | `CLOUDINARY_PENDING_FOLDER` | `barryos/pending` |
 | `CLOUDINARY_PUBLIC_FOLDER` | `barryos/gallery` |

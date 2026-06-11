@@ -5,10 +5,9 @@ import Toggle from '../../components/admin/shared/Toggle';
 import { useToast } from '../../components/admin/shared/Toast';
 import { useAdminApi } from '../../hooks/useAdminApi';
 import type { SiteSettings } from '../../types';
+import { API_BASE_URL } from '../../config/api';
 import formStyles from '../../components/admin/shared/adminForm.module.css';
 import styles from './MediaPage.module.css';
-
-const BASE = import.meta.env.VITE_API_URL;
 
 function filenameFromUrl(url?: string): string {
   if (!url) return 'No video set';
@@ -52,7 +51,7 @@ function MediaPage() {
 
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', `${BASE}/admin/media/hero`);
+      xhr.open('POST', `${API_BASE_URL}/admin/media/hero`);
       xhr.setRequestHeader('Authorization', `Bearer ${token}`);
 
       xhr.upload.onprogress = (event) => {

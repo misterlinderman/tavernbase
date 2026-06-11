@@ -1,7 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useCallback } from 'react';
-
-const BASE = import.meta.env.VITE_API_URL;
+import { API_BASE_URL } from '../config/api';
 
 export function useAdminApi() {
   const { getAccessTokenSilently } = useAuth0();
@@ -9,7 +8,7 @@ export function useAdminApi() {
   const adminFetch = useCallback(
     async <T>(path: string, options?: RequestInit): Promise<T> => {
       const token = await getAccessTokenSilently();
-      const res = await fetch(`${BASE}${path}`, {
+      const res = await fetch(`${API_BASE_URL}${path}`, {
         ...options,
         headers: {
           'Content-Type': 'application/json',
@@ -39,7 +38,7 @@ export function useAdminApi() {
   const adminFetchList = useCallback(
     async <T>(path: string, options?: RequestInit): Promise<{ data: T; count: number }> => {
       const token = await getAccessTokenSilently();
-      const res = await fetch(`${BASE}${path}`, {
+      const res = await fetch(`${API_BASE_URL}${path}`, {
         ...options,
         headers: {
           'Content-Type': 'application/json',

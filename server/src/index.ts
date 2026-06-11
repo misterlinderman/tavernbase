@@ -24,8 +24,15 @@ const allowedOrigins = [
   'http://127.0.0.1:5173',
 ];
 
-if (process.env.CLIENT_URL && !allowedOrigins.includes(process.env.CLIENT_URL)) {
-  allowedOrigins.push(process.env.CLIENT_URL);
+function normalizeOrigin(url: string): string {
+  return url.trim().replace(/\/+$/, '');
+}
+
+if (process.env.CLIENT_URL) {
+  const clientOrigin = normalizeOrigin(process.env.CLIENT_URL);
+  if (!allowedOrigins.includes(clientOrigin)) {
+    allowedOrigins.push(clientOrigin);
+  }
 }
 
 app.set('trust proxy', 1);
