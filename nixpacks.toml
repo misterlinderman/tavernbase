@@ -5,7 +5,7 @@
 NIXPACKS_INSTALL_DEV_DEPENDENCIES = "true"
 
 [phases.setup]
-nixPkgs = ["nodejs_18"]
+nixPkgs = ["nodejs_22"]
 
 [phases.install]
 dependsOn = ["setup"]

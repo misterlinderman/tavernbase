@@ -73,6 +73,8 @@ Template values live in `client/.env.production` — replace placeholders before
 
 **If the build fails with `tsc: not found`:** Railway was building the client or omitting dev dependencies. Confirm `nixpacks.toml` is committed and redeploy.
 
+**If the build fails with `Node.js 18.x has reached End-Of-Life`:** Nixpacks no longer ships Node 18. This repo uses Node 22 via `nixpacks.toml` and `.node-version`.
+
 **Seed admin user (one-time, from local machine with env vars set):**
 
 ```bash
