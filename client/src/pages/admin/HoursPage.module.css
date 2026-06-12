@@ -39,8 +39,8 @@
 .iconBtn {
   width: 2rem;
   height: 2rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-button);
+  border: var(--border-button) solid var(--line);
   background: var(--panel-2);
   color: var(--text);
   font-size: 0.875rem;

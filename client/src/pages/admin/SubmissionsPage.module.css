@@ -11,8 +11,8 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.65rem 1rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
+  border: var(--border-button) solid var(--line);
+  border-radius: var(--radius-button);
   background: var(--panel);
   color: var(--muted);
   font-family: 'Oswald', sans-serif;
@@ -36,7 +36,7 @@
   min-width: 1.25rem;
   height: 1.25rem;
   padding: 0 0.35rem;
-  border-radius: 999px;
+  border-radius: var(--radius-card);
   background: rgba(255, 255, 255, 0.08);
   font-size: 0.6875rem;
 }
@@ -70,7 +70,7 @@
   gap: 1rem;
   align-items: center;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--line);
+  border-bottom: var(--border-container) solid var(--line);
 }
 
 .item:last-child {
@@ -80,9 +80,9 @@
 .thumb {
   width: 88px;
   height: 88px;
-  border-radius: 8px;
+  border-radius: var(--radius-card);
   overflow: hidden;
-  border: 1px solid var(--line);
+  border: var(--border-container) solid var(--line);
   background: var(--panel-2);
 }
 
@@ -185,8 +185,8 @@
 .deleteBtn {
   min-width: 9rem;
   padding: 0.55rem 0.85rem;
-  border-radius: 8px;
-  border: 1px solid transparent;
+  border-radius: var(--radius-button);
+  border: var(--border-button) solid transparent;
   font-family: 'Oswald', sans-serif;
   font-size: 0.6875rem;
   font-weight: 600;
@@ -251,7 +251,7 @@
 .pill {
   display: inline-block;
   padding: 0.25rem 0.65rem;
-  border-radius: 999px;
+  border-radius: var(--radius-card);
   font-family: 'Oswald', sans-serif;
   font-size: 0.625rem;
   font-weight: 600;
@@ -277,14 +277,14 @@
 }
 
 .skeletonThumb {
-  border: 1px solid var(--line);
+  border: var(--border-container) solid var(--line);
 }
 
 .skeletonBody {
   flex: 1;
   min-height: 5rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
 }
 
 @media (max-width: 760px) {

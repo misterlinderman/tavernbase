@@ -14,8 +14,8 @@
   position: relative;
   width: min(100%, 480px);
   padding: 2rem 1.75rem 1.75rem;
-  border-radius: 12px;
-  border: 1px solid var(--green-line);
+  border-radius: var(--radius-panel);
+  border: var(--border-container) solid var(--green-line);
   background:
     radial-gradient(ellipse at top, rgba(39, 184, 92, 0.12), transparent 55%),
     var(--panel);
@@ -33,7 +33,7 @@
   justify-content: center;
   width: 2rem;
   height: 2rem;
-  border-radius: 8px;
+  border-radius: var(--radius-button);
   color: var(--muted);
   transition:
     color 0.2s ease,
@@ -83,8 +83,8 @@
   flex-direction: column;
   gap: 0.75rem;
   padding: 1rem 1.125rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
   background: var(--panel-2);
   margin-bottom: 1.5rem;
 }

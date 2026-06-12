@@ -53,8 +53,8 @@
   height: 2.25rem;
   max-width: 420px;
   margin: 0 auto 2rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
 }
 
 .skeletonGrid {
@@ -65,8 +65,8 @@
 
 .skeletonCard {
   min-height: 9.5rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
 }
 
 .errorMain {
@@ -82,8 +82,8 @@
   max-width: 520px;
   padding: 2rem;
   text-align: center;
-  border-radius: 12px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  border: var(--border-container) solid var(--line);
   background: var(--panel);
 }
 
@@ -107,7 +107,7 @@
 .minimalFooter {
   padding: 1.5rem;
   text-align: center;
-  border-top: 1px solid var(--line);
+  border-top: var(--border-container) solid var(--line);
   font-family: 'Barlow', sans-serif;
   font-size: 0.875rem;
   color: var(--muted);

@@ -1,7 +1,7 @@
 .footer {
   padding: 64px 0 2rem;
   background: var(--side);
-  border-top: 1px solid var(--line);
+  border-top: var(--border-container) solid var(--line);
 }
 
 .grid {
@@ -70,7 +70,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.375rem 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: var(--border-container) solid var(--line);
   font-family: 'Barlow', sans-serif;
   font-size: 0.875rem;
   color: var(--text);
@@ -114,7 +114,7 @@
 
 .bottom {
   padding-top: 1.5rem;
-  border-top: 1px solid var(--line);
+  border-top: var(--border-container) solid var(--line);
   text-align: center;
 }
 

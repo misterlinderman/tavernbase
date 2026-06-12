@@ -9,8 +9,8 @@
   align-items: center;
   gap: 1.5rem;
   padding: 2rem 2.25rem;
-  border-radius: 12px;
-  border: 1px solid var(--green-bright);
+  border-radius: var(--radius-panel);
+  border: var(--border-container) solid var(--green-bright);
   background:
     radial-gradient(ellipse 80% 120% at 12% 50%, rgba(39, 184, 92, 0.08) 0%, transparent 55%),
     radial-gradient(ellipse 70% 100% at 88% 50%, rgba(39, 184, 92, 0.06) 0%, transparent 50%),

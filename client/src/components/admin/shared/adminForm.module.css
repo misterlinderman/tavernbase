@@ -1,7 +1,7 @@
 .panel {
   background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  border: var(--border-container) solid var(--line);
+  border-radius: var(--radius-panel);
   padding: 1.5rem;
 }
 
@@ -41,8 +41,8 @@
 .textarea {
   width: 100%;
   padding: 0.75rem 0.875rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
   background: var(--panel-2);
   color: var(--text);
   font-family: 'Barlow', sans-serif;
@@ -72,8 +72,8 @@
 
 .btnDanger {
   padding: 0.5rem 0.875rem;
-  border-radius: 8px;
-  border: 1px solid rgba(226, 85, 85, 0.35);
+  border-radius: var(--radius-button);
+  border: var(--border-button) solid rgba(226, 85, 85, 0.35);
   background: rgba(226, 85, 85, 0.12);
   color: var(--red);
   font-family: 'Oswald', sans-serif;

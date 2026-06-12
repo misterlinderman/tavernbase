@@ -30,8 +30,8 @@
   max-width: 560px;
   margin: 0 auto;
   padding: 1.75rem;
-  border-radius: 12px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  border: var(--border-container) solid var(--line);
   background: var(--panel);
   display: flex;
   flex-direction: column;
@@ -63,8 +63,8 @@
 .textarea {
   width: 100%;
   padding: 0.75rem 0.875rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
   background: var(--panel-2);
   color: var(--text);
   font-family: 'Barlow', sans-serif;
@@ -94,8 +94,8 @@
 
 .dropzone {
   position: relative;
-  border: 1px dashed var(--green-line);
-  border-radius: 12px;
+  border: var(--border-container) dashed var(--green-line);
+  border-radius: var(--radius-panel);
   background: var(--panel-2);
   padding: 1.5rem;
   cursor: pointer;
@@ -170,8 +170,8 @@
   width: 88px;
   height: 88px;
   object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
   flex-shrink: 0;
 }
 
@@ -202,8 +202,8 @@
   gap: 0.75rem;
   align-items: flex-start;
   padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
   background: rgba(255, 255, 255, 0.02);
 }
 

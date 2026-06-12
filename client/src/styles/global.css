@@ -99,8 +99,8 @@ button,
   padding: 0.75rem 1rem;
   background: var(--panel);
   color: var(--text);
-  border: 1px solid var(--green-bright);
-  border-radius: 8px;
+  border: var(--border-button) solid var(--green-bright);
+  border-radius: var(--radius-button);
   font-family: 'Oswald', sans-serif;
   font-size: 0.75rem;
   font-weight: 600;

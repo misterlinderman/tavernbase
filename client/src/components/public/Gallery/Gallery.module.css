@@ -24,8 +24,8 @@
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
   margin: 0;
 }
 
@@ -92,6 +92,6 @@
 
 .skeletonTile {
   aspect-ratio: 1;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
 }

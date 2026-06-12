@@ -7,7 +7,7 @@
     var(--green) 50%,
     var(--green-deep) 100%
   );
-  border-bottom: 1px solid var(--green-line);
+  border-bottom: var(--border-container) solid var(--green-line);
 }
 
 .stripes {

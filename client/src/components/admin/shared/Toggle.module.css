@@ -31,8 +31,8 @@
   position: relative;
   width: 3rem;
   height: 1.75rem;
-  border-radius: 999px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-button);
+  border: var(--border-button) solid var(--line);
   background: var(--panel-2);
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease;

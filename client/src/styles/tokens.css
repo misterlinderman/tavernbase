@@ -15,4 +15,9 @@
   --muted: #8b988d;
   --line: rgba(255, 255, 255, 0.08);
   --green-line: rgba(39, 184, 92, 0.3);
+  --radius-card: 0;
+  --radius-panel: 0;
+  --radius-button: 0;
+  --border-container: 2px;
+  --border-button: 3px;
 }

@@ -6,8 +6,8 @@
 
 .skeletonCard {
   min-height: 15rem;
-  border-radius: 8px;
-  border: 1px solid var(--green-line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--green-line);
 }
 
 @media (min-width: 901px) {

@@ -13,7 +13,7 @@
 
 .toast {
   padding: 0.75rem 1.25rem;
-  border-radius: 8px;
+  border-radius: var(--radius-card);
   font-family: 'Barlow', sans-serif;
   font-size: 0.9375rem;
   font-weight: 500;
@@ -24,12 +24,12 @@
 
 .success {
   background: var(--green-deep);
-  border: 1px solid var(--green-line);
+  border: var(--border-container) solid var(--green-line);
 }
 
 .error {
   background: rgba(226, 85, 85, 0.2);
-  border: 1px solid rgba(226, 85, 85, 0.45);
+  border: var(--border-container) solid rgba(226, 85, 85, 0.45);
   color: #ffd8d8;
 }
 

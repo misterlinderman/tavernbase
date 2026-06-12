@@ -10,8 +10,8 @@
   margin: 0 auto;
   padding: 2.5rem 2rem;
   text-align: center;
-  border-radius: 12px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  border: var(--border-container) solid var(--line);
   background: var(--panel);
 }
 

@@ -65,8 +65,8 @@
   align-items: flex-start;
   gap: 1rem;
   padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
   background: var(--panel-2);
 }
 
@@ -88,8 +88,8 @@
 
 .editBtn {
   padding: 0.5rem 0.875rem;
-  border-radius: 8px;
-  border: 1px solid var(--green-line);
+  border-radius: var(--radius-button);
+  border: var(--border-button) solid var(--green-line);
   background: rgba(39, 184, 92, 0.1);
   color: var(--green-bright);
   font-family: 'Oswald', sans-serif;
@@ -113,8 +113,8 @@
   justify-content: center;
   width: 3.5rem;
   padding: 0.5rem;
-  border-radius: 8px;
-  border: 1px solid var(--green-line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--green-line);
   background: rgba(15, 92, 46, 0.2);
   flex-shrink: 0;
 }
@@ -226,8 +226,8 @@
 .skeletonBody {
   flex: 1;
   min-height: 4rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
 }
 
 @media (max-width: 900px) {

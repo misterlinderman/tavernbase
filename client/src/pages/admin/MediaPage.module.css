@@ -30,7 +30,7 @@
 .progressTrack {
   margin-top: 0.75rem;
   height: 0.5rem;
-  border-radius: 999px;
+  border-radius: var(--radius-card);
   background: var(--panel-2);
   overflow: hidden;
 }

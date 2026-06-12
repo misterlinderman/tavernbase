@@ -2,8 +2,8 @@
   position: relative;
   overflow: hidden;
   padding: 2.5rem 2rem;
-  border-radius: 12px;
-  border: 1px solid var(--green-line);
+  border-radius: var(--radius-panel);
+  border: var(--border-container) solid var(--green-line);
   background:
     radial-gradient(ellipse 80% 70% at 50% 0%, rgba(39, 184, 92, 0.12) 0%, transparent 55%),
     linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
@@ -65,8 +65,8 @@
 
 .pillar {
   padding: 1.25rem 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
   background: rgba(7, 10, 7, 0.35);
 }
 

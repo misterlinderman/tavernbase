@@ -15,8 +15,8 @@
   flex-direction: column;
   gap: 0.375rem;
   padding: 1.25rem 1rem;
-  border-radius: 12px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  border: var(--border-container) solid var(--line);
   background: var(--panel);
   text-decoration: none;
   transition: border-color 0.15s ease, transform 0.15s ease;
@@ -77,15 +77,15 @@
   align-items: center;
   gap: 1rem;
   padding: 0.875rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
   background: var(--panel-2);
 }
 
 .thumb {
   width: 3.5rem;
   height: 3.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius-card);
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -93,7 +93,7 @@
 .thumbPlaceholder {
   width: 3.5rem;
   height: 3.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius-card);
   background: var(--line);
   flex-shrink: 0;
 }
@@ -128,7 +128,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.75rem 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: var(--border-container) solid var(--line);
   font-family: 'Barlow', sans-serif;
   color: var(--muted);
 }

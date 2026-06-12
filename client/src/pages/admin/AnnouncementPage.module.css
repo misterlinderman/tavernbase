@@ -29,8 +29,8 @@
 
 .previewFrame {
   overflow: hidden;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
   background: var(--bg);
 }
 
