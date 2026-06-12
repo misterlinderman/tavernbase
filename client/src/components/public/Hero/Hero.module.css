@@ -88,30 +88,6 @@
   min-width: 12rem;
 }
 
-.unmute {
-  position: absolute;
-  right: 1.5rem;
-  bottom: 1.5rem;
-  z-index: 4;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-  background: rgba(7, 10, 7, 0.72);
-  backdrop-filter: blur(6px);
-  color: var(--text);
-  font-family: 'Oswald', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.unmute:hover {
-  background: rgba(15, 20, 15, 0.88);
-  border-color: var(--green-line);
-}
-
 .animate {
   opacity: 0;
   animation: heroFadeUp 0.85s ease forwards;
@@ -139,10 +115,5 @@
 @media (max-width: 560px) {
   .sub {
     letter-spacing: 0.28em;
-  }
-
-  .unmute {
-    right: 1rem;
-    bottom: 1rem;
   }
 }

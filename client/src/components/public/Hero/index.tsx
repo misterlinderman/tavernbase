@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BRAND_ASSETS } from '../../../constants/brandAssets';
 import styles from './Hero.module.css';
 
@@ -10,7 +10,6 @@ export interface HeroProps {
 }
 
 function Hero({ videoUrl, posterUrl, headline, subheadline }: HeroProps) {
-  const [muted, setMuted] = useState(true);
   const [videoFailed, setVideoFailed] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(() =>
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -25,10 +24,6 @@ function Hero({ videoUrl, posterUrl, headline, subheadline }: HeroProps) {
 
   const showVideo = Boolean(videoUrl) && !videoFailed && !reduceMotion;
 
-  const toggleMute = useCallback(() => {
-    setMuted((prev) => !prev);
-  }, []);
-
   return (
     <section className={styles.hero} aria-label="Welcome to Barry O's Old Market Tavern">
       <div className={styles.fallback} aria-hidden="true" />
@@ -39,7 +34,7 @@ function Hero({ videoUrl, posterUrl, headline, subheadline }: HeroProps) {
           src={videoUrl}
           poster={posterUrl}
           autoPlay
-          muted={muted}
+          muted
           loop
           playsInline
           aria-hidden="true"
@@ -76,16 +71,6 @@ function Hero({ videoUrl, posterUrl, headline, subheadline }: HeroProps) {
         </a>
       </div>
 
-      {showVideo && (
-        <button
-          type="button"
-          className={styles.unmute}
-          onClick={toggleMute}
-          aria-label={muted ? 'Unmute hero video' : 'Mute hero video'}
-        >
-          {muted ? 'Unmute' : 'Mute'}
-        </button>
-      )}
     </section>
   );
 }
