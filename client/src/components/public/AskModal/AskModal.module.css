@@ -1,0 +1,128 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(7, 10, 7, 0.82);
+  backdrop-filter: blur(4px);
+}
+
+.dialog {
+  position: relative;
+  width: min(100%, 480px);
+  padding: 2rem 1.75rem 1.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--green-line);
+  background:
+    radial-gradient(ellipse at top, rgba(39, 184, 92, 0.12), transparent 55%),
+    var(--panel);
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.close {
+  position: absolute;
+  top: 0.875rem;
+  right: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  color: var(--muted);
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.close:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--green-bright);
+  outline-offset: 2px;
+}
+
+.kicker {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.75rem;
+}
+
+.title {
+  font-family: 'Anton', sans-serif;
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+}
+
+.lead {
+  font-family: 'Barlow', sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+}
+
+.contact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.125rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  margin-bottom: 1.5rem;
+}
+
+.contactRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.contactRow a {
+  color: var(--green-bright);
+  text-decoration: none;
+}
+
+.contactRow a:hover {
+  text-decoration: underline;
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.125rem;
+  color: var(--green-bright);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .close {
+    transition: none;
+  }
+}

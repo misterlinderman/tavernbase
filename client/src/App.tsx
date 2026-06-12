@@ -15,6 +15,7 @@ import AnnouncementPage from './pages/admin/AnnouncementPage';
 import ChristmasPage from './pages/admin/ChristmasPage';
 import HoursPage from './pages/admin/HoursPage';
 import MediaPage from './pages/admin/MediaPage';
+import PublicEasterEgg from './components/public/PublicEasterEgg';
 
 function App() {
   const { isLoading } = useAuth0();
@@ -42,6 +43,7 @@ function App() {
           <Route path="media" element={<MediaPage />} />
         </Route>
       </Routes>
+      <PublicEasterEgg />
     </ToastProvider>
   );
 }
