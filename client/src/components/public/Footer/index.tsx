@@ -1,3 +1,4 @@
+import ShamrockIcon from '../../shared/ShamrockIcon';
 import { BRAND_ASSETS } from '../../../constants/brandAssets';
 import type { SiteSettings } from '../../../types';
 import styles from './Footer.module.css';
@@ -18,17 +19,6 @@ function PhoneIcon() {
   return (
     <svg className={styles.icon} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-    </svg>
-  );
-}
-
-function ShamrockIcon() {
-  return (
-    <svg className={styles.shamrock} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <circle cx="8" cy="8" r="4" />
-      <circle cx="16" cy="8" r="4" />
-      <circle cx="8" cy="16" r="4" />
-      <circle cx="16" cy="16" r="4" />
     </svg>
   );
 }
@@ -79,7 +69,7 @@ function Footer({ settings }: FooterProps) {
             <h3 className={styles.colTitle}>Tagline</h3>
             <p className={styles.tagline}>
               {settings.tagline}
-              <ShamrockIcon />
+              <ShamrockIcon className={styles.shamrock} />
             </p>
             {settings.about ? <p className={styles.about}>{settings.about}</p> : null}
           </div>
