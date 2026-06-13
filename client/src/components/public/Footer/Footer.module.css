@@ -124,6 +124,20 @@
   color: var(--muted);
 }
 
+.contactLink {
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.contactLink:hover {
+  color: var(--green-bright);
+}
+
+.bottomSep {
+  margin: 0 0.5rem;
+}
+
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);

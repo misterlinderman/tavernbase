@@ -1,4 +1,5 @@
 import ShamrockIcon from '../../shared/ShamrockIcon';
+import { ContactLink } from '../ContactModal/ContactModalContext';
 import styles from './AnnouncementBar.module.css';
 
 export interface AnnouncementBarProps {
@@ -21,6 +22,15 @@ function linkTargetToHash(linkTarget: string): string {
 function AnnouncementBar({ enabled, message, linkTarget }: AnnouncementBarProps) {
   if (!enabled) return null;
 
+  const linkContent = (
+    <>
+      {linkTarget}
+      <span className={styles.arrow} aria-hidden="true">
+        →
+      </span>
+    </>
+  );
+
   return (
     <div className={styles.bar} role="region" aria-label="Announcement">
       <div className={styles.stripes} aria-hidden="true" />
@@ -30,12 +40,13 @@ function AnnouncementBar({ enabled, message, linkTarget }: AnnouncementBarProps)
           <span className={styles.label}>Announcement</span>
           <span className={styles.message}>{message}</span>
         </div>
-        <a href={linkTargetToHash(linkTarget)} className={styles.link}>
-          {linkTarget}
-          <span className={styles.arrow} aria-hidden="true">
-            →
-          </span>
-        </a>
+        {linkTarget === 'Contact' || linkTarget === 'Menu' ? (
+          <ContactLink className={styles.link}>{linkContent}</ContactLink>
+        ) : (
+          <a href={linkTargetToHash(linkTarget)} className={styles.link}>
+            {linkContent}
+          </a>
+        )}
       </div>
     </div>
   );

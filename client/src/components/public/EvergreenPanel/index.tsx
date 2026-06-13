@@ -1,3 +1,4 @@
+import { ContactLink } from '../ContactModal/ContactModalContext';
 import styles from './EvergreenPanel.module.css';
 
 const PILLARS = [
@@ -45,9 +46,7 @@ function EvergreenPanel() {
           <a href="#instagram" className="btn btn-outline">
             Follow for Updates
           </a>
-          <a href="#contact" className="btn btn-green">
-            See Hours &amp; Find Us
-          </a>
+          <ContactLink className="btn btn-green">See Hours &amp; Find Us</ContactLink>
         </div>
       </div>
     </section>

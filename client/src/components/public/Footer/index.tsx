@@ -1,4 +1,5 @@
 import ShamrockIcon from '../../shared/ShamrockIcon';
+import { ContactLink } from '../ContactModal/ContactModalContext';
 import { BRAND_ASSETS } from '../../../constants/brandAssets';
 import type { SiteSettings } from '../../../types';
 import styles from './Footer.module.css';
@@ -76,7 +77,13 @@ function Footer({ settings }: FooterProps) {
         </div>
 
         <div className={styles.bottom}>
-          <p>&copy; {new Date().getFullYear()} Barry O&apos;s Old Market Tavern. All rights reserved.</p>
+          <p>
+            <ContactLink className={styles.contactLink}>Contact</ContactLink>
+            <span className={styles.bottomSep} aria-hidden="true">
+              ·
+            </span>
+            &copy; {new Date().getFullYear()} Barry O&apos;s Old Market Tavern. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

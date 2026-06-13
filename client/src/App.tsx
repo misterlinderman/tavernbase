@@ -16,6 +16,8 @@ import AnnouncementPage from './pages/admin/AnnouncementPage';
 import ChristmasPage from './pages/admin/ChristmasPage';
 import HoursPage from './pages/admin/HoursPage';
 import MediaPage from './pages/admin/MediaPage';
+import { ContactModalProvider } from './components/public/ContactModal/ContactModalContext';
+import PublicContactModal from './components/public/PublicContactModal';
 import PublicEasterEgg from './components/public/PublicEasterEgg';
 
 function App() {
@@ -29,23 +31,26 @@ function App() {
 
   return (
     <ToastProvider>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/submit" element={<SubmitPage />} />
-        <Route path="/thank-you" element={<ThankYouPage />} />
-        <Route path="/christmas-party" element={<ChristmasTicketsPage />} />
-        <Route path="/admin/login" element={<LoginPage />} />
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<OverviewPage />} />
-          <Route path="submissions" element={<SubmissionsPage />} />
-          <Route path="events" element={<EventsPage />} />
-          <Route path="announcement" element={<AnnouncementPage />} />
-          <Route path="christmas" element={<ChristmasPage />} />
-          <Route path="hours" element={<HoursPage />} />
-          <Route path="media" element={<MediaPage />} />
-        </Route>
-      </Routes>
-      <PublicEasterEgg />
+      <ContactModalProvider>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/submit" element={<SubmitPage />} />
+          <Route path="/thank-you" element={<ThankYouPage />} />
+          <Route path="/christmas-party" element={<ChristmasTicketsPage />} />
+          <Route path="/admin/login" element={<LoginPage />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<OverviewPage />} />
+            <Route path="submissions" element={<SubmissionsPage />} />
+            <Route path="events" element={<EventsPage />} />
+            <Route path="announcement" element={<AnnouncementPage />} />
+            <Route path="christmas" element={<ChristmasPage />} />
+            <Route path="hours" element={<HoursPage />} />
+            <Route path="media" element={<MediaPage />} />
+          </Route>
+        </Routes>
+        <PublicContactModal />
+        <PublicEasterEgg />
+      </ContactModalProvider>
     </ToastProvider>
   );
 }

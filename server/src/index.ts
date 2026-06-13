@@ -12,6 +12,7 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/health';
 import publicRouter from './routes/public';
 import adminRouter from './routes/admin';
+import contactRouter from './routes/contact';
 import submissionsRouter from './routes/submissions';
 
 const app = express();
@@ -56,6 +57,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/health', healthRoutes);
 app.use('/api', publicRouter);
+app.use('/api/contact', contactRouter);
 app.use('/api/submissions', submissionsRouter);
 app.use('/api/admin', adminRouter);
 

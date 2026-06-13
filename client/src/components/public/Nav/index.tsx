@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { ContactLink } from '../ContactModal/ContactModalContext';
 import { BRAND_ASSETS } from '../../../constants/brandAssets';
 import styles from './Nav.module.css';
 
@@ -21,7 +22,7 @@ function Nav() {
 
         <nav className={styles.links} aria-label="Primary">
           <a href="/#events">Events</a>
-          <a href="/#contact">Contact</a>
+          <ContactLink>Contact</ContactLink>
           <Link to="/submit">Share a Photo</Link>
         </nav>
       </div>
