@@ -26,45 +26,79 @@ const DAY_NAMES = [
   'Saturday',
 ] as const;
 
-export function parseCalendarDate(value: string): Date {
+export const TAVERN_TIME_ZONE = 'America/Detroit';
+
+export function getCalendarDateParts(
+  value: Date | string,
+  timeZone = TAVERN_TIME_ZONE
+): { year: number; month: number; day: number } {
+  const date = new Date(value);
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  }).formatToParts(date);
+
+  const pick = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((part) => part.type === type)?.value);
+
+  return {
+    year: pick('year'),
+    month: pick('month'),
+    day: pick('day'),
+  };
+}
+
+export function toCalendarDateString(
+  value: Date | string,
+  timeZone = TAVERN_TIME_ZONE
+): string {
+  const { year, month, day } = getCalendarDateParts(value, timeZone);
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
+function calendarInputToUtcNoon(value: string): Date {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
 
-  if (match) {
-    const year = Number(match[1]);
-    const month = Number(match[2]) - 1;
-    const day = Number(match[3]);
-    const parsed = new Date(year, month, day);
-
-    if (
-      parsed.getFullYear() !== year ||
-      parsed.getMonth() !== month ||
-      parsed.getDate() !== day
-    ) {
-      throw new Error('Invalid date');
-    }
-
-    return parsed;
+  if (!match) {
+    throw new Error('Invalid date');
   }
 
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
+  const year = Number(match[1]);
+  const month = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  const parsed = new Date(Date.UTC(year, month, day, 12));
+
+  if (
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== month ||
+    parsed.getUTCDate() !== day
+  ) {
     throw new Error('Invalid date');
   }
 
   return parsed;
 }
 
+export function parseCalendarDate(value: string): Date {
+  const trimmed = value.trim();
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return calendarInputToUtcNoon(trimmed);
+  }
+
+  const parsed = new Date(trimmed);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error('Invalid date');
+  }
+
+  return calendarInputToUtcNoon(toCalendarDateString(parsed));
+}
+
 export function getTodayBounds(now = new Date()) {
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const endOfToday = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    23,
-    59,
-    59,
-    999
-  );
+  const startOfToday = calendarInputToUtcNoon(toCalendarDateString(now));
+  const endOfToday = startOfToday;
 
   return { startOfToday, endOfToday, now };
 }
@@ -83,36 +117,28 @@ export function isWeeklyEventActive(event: EventScheduleFields, now = new Date()
 function isWeeklySeasonEnded(event: EventScheduleFields, now = new Date()): boolean {
   if (!event.endDate) return true;
 
-  const { startOfToday } = getTodayBounds(now);
   const endDate = new Date(event.endDate);
-
   if (Number.isNaN(endDate.getTime())) return true;
 
-  endDate.setHours(23, 59, 59, 999);
-  return endDate < startOfToday;
+  return toCalendarDateString(endDate) < toCalendarDateString(now);
 }
 
 export function isWeeklyEventStarted(event: EventScheduleFields, now = new Date()): boolean {
   if (!event.startDate) return true;
 
-  const { startOfToday } = getTodayBounds(now);
   const startDate = new Date(event.startDate);
-
   if (Number.isNaN(startDate.getTime())) return true;
 
-  startDate.setHours(0, 0, 0, 0);
-  return startDate <= startOfToday;
+  return toCalendarDateString(startDate) <= toCalendarDateString(now);
 }
 
 export function isDatedEventActive(event: EventScheduleFields, now = new Date()): boolean {
   if (resolveScheduleType(event) !== 'dated' || !event.date) return false;
 
-  const { startOfToday } = getTodayBounds(now);
   const eventDate = new Date(event.date);
-
   if (Number.isNaN(eventDate.getTime())) return false;
 
-  return eventDate >= startOfToday;
+  return toCalendarDateString(eventDate) >= toCalendarDateString(now);
 }
 
 export function isEventActive(event: EventScheduleFields, now = new Date()): boolean {
@@ -126,15 +152,11 @@ export function isEventActive(event: EventScheduleFields, now = new Date()): boo
 export function isEventPast(event: EventScheduleFields, now = new Date()): boolean {
   if (resolveScheduleType(event) === 'weekly') {
     if (!event.endDate) return false;
-    const { startOfToday } = getTodayBounds(now);
-    const endDate = new Date(event.endDate);
-    endDate.setHours(23, 59, 59, 999);
-    return endDate < startOfToday;
+    return toCalendarDateString(event.endDate) < toCalendarDateString(now);
   }
 
   if (!event.date) return false;
-  const { startOfToday } = getTodayBounds(now);
-  return new Date(event.date) < startOfToday;
+  return toCalendarDateString(event.date) < toCalendarDateString(now);
 }
 
 export function getActiveEventsFilter(now = new Date()) {
@@ -156,8 +178,7 @@ export function getActiveEventsFilter(now = new Date()) {
 }
 
 function normalizeCalendarDate(value: Date | string): Date {
-  const date = new Date(value);
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  return calendarInputToUtcNoon(toCalendarDateString(value));
 }
 
 export function getWeeklyNextOccurrence(
@@ -267,10 +288,7 @@ export function parseEventScheduleInput(body: Record<string, unknown>): ParsedEv
   const startDate = parseDateInput(body.startDate, 'startDate');
   const endDate = parseDateInput(body.endDate, 'endDate');
 
-  startDate.setHours(0, 0, 0, 0);
-  endDate.setHours(23, 59, 59, 999);
-
-  if (endDate < startDate) {
+  if (toCalendarDateString(endDate) < toCalendarDateString(startDate)) {
     throw new Error('endDate must be on or after startDate');
   }
 

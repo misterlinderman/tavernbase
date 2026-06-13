@@ -4,6 +4,7 @@ import { useToast } from '../../components/admin/shared/Toast';
 import {
   DAY_OF_WEEK_OPTIONS,
   formatDateRange,
+  formatEventDateParts,
   isEventPast,
   isWeeklyEventLive,
   isWeeklyEventStarted,
@@ -45,18 +46,6 @@ const EMPTY_FORM: EventFormState = {
   title: '',
   description: '',
 };
-
-function formatEventDate(dateStr?: string) {
-  if (!dateStr) {
-    return { month: '—', day: '—' };
-  }
-
-  const date = new Date(dateStr);
-  return {
-    month: date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
-    day: date.getDate(),
-  };
-}
 
 function eventToForm(event: Event): EventFormState {
   const scheduleType = event.scheduleType === 'weekly' ? 'weekly' : 'dated';
@@ -408,7 +397,7 @@ function EventsPage() {
                         ?.label.slice(0, 3)
                         .toUpperCase() ?? '—',
                   }
-                : formatEventDate(item.date);
+                : formatEventDateParts(item.date);
               const scheduleRange = isWeekly ? formatDateRange(item.startDate, item.endDate) : null;
               const weeklyLive = isWeekly && isWeeklyEventLive(item);
               const weeklyStarted = isWeekly && isWeeklyEventStarted(item);
