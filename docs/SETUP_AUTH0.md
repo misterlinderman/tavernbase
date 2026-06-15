@@ -122,6 +122,88 @@ Admin user upserted: owner@example.com (manager)
 
 The script upserts by `auth0Sub` — running it again updates name/email without creating duplicates.
 
+### Optional: league-only admin (`league_admin`)
+
+Use this role when someone should manage leagues (CRUD, schedules, disputes, CSV import) but not edit site settings, events, or photo moderation.
+
+1. Have the person log in at `/admin/login` once and copy their Auth0 `sub`
+2. Add to `server/.env`:
+
+```env
+LEAGUE_ADMIN_AUTH0_SUB=auth0|their-sub-here
+LEAGUE_ADMIN_EMAIL=leagues@example.com
+LEAGUE_ADMIN_NAME=League Coordinator
+```
+
+3. Run:
+
+```bash
+npx ts-node server/src/scripts/seedLeagueAdmin.ts
+```
+
+`league_admin` users see **Overview** and **Leagues** in the dashboard only. They cannot `PUT /api/admin/site` (including sports toggles).
+
+---
+
+## Captain portal onboarding
+
+Team captains submit match scoresheets at `/captain/login`. They use the same Auth0 SPA and API as staff — no separate Auth0 application is required.
+
+### Normal path (recommended)
+
+1. In **Admin → Leagues → [league] → Players**, add the captain with their **email address**
+2. Under **Teams**, assign that player as the team captain
+3. Click **Invite captain** on the team row — copy the generated email and send it to them
+4. Captain opens `/captain/login` and signs in with Auth0 using **the same email**
+5. On first login, the API links their Auth0 account to the player record automatically
+
+No Auth0 `sub` paste is required for invited captains.
+
+### Auth0 email in the access token
+
+Auto-linking matches the JWT `email` claim to the invited player. Ensure your Auth0 tenant includes email in tokens:
+
+1. Auth0 Dashboard → **Applications → APIs → Barry O's API**
+2. Open **Settings** (or **Token Settings**)
+3. Confirm **Add email to access tokens** (or equivalent) is enabled for your login connection
+
+If captains see “account not registered” after login, verify they used the invited email and that the token includes `email` (decode at [jwt.io](https://jwt.io)).
+
+### Manual link (advanced / legacy)
+
+For captains who already have an Auth0 account with a different workflow:
+
+1. Have them sign in once at `/captain/login`
+2. Copy their Auth0 `sub` from the access token
+3. In **Players & captain logins**, use **Link captain login** with player, sub, email, and name
+
+Or run `npx ts-node server/src/scripts/seedCaptain.ts` with env vars (see script header).
+
+Manually seeded captains continue to work — invite flow does not replace them.
+
+### Optional: Auth0 Management API
+
+Not required for Phase 1. To send Auth0-hosted invitation emails automatically, add a Machine-to-Machine application with Management API access and set:
+
+```env
+AUTH0_MGMT_CLIENT_ID=
+AUTH0_MGMT_CLIENT_SECRET=
+```
+
+The invite endpoint can be extended to call the Management API when these vars are present.
+
+### Player portal (read-only standings)
+
+Roster players (not captains) view standings at `/player/login`.
+
+1. Add the player under **Players**, assign them to a team **Roster** on the league detail page
+2. Player signs in at `/player/login` with the email on their player record — account links automatically on first login
+3. They see every league they are on across pool, darts, and volleyball
+
+Captains should use `/captain/login` instead — the player portal rejects team captains.
+
+Manual link: **Link player login** in admin, or `npx ts-node server/src/scripts/seedPlayer.ts` (player must be on a team roster first).
+
 ---
 
 ## 4. How auth works in code
@@ -131,14 +213,18 @@ Browser → Auth0 login → JWT (includes sub + audience)
        → API request with Authorization: Bearer <token>
        → checkJwt validates signature + audience
        → extractAuth0Sub(req) → User lookup
-       → requireRole('manager' | 'staff') → 403 if not authorized
+       → requireRole('manager' | 'staff' | 'league_admin') → 403 if not authorized
 ```
 
 | Middleware | File | Purpose |
 |------------|------|---------|
 | `checkJwt` | `server/src/middleware/auth.ts` | Validates Auth0 JWT |
 | `extractAuth0Sub` | `server/src/middleware/auth.ts` | Reads `sub` claim for User lookup |
-| `requireRole` | `server/src/middleware/requireRole.ts` | Enforces manager/staff role from MongoDB |
+| `requireRole` | `server/src/middleware/requireRole.ts` | Enforces staff role from MongoDB |
+| `requireLeagueRead` | `server/src/middleware/requireLeagueAdmin.ts` | League GET routes (manager, staff, league_admin) |
+| `requireLeagueWrite` | `server/src/middleware/requireLeagueAdmin.ts` | League mutations (manager, league_admin) |
+| `requireCaptain` | `server/src/middleware/requireCaptain.ts` | Captain scoresheet routes |
+| `requirePlayer` | `server/src/middleware/requirePlayer.ts` | Player read-only league routes |
 
 Example route usage:
 

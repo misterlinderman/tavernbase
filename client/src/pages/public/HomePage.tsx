@@ -1,6 +1,7 @@
 import AnnouncementBar from '../../components/public/AnnouncementBar';
 import ChristmasCTA from '../../components/public/ChristmasCTA';
 import EventsSection from '../../components/public/EventsSection';
+import LeaguesSection from '../../components/public/LeaguesSection';
 import Footer from '../../components/public/Footer';
 import Gallery from '../../components/public/Gallery';
 import Hero from '../../components/public/Hero';
@@ -71,6 +72,7 @@ function HomePage() {
         />
         <AnnouncementBar {...settings.announcement} />
         <EventsSection />
+        <LeaguesSection />
         <ChristmasCTA christmasParty={settings.christmasParty} />
         <Gallery
           instagramHandle={settings.instagram?.handle}

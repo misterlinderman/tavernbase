@@ -1,6 +1,11 @@
 import { Router, Response } from 'express';
 import mongoose from 'mongoose';
 import { EVENT_TYPES, type EventType } from '../constants/eventTypes';
+import { SPORTS } from '../constants/leagues';
+import {
+  getLicensedLeagueSports,
+  isSportLicensed,
+} from '../config/establishment';
 import {
   buildEventFieldsFromBody,
   getActiveEventsFilter,
@@ -9,6 +14,7 @@ import {
   toMongoUpdatePayload,
 } from '../utils/eventSchedule';
 import { checkJwt, extractAuth0Sub } from '../middleware/auth';
+import { requireRole } from '../middleware/requireRole';
 import { heroVideoUpload } from '../middleware/uploadHero';
 import { asyncHandler, createError } from '../middleware/errorHandler';
 import { Event, SiteSettings, Submission, User } from '../models';
@@ -16,6 +22,7 @@ import type { ISiteSettings } from '../models/SiteSettings';
 import { uploadHeroVideo } from '../services/storage';
 import { destroyImage, moveToGallery } from '../services/imagePipeline';
 import type { ISubmission } from '../models/Submission';
+import leaguesAdminRouter from './leagues/admin';
 
 const router = Router();
 
@@ -158,6 +165,37 @@ function mergeSiteSettings(
     }
     Object.assign(settings.instagram, body.instagram);
   }
+
+  if (body.sportsEnabled !== undefined) {
+    if (typeof body.sportsEnabled !== 'object' || body.sportsEnabled === null) {
+      throw createError('sportsEnabled must be an object', 400);
+    }
+
+    const sportsEnabled = body.sportsEnabled as Record<string, unknown>;
+
+    if (sportsEnabled.pool !== undefined && typeof sportsEnabled.pool !== 'boolean') {
+      throw createError('sportsEnabled.pool must be a boolean', 400);
+    }
+
+    if (sportsEnabled.darts !== undefined && typeof sportsEnabled.darts !== 'boolean') {
+      throw createError('sportsEnabled.darts must be a boolean', 400);
+    }
+
+    if (
+      sportsEnabled.volleyball !== undefined &&
+      typeof sportsEnabled.volleyball !== 'boolean'
+    ) {
+      throw createError('sportsEnabled.volleyball must be a boolean', 400);
+    }
+
+    for (const sport of SPORTS) {
+      if (sportsEnabled[sport] === true && !isSportLicensed(sport)) {
+        throw createError(`Cannot enable ${sport} — sport is not licensed for this deployment`, 400);
+      }
+    }
+
+    Object.assign(settings.sportsEnabled, sportsEnabled);
+  }
 }
 
 function formatSubmission(doc: ISubmission | Record<string, unknown>) {
@@ -179,6 +217,29 @@ function formatSubmission(doc: ISubmission | Record<string, unknown>) {
     }),
   };
 }
+
+router.get(
+  '/me',
+  asyncHandler(async (req, res: Response) => {
+    const auth0Sub = extractAuth0Sub(req);
+
+    if (!auth0Sub) {
+      throw createError('Unauthorized', 401);
+    }
+
+    const user = await User.findOne({ auth0Sub }).select('name email role').lean();
+
+    if (!user) {
+      throw createError('Forbidden — user not registered in staff database', 403);
+    }
+
+    if (!['manager', 'staff', 'league_admin'].includes(user.role)) {
+      throw createError('Forbidden — staff access only', 403);
+    }
+
+    res.json({ data: user });
+  })
+);
 
 router.get(
   '/overview',
@@ -446,13 +507,26 @@ router.get(
   '/site',
   asyncHandler(async (_req, res: Response) => {
     const settings = await getSettingsDocument();
-    res.json({ data: settings.toObject() });
+    res.json({
+      data: {
+        ...settings.toObject(),
+        sportsLicensed: getLicensedLeagueSports(),
+      },
+    });
   })
 );
 
 router.put(
   '/site',
+  requireRole('staff'),
   asyncHandler(async (req, res: Response) => {
+    const auth0Sub = extractAuth0Sub(req);
+    const user = auth0Sub ? await User.findOne({ auth0Sub }) : null;
+
+    if (user?.role === 'league_admin') {
+      throw createError('Forbidden — site settings require manager or staff access', 403);
+    }
+
     const settings = await getSettingsDocument();
     mergeSiteSettings(settings, req.body);
     await settings.save();
@@ -492,5 +566,7 @@ router.post(
     res.json({ data: { videoUrl } });
   })
 );
+
+router.use('/leagues', leaguesAdminRouter);
 
 export default router;

@@ -24,6 +24,18 @@ export const extractAuth0Sub = (req: Request): string | null => {
   return typeof sub === 'string' ? sub : null;
 };
 
+/** Email from JWT — used to auto-link invited captains on first login. */
+export const extractAuthEmail = (req: Request): string | null => {
+  const email = req.auth?.payload?.email;
+  return typeof email === 'string' && email.trim() ? email.trim().toLowerCase() : null;
+};
+
+/** Display name from JWT when present. */
+export const extractAuthName = (req: Request): string | null => {
+  const name = req.auth?.payload?.name;
+  return typeof name === 'string' && name.trim() ? name.trim() : null;
+};
+
 export const optionalAuth = (req: Request, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
 

@@ -8,15 +8,17 @@ Use this file for fast orientation when editing this repository in an AI-assiste
 
 Each venue gets:
 
-- **Public site** — marketing pages (read-mostly): home, event calendar, photo submit, Christmas tickets
+- **Public site** — marketing pages (read-mostly): home, event calendar, photo submit, Christmas tickets, leagues
 - **Staff dashboard** — Auth0-gated SPA for all content management
+- **Captain portal** — Auth0-gated scoresheet workflow for team captains
+- **Player portal** — Auth0-gated read-only standings for rostered players
 
-**Owner is non-technical.** Dashboard copy must be plain English. An empty event calendar is normal — show EvergreenPanel, never an error.
+**Owner is non-technical.** Dashboard copy must be plain English. An empty event calendar is normal — show EvergreenPanel, never an error. An empty leagues list is normal — show LeaguesEmptyPanel, never an error.
 
 ## Stack
 
 - **client**: Vite + React 18 + TypeScript + Tailwind + Auth0 SPA SDK
-- **server**: Express + TypeScript + Mongoose + MongoDB; JWT validation on `/api/admin/*`
+- **server**: Express + TypeScript + Mongoose + MongoDB; JWT validation on `/api/admin/*`, `/api/captain/*`, `/api/player/*`
 - **services**: Vercel (client) · Railway (server) · MongoDB Atlas · Auth0 · Cloudinary
 
 Repository layout: **`client/` and `server/` at the repo root** (no wrapper folder).
@@ -30,6 +32,8 @@ Repository layout: **`client/` and `server/` at the repo root** (no wrapper fold
 | `npm run dev:client` | Frontend only (port 5173) |
 | `npm run dev:server` | API only (port 3001) |
 | `npm run build` | Production build of client and server |
+| `npm run test` | Run server unit tests (Vitest, no MongoDB) |
+| `npm run test:server` | Same as `npm run test` |
 | `npm run lint` | ESLint in client and server |
 | `npm run format` | Prettier for common file types |
 
@@ -38,18 +42,77 @@ Repository layout: **`client/` and `server/` at the repo root** (no wrapper fold
 ```
 /                    → HomePage
 /calendar            → CalendarPage (full event list)
+/leagues             → LeaguesPage (hub when sports enabled)
+/leagues/:leagueId   → LeaguePublicPage (standings + schedule)
 /submit              → SubmitPage
 /thank-you           → ThankYouPage
 /christmas-party     → ChristmasTicketsPage
+/captain/login       → CaptainLoginPage
+/captain             → CaptainPage (scoresheets)
+/player/login        → PlayerLoginPage
+/player              → PlayerPage (standings)
+/player/scores       → PlayerScoresPage (dual-entry for player-entrant matches)
 /admin/login         → LoginPage
 /admin               → Overview (protected)
 /admin/submissions   → SubmissionsPage
 /admin/events        → EventsPage
+/admin/leagues       → LeaguesPage (overview + create)
+/admin/leagues/:id   → LeagueDetailPage
 /admin/announcement  → AnnouncementPage
 /admin/christmas     → ChristmasPage
 /admin/hours         → HoursPage
 /admin/media         → MediaPage
 ```
+
+## API routes (summary)
+
+### Public — no auth
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/api/site` | Site settings (public fields) |
+| GET | `/api/events` | Active upcoming events |
+| GET | `/api/gallery` | Approved photo submissions |
+| POST | `/api/submissions` | Photo submit (multipart, rate-limited) |
+| GET | `/api/leagues` | Active/completed leagues (licensed + enabled sports) |
+| GET | `/api/leagues/:id` | League detail |
+| GET | `/api/leagues/:id/standings` | Standings by division |
+| GET | `/api/leagues/:id/matches` | Schedule + final results |
+
+### Admin — Auth0 JWT (`checkJwt`)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET/PUT | `/api/admin/site` | Site settings incl. `sportsEnabled` |
+| GET/POST/PATCH/DELETE | `/api/admin/events` | Event CRUD |
+| GET/PATCH/DELETE | `/api/admin/submissions/:id` | Photo moderation |
+| GET/POST/PATCH/DELETE | `/api/admin/leagues` | League CRUD |
+| POST | `/api/admin/leagues/:id/schedule/generate` | Round-robin / ladder / bracket |
+| POST | `/api/admin/leagues/:id/import` | CSV import (teams, players, schedule, results) |
+| POST | `/api/admin/leagues/:id/matches/:matchId/resolve` | Dispute resolution |
+| POST | `/api/admin/leagues/:id/matches/:matchId/finalize` | Staff-enter result (player matches) |
+| POST | `/api/admin/leagues/:id/standings/recalculate` | Recompute standings |
+
+League write routes require `manager` or `league_admin`. Staff can read.
+
+### Captain — Auth0 JWT + `requireCaptain`
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/api/captain/activate` | Link Auth0 user to captain Player record |
+| GET | `/api/captain/profile` | Captain + team info |
+| GET | `/api/captain/matches` | Upcoming matches for captain's team |
+| POST | `/api/captain/matches/:matchId/scoresheet` | Submit scoresheet (team-scoped) |
+
+### Player — Auth0 JWT + `requirePlayer`
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/api/player/activate` | Link Auth0 user to Player record |
+| GET | `/api/player/leagues` | Leagues where player is on a roster |
+| GET | `/api/player/leagues/:id/standings` | Read-only standings |
+| GET | `/api/player/matches` | Upcoming player-entrant matches |
+| POST | `/api/player/matches/:matchId/scoresheet` | Dual-entry scoresheet (player matches) |
 
 ## Key features to know
 
@@ -65,6 +128,20 @@ Public API `GET /api/events` returns only **active upcoming** events. Logic live
 
 Homepage: `EventsSection` → `EventsGrid` (with link to `/calendar`) or `EvergreenPanel` when empty.
 
+### Leagues (optional module — pool · darts · volleyball)
+
+- **Licensing:** `config/establishment.json` → `modules.leagues.{pool,darts,volleyball}` — enforced server-side
+- **Runtime toggles:** `SiteSettings.sportsEnabled` — staff enable/disable licensed sports
+- **Kind / entrant:** `League.kind` (`league` | `tournament`) and `entrantType` (`team` | `player`) — tournaments use `format: 'bracket'` and `Division.playerIds` for seeds
+- **Schedule formats:** `round_robin`, `ladder`, `bracket` on `League.format`
+- **Scoresheets:** Team leagues — dual captain entry via `/captain`. Player tournaments — dual player entry via `/player/scores`; staff can finalize without logins
+- **Standings:** Season leagues — sport engines (`PoolStandingsEngine`, etc.). Tournaments — `TournamentPlacementEngine` (1st, 2nd, …) — never hand-edited
+- **Public:** `/leagues` lists tournaments with a **Tournament** badge; detail shows bracket columns or `BracketEmptyPanel` when no draw yet
+- **Pool split:** 8-ball team race = season league; 9-ball singles race-to = tournament preset
+- **CSV import:** Teams → players → schedule → historical results; CompuSport column aliases supported
+
+Deep context: [docs/contexts/CONTEXT_leagues.md](docs/contexts/CONTEXT_leagues.md) · [docs/LEAGUES.md](docs/LEAGUES.md)
+
 ### Photo submissions
 
 - `POST /api/submissions` — multipart, rate-limited, consent required server-side
@@ -74,20 +151,25 @@ Homepage: `EventsSection` → `EventsGrid` (with link to `/calendar`) or `Evergr
 
 ### Site settings (singleton)
 
-Announcement bar, Christmas CTA, hero video, hours, contact, Instagram — all toggled via `SiteSettings` in MongoDB. Disabled components render `null` on the public site.
+Announcement bar, Christmas CTA, hero video, hours, contact, Instagram, sports enabled — all toggled via `SiteSettings` in MongoDB. Disabled components render `null` on the public site.
 
 ## Where to look
 
 | Task | Location |
 |------|----------|
 | API routes | `server/src/routes/` |
+| League routes | `server/src/routes/leagues/` |
 | Event schedule logic | `server/src/utils/eventSchedule.ts` |
+| League standings | `server/src/services/leagues/standings/` |
+| Scoresheet workflow | `server/src/services/leagues/scoresheet.ts` |
+| Establishment licensing | `server/src/config/establishment.ts` |
 | Auth middleware | `server/src/middleware/auth.ts` |
 | Image pipeline | `server/src/middleware/imagePipeline.ts` |
-| Models | `server/src/models/` |
+| Models | `server/src/models/` · league models in `server/src/models/leagues/` |
 | App routes | `client/src/App.tsx` |
 | Public components | `client/src/components/public/` |
 | Admin pages | `client/src/pages/admin/` |
+| Captain / player pages | `client/src/pages/captain/` · `client/src/pages/player/` |
 | API client | `client/src/services/` |
 | Design tokens | `client/src/styles/tokens.css` |
 | Architecture | `docs/architecture/ARCHITECTURE.md` |
@@ -95,9 +177,11 @@ Announcement bar, Christmas CTA, hero video, hours, contact, Instagram — all t
 
 ## Env setup
 
-Copy examples: `.env.example`, `client/.env.example`, `server/.env.example` → respective `.env` files. Copy `config/establishment.example.json` → `config/establishment.json` for venue identity. Configure MongoDB Atlas, Auth0, and Cloudinary before exercising authenticated or upload flows. See [SETUP.md](SETUP.md) and [docs/PLATFORM.md](docs/PLATFORM.md).
+Copy examples: `.env.example`, `client/.env.example`, `server/.env.example` → respective `.env` files. Copy `config/establishment.example.json` → `config/establishment.json` for venue identity and league module licensing. Configure MongoDB Atlas, Auth0, and Cloudinary before exercising authenticated or upload flows. See [SETUP.md](SETUP.md) and [docs/PLATFORM.md](docs/PLATFORM.md).
 
 ## Critical non-negotiables
+
+### Site-wide
 
 1. No stranger-submitted photo on the public site without staff approval
 2. Consent enforced server-side on submissions — never trust the UI alone
@@ -105,3 +189,12 @@ Copy examples: `.env.example`, `client/.env.example`, `server/.env.example` → 
 4. All `/api/admin/*` routes require Auth0 JWT
 5. Empty events calendar → EvergreenPanel, not an error state
 6. Secrets in `.env` only — never in source
+
+### Leagues module
+
+7. Standings are **computed** from finalized match results — never hand-edited without audit trail
+8. A match is not `final` until both captains confirm matching scoresheets (or admin resolves dispute)
+9. Captain routes are **team-scoped** — captains cannot submit for another team's match
+10. Public leagues show only **active/completed** leagues and **final** results
+11. Empty leagues state → friendly empty panel, not an error
+12. Unlicensed sports cannot be enabled or used (`establishment.json` + `sportsEnabled`)

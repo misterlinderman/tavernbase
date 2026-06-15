@@ -24,6 +24,11 @@ export interface ISiteSettings extends Document {
   tagline: string;
   about: string;
   instagram: { handle: string; showApprovedInGallery: boolean };
+  sportsEnabled: {
+    pool: boolean;
+    darts: boolean;
+    volleyball: boolean;
+  };
 }
 
 const SiteSettingsSchema = new Schema<ISiteSettings>(
@@ -61,6 +66,11 @@ const SiteSettingsSchema = new Schema<ISiteSettings>(
     instagram: {
       handle: { type: String, default: '' },
       showApprovedInGallery: { type: Boolean, default: true },
+    },
+    sportsEnabled: {
+      pool: { type: Boolean, default: false },
+      darts: { type: Boolean, default: false },
+      volleyball: { type: Boolean, default: false },
     },
   },
   { timestamps: true }

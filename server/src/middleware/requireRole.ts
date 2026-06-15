@@ -3,12 +3,14 @@ import { User } from '../models';
 import { extractAuth0Sub } from './auth';
 import { createError } from './errorHandler';
 
-type StaffRole = 'manager' | 'staff';
+type StaffRole = 'manager' | 'staff' | 'league_admin';
 
 function hasRequiredRole(userRole: StaffRole, requiredRole: StaffRole): boolean {
   if (userRole === requiredRole) return true;
-  // Managers can access staff-level routes
-  if (requiredRole === 'staff' && userRole === 'manager') return true;
+  if (requiredRole === 'staff' && (userRole === 'manager' || userRole === 'league_admin')) {
+    return true;
+  }
+  if (requiredRole === 'league_admin' && userRole === 'manager') return true;
   return false;
 }
 
@@ -35,7 +37,7 @@ export function requireRole(requiredRole: StaffRole) {
         return;
       }
 
-      if (!hasRequiredRole(user.role, requiredRole)) {
+      if (!hasRequiredRole(user.role as StaffRole, requiredRole)) {
         next(createError('Forbidden — insufficient role', 403));
         return;
       }

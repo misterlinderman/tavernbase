@@ -14,6 +14,8 @@
     "start": "cd server && npm start",
     "install:all": "npm install && cd client && npm install && cd ../server && npm install",
     "lint": "cd client && npm run lint && cd ../server && npm run lint",
+    "test": "npm run test:server",
+    "test:server": "npm run test --prefix server",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "rm -rf client/dist server/dist client/node_modules server/node_modules node_modules"
   },

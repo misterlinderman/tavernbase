@@ -1,0 +1,171 @@
+.main {
+  min-height: calc(100vh - 120px);
+  min-height: calc(100dvh - 120px);
+}
+
+.header {
+  max-width: 720px;
+  margin: 0 auto 2rem;
+  text-align: center;
+}
+
+.backLink {
+  display: inline-flex;
+  margin-bottom: 1.25rem;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: var(--green-bright);
+}
+
+.title {
+  font-family: 'Anton', sans-serif;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 400;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-family: 'Barlow', sans-serif;
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tab,
+.tabActive {
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-button);
+  border: var(--border-button) solid var(--line);
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+}
+
+.tabActive {
+  border-color: var(--green-line);
+  background: rgba(39, 184, 92, 0.12);
+  color: var(--green-bright);
+}
+
+.block {
+  max-width: 800px;
+  margin: 0 auto 1.5rem;
+}
+
+.blockTitle {
+  margin: 0 0 0.75rem;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.standingsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.9375rem;
+}
+
+.standingsTable th,
+.standingsTable td {
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+  border-bottom: var(--border-container) solid var(--line);
+}
+
+.standingsTable th {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.matchList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.matchRow {
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
+  background: var(--panel);
+}
+
+.matchTeams {
+  font-family: 'Barlow', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.formatBadge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--green-line);
+  background: rgba(39, 184, 92, 0.1);
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green-bright);
+  vertical-align: middle;
+}
+
+.matchMeta {
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.empty {
+  text-align: center;
+  font-family: 'Barlow', sans-serif;
+  color: var(--muted);
+  padding: 2rem 0;
+}
+
+.tournamentNote {
+  margin-top: 2rem;
+  text-align: center;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.score {
+  color: var(--gold);
+  font-weight: 600;
+}

@@ -39,6 +39,14 @@ The owner is non-technical. The dashboard uses plain language, not CMS jargon.
 - Announcement, Christmas, hours, and media editors
 - Live previews on announcement and Christmas editors
 
+### Leagues (multi-sport — shipped)
+- Pool, darts, and volleyball — admin CRUD, schedules (round-robin / ladder / bracket), captain scoresheets, auto standings
+- Public `/leagues` hub + league detail; homepage `LeaguesSection` when active leagues exist
+- Captain portal `/captain` and player portal `/player` (read-only standings)
+- CSV import with CompuSport column mapping and historical results backfill
+- Per-sport licensing via `config/establishment.json` (`modules.leagues`)
+- See [docs/LEAGUES.md](../docs/LEAGUES.md) and [docs/contexts/CONTEXT_leagues.md](../docs/contexts/CONTEXT_leagues.md)
+
 ### Safety
 - No photo public without staff approval
 - Consent enforced server-side
@@ -59,6 +67,9 @@ The owner is non-technical. The dashboard uses plain language, not CMS jargon.
 | [docs/contexts/](../docs/contexts/) | Feature-specific AI session context |
 | [docs/DEPLOY.md](../docs/DEPLOY.md) | Vercel + Railway deployment |
 | [docs/GIT_CONVENTIONS.md](../docs/GIT_CONVENTIONS.md) | Commits, branches, PRs |
+| [contexts/CONTEXT_leagues.md](../docs/contexts/CONTEXT_leagues.md) | League module AI session context |
+| [LEAGUES_BUILD_PROMPTS.md](./LEAGUES_BUILD_PROMPTS.md) | Phased league build prompts (L0–L7.1 shipped) |
+| [LEAGUES.md](../docs/LEAGUES.md) | Multi-sport league product plan |
 | [.cursorrules](../.cursorrules) | Cursor IDE rules — read before every session |
 
 ---

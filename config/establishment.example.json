@@ -27,5 +27,12 @@
   "theme": {
     "primaryGreen": "#2d5016",
     "accentGold": "#c9a227"
+  },
+  "modules": {
+    "leagues": {
+      "pool": true,
+      "darts": false,
+      "volleyball": false
+    }
   }
 }

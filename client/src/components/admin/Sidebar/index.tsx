@@ -1,24 +1,30 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { BRAND_ASSETS } from '../../../constants/brandAssets';
+import type { StaffRole } from '../../../hooks/useStaffProfile';
 import styles from './Sidebar.module.css';
 
 export interface SidebarProps {
   pendingCount: number;
+  role: StaffRole | null;
 }
 
-const NAV_ITEMS = [
-  { path: '/admin', label: 'Overview', end: true },
-  { path: '/admin/submissions', label: 'Photo Submissions', badge: true },
-  { path: '/admin/events', label: 'Events' },
-  { path: '/admin/announcement', label: 'Announcement Bar' },
-  { path: '/admin/christmas', label: 'Christmas Party' },
-  { path: '/admin/hours', label: 'Hours & Info' },
-  { path: '/admin/media', label: 'Media & Social' },
+const ALL_NAV_ITEMS = [
+  { path: '/admin', label: 'Overview', end: true, roles: ['manager', 'staff', 'league_admin'] as const },
+  { path: '/admin/submissions', label: 'Photo Submissions', badge: true, roles: ['manager', 'staff'] as const },
+  { path: '/admin/events', label: 'Events', roles: ['manager', 'staff'] as const },
+  { path: '/admin/leagues', label: 'Leagues', roles: ['manager', 'staff', 'league_admin'] as const },
+  { path: '/admin/announcement', label: 'Announcement Bar', roles: ['manager', 'staff'] as const },
+  { path: '/admin/christmas', label: 'Christmas Party', roles: ['manager', 'staff'] as const },
+  { path: '/admin/hours', label: 'Hours & Info', roles: ['manager', 'staff'] as const },
+  { path: '/admin/media', label: 'Media & Social', roles: ['manager', 'staff'] as const },
 ] as const;
 
-function Sidebar({ pendingCount }: SidebarProps) {
+function Sidebar({ pendingCount, role }: SidebarProps) {
   const { user, logout } = useAuth0();
+  const navItems = ALL_NAV_ITEMS.filter((item) =>
+    role ? (item.roles as readonly StaffRole[]).includes(role) : true
+  );
 
   return (
     <aside className={styles.sidebar}>
@@ -34,7 +40,7 @@ function Sidebar({ pendingCount }: SidebarProps) {
       </div>
 
       <nav className={styles.nav} aria-label="Admin navigation">
-        {NAV_ITEMS.map((item) => (
+        {navItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}

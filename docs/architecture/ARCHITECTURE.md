@@ -1,4 +1,4 @@
-# Barry O's — System Architecture
+# Tavern Base — System Architecture
 
 **Stack:** MongoDB Atlas · Express · React (Vite) · Node.js  
 **Services:** Vercel · Railway · Auth0 · Cloudinary  
@@ -8,16 +8,16 @@
 
 ## System Overview
 
-Two front-end experiences, one Express API, one MongoDB database.
+Three authenticated experiences plus a public site share one Express API and one MongoDB database.
 
 ```
-┌──────────────────────────┐     ┌──────────────────────────┐
-│  Public Site             │     │  Staff Dashboard          │
-│  React (Vite, SSR-ready) │     │  React (auth-gated SPA)   │
-│  Vercel (static/edge)    │     │  Vercel (same deploy)     │
-└────────────┬─────────────┘     └─────────────┬────────────┘
-             │ read + submit                    │ read/write/moderate
-             └──────────────┬───────────────────┘
+┌──────────────────────────┐  ┌──────────────────────────┐  ┌──────────────────────────┐
+│  Public Site             │  │  Staff Dashboard          │  │  Captain / Player portals │
+│  React (Vite)            │  │  React (Auth0 SPA)        │  │  React (Auth0 SPA)        │
+│  Vercel                  │  │  /admin/*                 │  │  /captain · /player       │
+└────────────┬─────────────┘  └─────────────┬────────────┘  └─────────────┬────────────┘
+             │ read + submit                │ read/write/moderate         │ scoresheets / read-only
+             └──────────────┬───────────────┴─────────────────────────────┘
                             ▼
                ┌────────────────────────┐
                │  Express REST API      │
@@ -29,16 +29,24 @@ Two front-end experiences, one Express API, one MongoDB database.
           ▼                                       ▼
 ┌──────────────────┐                 ┌─────────────────────────┐
 │  MongoDB Atlas   │                 │  Cloudinary             │
-│  Collections:    │                 │  barryos/pending/       │
-│  · Event         │                 │  barryos/gallery/       │
-│  · Submission    │                 │  (hero video)           │
-│  · SiteSettings  │                 └─────────────────────────┘
+│  Collections:    │                 │  pending/ · gallery/    │
+│  · Event         │                 │  hero video             │
+│  · Submission    │                 └─────────────────────────┘
+│  · SiteSettings  │
 │  · User          │
+│  · League*       │  ← optional leagues module
 └──────────────────┘
 
-Auth flow:
-Browser → Auth0 (login) → JWT → Express (checkJwt middleware) → /api/admin/*
+Auth flows:
+  Staff   → Auth0 → JWT → checkJwt → /api/admin/*
+  Captain → Auth0 → JWT → checkJwt → requireCaptain → /api/captain/*
+  Player  → Auth0 → JWT → checkJwt → requirePlayer → /api/player/*
+  Public  → no auth → /api/events, /api/site, /api/leagues, /api/submissions
 ```
+
+**League collections** (when module enabled): `League`, `Division`, `Team`, `Player`, `Match` (sport discriminators: pool, darts, volleyball), `Scoresheet`, `StandingsSnapshot`.
+
+**Licensing:** `config/establishment.json` → `modules.leagues` loaded at boot (`server/src/config/establishment.ts`). Staff `sportsEnabled` toggles cannot exceed the license tier.
 
 ---
 
@@ -52,17 +60,25 @@ Browser → Auth0 (login) → JWT → Express (checkJwt middleware) → /api/adm
 /submit              → SubmitPage (public — photo submission)
 /thank-you           → ThankYouPage (public)
 /christmas-party     → ChristmasTicketsPage (public)
+/leagues             → LeaguesPage (public — when sports enabled)
+/leagues/:leagueId   → LeaguePublicPage (public)
+/captain/login       → CaptainLoginPage (unauthenticated)
+/captain             → CaptainPage (protected — scoresheets)
+/player/login        → PlayerLoginPage (unauthenticated)
+/player              → PlayerPage (protected — read-only standings)
 /admin/login         → LoginPage (unauthenticated)
 /admin               → Overview (protected)
 /admin/submissions   → SubmissionsPage (protected)
 /admin/events        → EventsPage (protected)
+/admin/leagues       → LeaguesPage (protected)
+/admin/leagues/:id   → LeagueDetailPage (protected)
 /admin/announcement  → AnnouncementPage (protected)
 /admin/christmas     → ChristmasPage (protected)
 /admin/hours         → HoursPage (protected)
 /admin/media         → MediaPage (protected)
 ```
 
-All `/admin/*` routes wrap with `<RequireAuth>` which checks Auth0 `isAuthenticated`. Unauthenticated users redirect to `/admin/login`.
+All `/admin/*`, `/captain`, and `/player` routes wrap with Auth0 `RequireAuth`. Unauthenticated users redirect to the respective login page.
 
 ### Component Tree (Public Site)
 
@@ -74,6 +90,7 @@ HomePage
 ├── <EventsSection />
 │   ├── <EventsGrid />         when upcoming events exist; "View Full Calendar" → /calendar
 │   └── <EvergreenPanel />     when calendar is empty
+├── <LeaguesSection />         when active leagues exist; link to /leagues (else null)
 ├── <ChristmasCTA />           renders null when disabled
 ├── <Gallery />                approved submissions only
 └── <Footer />                 hours, address, phone, about
@@ -106,7 +123,19 @@ AdminLayout
     │   ├── <TicketUrlField />
     │   └── <ChristmasPreview />
     ├── HoursPage              editable hours rows
-    └── MediaPage              hero video swap, IG handle
+    ├── MediaPage              hero video swap, IG handle
+    ├── LeaguesPage            sports toggles, overview, create league
+    └── LeagueDetailPage       divisions, teams, schedule, import, disputes
+```
+
+### Component Tree (Captain / Player portals)
+
+```
+CaptainLayout
+└── CaptainPage                upcoming matches → sport-specific scoresheet form
+
+PlayerLayout
+└── PlayerPage                 my leagues → read-only standings per division
 ```
 
 ### State Management
@@ -148,7 +177,10 @@ Request
   → express.json()
   → morgan (logging)
   → /api/submissions  → rateLimit → multer → imagePipeline → route handler
-  → /api/admin/*      → checkJwt (Auth0) → route handler
+  → /api/admin/*      → checkJwt (Auth0) → requireRole (staff+) → route handler
+  → /api/captain/*    → checkJwt → requireCaptain → route handler
+  → /api/player/*     → checkJwt → requirePlayer → route handler
+  → /api/leagues/*    → route handler (public read; licensed + enabled sports)
   → /api/*            → route handler
   → globalErrorHandler
 Response
@@ -197,7 +229,17 @@ On **reject** or **delete**:
 - Backend: `express-oauth2-jwt-bearer` — `checkJwt` middleware validates tokens against Auth0 JWKS endpoint.
 - User role is stored in MongoDB `User.role`. Auth0 manages identity; we manage authorization.
 
-**Login flow:**
+**Roles:**
+
+| Role | Portal | API access |
+|------|--------|------------|
+| `manager` | `/admin` | Full admin + site settings + league write |
+| `staff` | `/admin` | Dashboard read; league read; no league write |
+| `league_admin` | `/admin/leagues` | League CRUD, disputes, import — no site settings |
+| `captain` | `/captain` | Team-scoped scoresheet submit |
+| `player` | `/player` | Read-only standings for rostered leagues |
+
+**Staff login flow:**
 ```
 Staff opens /admin/login
 → Auth0 Universal Login (hosted)
@@ -205,6 +247,15 @@ Staff opens /admin/login
 → getAccessTokenSilently() injected into all admin API calls
 → Backend checkJwt validates; extracts sub (Auth0 user ID)
 → User.findOne({ auth0Sub }) for role
+```
+
+**Captain login flow:**
+```
+Captain opens /captain/login → Auth0 → /captain
+→ POST /api/captain/activate (links auth0Sub to Player via email)
+→ requireCaptain on subsequent requests
+→ GET /api/captain/matches (team-scoped)
+→ POST /api/captain/matches/:id/scoresheet
 ```
 
 ### Cloudinary
@@ -318,4 +369,31 @@ Staff → /admin/submissions → ModerationQueue (Pending tab)
   → Submission updated
   → GET /api/gallery now includes this photo
   [ photo appears in public gallery ]
+```
+
+## Data Flow: "Captain Submits Matching Scoresheets"
+
+```
+Captain A → /captain → submit scoresheet for home match
+  → POST /api/captain/matches/:id/scoresheet
+  → Scoresheet status: submitted (one side)
+
+Captain B → submit matching scoresheet
+  → evaluateScoresheets() via getScoresheetValidator(sport)
+  → payloads match → both approved → Match status: final
+  → StandingsEngine recomputes → StandingsSnapshot updated
+  → GET /api/leagues/:id/standings reflects new ranks
+
+If payloads differ → both disputed → admin resolves on LeagueDetailPage
+  → POST /api/admin/leagues/:id/matches/:id/resolve → final → standings recalc
+```
+
+## Data Flow: "Staff Creates a League"
+
+```
+Admin → /admin/leagues → create pool league
+  → assertSportLicensed('pool') from establishment.json
+  → POST /api/admin/leagues
+  → divisions → teams → captains → POST .../schedule/generate
+  → captains use /captain; public sees /leagues/:id when league status active
 ```

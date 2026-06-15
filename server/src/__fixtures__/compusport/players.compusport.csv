@@ -1,0 +1,4 @@
+DivnID,TeamName,PlayerName,EmailAddress,TeamCaptain
+A Flight,Shark Attack,Alex Player,player.alex@example.com,yes
+A Flight,Shark Attack,Jordan Player,,no
+A Flight,Cue Masters,Taylor Player,player.taylor@example.com,yes

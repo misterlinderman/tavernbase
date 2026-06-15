@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { Event, SiteSettings, Submission } from '../models';
 import type { ISiteSettings } from '../models/SiteSettings';
+import { intersectSportsWithLicense } from '../config/establishment';
 import { asyncHandler, createError } from '../middleware/errorHandler';
 import {
   filterActiveEventsForDisplay,
@@ -43,6 +44,11 @@ function toPublicSiteSettings(doc: ISiteSettings) {
       handle: doc.instagram.handle,
       showApprovedInGallery: doc.instagram.showApprovedInGallery,
     },
+    sportsEnabled: intersectSportsWithLicense({
+      pool: doc.sportsEnabled?.pool ?? false,
+      darts: doc.sportsEnabled?.darts ?? false,
+      volleyball: doc.sportsEnabled?.volleyball ?? false,
+    }),
   };
 }
 

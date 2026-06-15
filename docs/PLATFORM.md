@@ -12,8 +12,13 @@ Tavern Base is a white-label MERN platform for neighborhood bars, taverns, and p
 | Seasonal promotions (e.g. Christmas party) | `/christmas-party` | `/admin/christmas` |
 | Hours, contact, about | Footer | `/admin/hours` |
 | Hero video & social links | Homepage | `/admin/media` |
+| **Leagues** (pool · darts · volleyball) | `/leagues`, `/leagues/:id` | `/admin/leagues` |
+| Captain scoresheets | — | `/captain` (captain role) |
+| Player standings (read-only) | — | `/player` (player role) |
 
-All admin routes require Auth0. Photo moderation and consent enforcement are non-negotiable across every deployment.
+Leagues are **optional per sport** — set `modules.leagues` in `config/establishment.json` at deploy time; staff enable licensed sports via **Sports enabled** on `/admin/leagues`. See [LEAGUES.md](./LEAGUES.md).
+
+All admin routes require Auth0. Photo moderation, consent enforcement, and dual-entry league scoresheets are non-negotiable across every deployment.
 
 ## Reference implementation
 
@@ -30,7 +35,7 @@ New venues copy the stack, configure their own Auth0 tenant, MongoDB database, C
 1. **Fork or clone** this repository (or create a venue-specific branch).
 2. **Copy env templates** — `.env.example`, `client/.env.example`, `server/.env.example` → respective `.env` files.
 3. **Configure services** — MongoDB Atlas cluster, Auth0 SPA + API, Cloudinary account. See [SETUP.md](../SETUP.md) and [docs/SETUP_AUTH0.md](./SETUP_AUTH0.md).
-4. **Set venue identity** — update `config/establishment.json` (see `config/establishment.example.json`) and replace branding assets under `client/public/images/`.
+4. **Set venue identity** — update `config/establishment.json` (see `config/establishment.example.json`) including `modules.leagues` sport flags, and replace branding assets under `client/public/images/`.
 5. **Deploy** — Vercel (client) + Railway (server). See [docs/DEPLOY.md](./DEPLOY.md).
 6. **Seed admin** — run `npx ts-node server/src/scripts/seedAdmin.ts` with the venue manager's Auth0 sub.
 
@@ -47,6 +52,7 @@ These are the next features to build for multi-venue pitches:
 | Menu & specials module | Daily food/drink board managed from dashboard |
 | Private events inquiry | Lead capture for parties and buyouts |
 | Email notifications | Staff alerts on new photo submissions and contact messages |
+| Leagues integration tests | Automated standings/scoresheet test suite (L7.3) |
 
 ## Repository layout
 
@@ -71,6 +77,7 @@ These are the next features to build for multi-venue pitches:
 - Human-in-the-loop photo moderation (never auto-publish)
 - Server-side consent enforcement and EXIF stripping
 - Event scheduling that handles one-off, multi-day, and weekly recurring events
+- Optional native multi-sport league management (pool, darts, volleyball) with CompuSport CSV migration
 - Auth0-secured admin with no WordPress login surface
 - Deployed on modern serverless infrastructure (Vercel + Railway)
 

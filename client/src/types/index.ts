@@ -46,6 +46,17 @@ export interface SiteSettings {
     handle: string;
     showApprovedInGallery: boolean;
   };
+  sportsEnabled: {
+    pool: boolean;
+    darts: boolean;
+    volleyball: boolean;
+  };
+  /** Present on admin GET /api/admin/site — deployment license tier from establishment.json */
+  sportsLicensed?: {
+    pool: boolean;
+    darts: boolean;
+    volleyball: boolean;
+  };
 }
 
 export interface GallerySubmission {
