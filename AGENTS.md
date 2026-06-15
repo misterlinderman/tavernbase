@@ -1,10 +1,12 @@
-# Agent context — Barry O's Old Market Tavern
+# Agent context — Tavern Base
 
 Use this file for fast orientation when editing this repository in an AI-assisted IDE.
 
 ## What this is
 
-A neighborhood Irish tavern site migrating off WordPress:
+**Tavern Base** — a white-label MERN platform for neighborhood bars and taverns, forked from the Barry O's production site. The first live deployment is Barry O's; this repo is the base for pitching and onboarding additional establishments.
+
+Each venue gets:
 
 - **Public site** — marketing pages (read-mostly): home, event calendar, photo submit, Christmas tickets
 - **Staff dashboard** — Auth0-gated SPA for all content management
@@ -93,7 +95,7 @@ Announcement bar, Christmas CTA, hero video, hours, contact, Instagram — all t
 
 ## Env setup
 
-Copy examples: `.env.example`, `client/.env.example`, `server/.env.example` → respective `.env` files. Configure MongoDB Atlas, Auth0, and Cloudinary before exercising authenticated or upload flows. See [SETUP.md](SETUP.md).
+Copy examples: `.env.example`, `client/.env.example`, `server/.env.example` → respective `.env` files. Copy `config/establishment.example.json` → `config/establishment.json` for venue identity. Configure MongoDB Atlas, Auth0, and Cloudinary before exercising authenticated or upload flows. See [SETUP.md](SETUP.md) and [docs/PLATFORM.md](docs/PLATFORM.md).
 
 ## Critical non-negotiables
 

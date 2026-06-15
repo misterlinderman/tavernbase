@@ -1,4 +1,4 @@
-# Documentation — Barry O's Old Market Tavern
+# Documentation — Tavern Base
 
 Guides for developers, deployers, and AI-assisted sessions.
 
@@ -7,6 +7,7 @@ Guides for developers, deployers, and AI-assisted sessions.
 | Document | Description |
 |----------|-------------|
 | [../README.md](../README.md) | Project overview, features, quick start, API summary |
+| [PLATFORM.md](PLATFORM.md) | White-label platform overview, onboarding, roadmap |
 | [../SETUP.md](../SETUP.md) | Local development setup |
 | [architecture/ARCHITECTURE.md](architecture/ARCHITECTURE.md) | System design, routing, middleware, data flows |
 | [DEPLOY.md](DEPLOY.md) | Vercel + Railway production deployment |

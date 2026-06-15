@@ -1,0 +1,31 @@
+{
+  "$schema": "./establishment.schema.json",
+  "slug": "your-venue-slug",
+  "name": "Your Tavern Name",
+  "tagline": "Neighborhood Pub · Your City, ST",
+  "establishedYear": 1985,
+  "domains": {
+    "client": "https://yourtavern.com",
+    "api": "https://api.yourtavern.com"
+  },
+  "contact": {
+    "address": "123 Main St, Your City, ST 12345",
+    "phone": "(555) 555-5555",
+    "email": "hello@yourtavern.com"
+  },
+  "social": {
+    "instagram": "@yourtavern"
+  },
+  "cloudinary": {
+    "pendingFolder": "your-venue/pending",
+    "galleryFolder": "your-venue/gallery",
+    "heroFolder": "your-venue/hero"
+  },
+  "consent": {
+    "photoSubmissionText": "I took this photo (or have permission to share it), everyone pictured is okay with it being posted, and I give {venueName} permission to use it on their website and social media."
+  },
+  "theme": {
+    "primaryGreen": "#2d5016",
+    "accentGold": "#c9a227"
+  }
+}

@@ -1,8 +1,12 @@
-# Barry O's Old Market Tavern
+# Tavern Base
 
-**barryostavern.com · Royal Oak, MI · Est. 1985**
+**White-label MERN platform for neighborhood bars, taverns, and pubs**
 
-Custom MERN application replacing the legacy WordPress site. A dark Irish-pub marketing site for patrons, plus an Auth0-gated staff dashboard for day-to-day content management.
+Tavern Base is forked from the production [Barry O's Old Market Tavern](https://barryostavern.com) site — a dark Irish-pub marketing experience for patrons, plus an Auth0-gated staff dashboard for day-to-day content management. Use this repository to deploy new venues and expand the feature set for sales pitches.
+
+**Reference deployment:** [barryostavern.com](https://barryostavern.com) · Royal Oak, MI · Est. 1985
+
+See [docs/PLATFORM.md](docs/PLATFORM.md) for onboarding new establishments and the product roadmap.
 
 ## What’s in the build
 
@@ -95,9 +99,11 @@ Repository layout: `client/` and `server/` are siblings at the repo root.
 ### Install & configure
 
 ```bash
-git clone <repo-url>
-cd "Barry O's Tavern"
+git clone https://github.com/misterlinderman/tavernbase.git
+cd tavernbase
 npm run install:all
+
+cp config/establishment.example.json config/establishment.json
 
 cp .env.example .env
 cp client/.env.example client/.env
@@ -201,8 +207,10 @@ Full examples: `client/.env.example`, `server/.env.example`.
 | [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md) | System design, routing, data flows |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Vercel + Railway production deploy |
 | [docs/SETUP_AUTH0.md](docs/SETUP_AUTH0.md) | Auth0 configuration details |
+| [docs/PLATFORM.md](docs/PLATFORM.md) | White-label platform overview and roadmap |
 | [docs/GIT_CONVENTIONS.md](docs/GIT_CONVENTIONS.md) | Commits, branches, PRs |
 | [docs/contexts/](docs/contexts/) | Feature-specific context for AI sessions |
+| [config/README.md](config/README.md) | Per-venue configuration |
 | `.cursorrules` | Project conventions and non-negotiables |
 
 ---

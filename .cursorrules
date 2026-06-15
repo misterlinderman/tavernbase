@@ -1,11 +1,12 @@
-# Barry O's Old Market Tavern — Cursor Rules
-# Royal Oak, MI · Est. 1985 · barryostavern.com
+# Tavern Base — Cursor Rules
+# White-label MERN platform for neighborhood bars, taverns, and pubs
+# Reference deployment: Barry O's · barryostavern.com · Royal Oak, MI
 # Stack: MongoDB · Express · React · Node.js (TypeScript)
 # Services: Vercel (client) · Railway (server) · MongoDB Atlas · Auth0 · Cloudinary
 
 ## WHAT THIS PROJECT IS
 
-A neighborhood Irish tavern migrating off WordPress. Two experiences:
+Tavern Base is a white-label platform forked from the Barry O's production site. Two experiences per venue:
 1. A public marketing site (read-mostly, SSR-friendly React)
 2. A staff dashboard (auth-gated SPA, all content management)
 

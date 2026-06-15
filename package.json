@@ -1,7 +1,7 @@
 {
-  "name": "baseapp",
+  "name": "tavernbase",
   "version": "1.0.0",
-  "description": "Modern MERN stack starter with TypeScript, Auth0, and Tailwind CSS",
+  "description": "White-label MERN platform for neighborhood bars, taverns, and pubs",
   "private": true,
   "scripts": {
     "dev": "concurrently -n server,client -c magenta,cyan \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
@@ -26,7 +26,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/misterlinderman/baseapp.git"
+    "url": "https://github.com/misterlinderman/tavernbase.git"
   },
   "keywords": [
     "mern",
@@ -35,8 +35,11 @@
     "express",
     "mongodb",
     "auth0",
-    "tailwind"
+    "tailwind",
+    "tavern",
+    "hospitality",
+    "white-label"
   ],
-  "author": "",
+  "author": "misterlinderman",
   "license": "MIT"
 }
