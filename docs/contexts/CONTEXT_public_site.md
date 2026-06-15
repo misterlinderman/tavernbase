@@ -6,9 +6,8 @@ Paste at the start of a Cursor session when building or editing public-facing Re
 
 ## What You're Building
 
-A dark, Irish pub aesthetic marketing site. One page, scrollable sections.
+A dark, Irish pub aesthetic marketing site. Primary home page plus dedicated routes for calendar, photo submit, and Christmas tickets.
 Design language: deep greens, warm golds, Anton/Oswald/Kaushan Script fonts.
-Reference the static mockup: `barry-os-tavern.html` and `barry-os-event-states.html`.
 
 ## Design Tokens (import from `src/styles/tokens.css`)
 
@@ -31,59 +30,58 @@ Reference the static mockup: `barry-os-tavern.html` and `barry-os-event-states.h
 /* Fonts: Anton (display), Barlow (body), Kaushan Script (brand), Oswald (labels/UI) */
 ```
 
+## Public Routes
+
+```
+/                → HomePage
+/calendar        → CalendarPage (full event schedule)
+/submit          → SubmitPage
+/thank-you       → ThankYouPage
+/christmas-party → ChristmasTicketsPage
+```
+
 ## Component Map
 
 ```
 src/components/public/
-├── Nav/               sticky, scrolled state, brand + social links
-├── Hero/              video + fallback gradient + unmute button
-├── AnnouncementBar/   green strip; renders null when disabled
-├── EventsSection/     decides: EventsGrid OR EvergreenPanel
-│   ├── EventsGrid/    event cards with date, type tag, title, time, desc
-│   ├── EventCard/     single card
-│   └── EvergreenPanel/ evergreen fallback (3 pillars + CTAs)
-├── ChristmasCTA/      Christmas party banner; renders null when disabled
-├── Gallery/           approved photo grid
-├── SubmitPhotoForm/   consent-gated submission form
-└── Footer/            hours, address, phone, about
+├── Nav/                   brand logo; Events → /calendar; Contact modal; Share a Photo
+├── Hero/                  video + fallback gradient
+├── AnnouncementBar/       green strip; renders null when disabled
+├── EventsSection/         decides: EventsGrid OR EvergreenPanel
+│   ├── EventsGrid/        compact event cards + "View Full Calendar" link
+│   ├── EventCard/         single card (dated, multi-day, or weekly eyebrow)
+│   └── EvergreenPanel/    evergreen fallback (3 pillars + CTAs)
+├── EventCalendarList/     full calendar rows grouped by month
+├── ChristmasCTA/          Christmas party banner; renders null when disabled
+├── Gallery/               approved photo grid
+├── ContactModal/          hours, address, phone
+└── Footer/                hours, address, phone, about
+
+src/pages/public/
+├── HomePage.tsx
+├── CalendarPage.tsx
+├── SubmitPage.tsx
+├── ThankYouPage.tsx
+└── ChristmasTicketsPage.tsx
 ```
 
 ## Key Components
 
 ### AnnouncementBar
 
+Renders `null` when disabled — no empty shell.
+
 ```tsx
-// Renders null when disabled — no empty shell
 interface AnnouncementBarProps {
   enabled: boolean;
   message: string;
-  linkTarget: string;
-}
-
-export function AnnouncementBar({ enabled, message, linkTarget }: AnnouncementBarProps) {
-  if (!enabled) return null;
-  return (
-    <div className="announce">
-      {/* green gradient strip */}
-      <span>{message}</span>
-      <a href={`#${linkTarget.toLowerCase()}`}>{linkTarget} →</a>
-    </div>
-  );
+  linkTarget: 'Events' | 'Christmas Party' | 'Menu' | 'Contact';
 }
 ```
 
 ### EventsSection — THE CRITICAL DUAL STATE
 
 ```tsx
-interface Event {
-  _id: string;
-  type: 'sports' | 'holiday' | 'shuttle' | 'community';
-  title: string;
-  date: string; // ISO
-  timeLabel: string;
-  description: string;
-}
-
 export function EventsSection() {
   const { events, loading } = useEvents(); // GET /api/events (upcoming only)
 
@@ -92,9 +90,9 @@ export function EventsSection() {
   return (
     <section id="events" className="section">
       <div className="wrap">
-        <SectionHeading>What's On at Barry O's</SectionHeading>
+        <h2 className="sec-head">What's On at Barry O's</h2>
         {events.length > 0
-          ? <EventsGrid events={events} />
+          ? <EventsGrid events={events} />   // includes Link to="/calendar"
           : <EvergreenPanel />
         }
       </div>
@@ -105,32 +103,38 @@ export function EventsSection() {
 
 **Never** show an empty state or error message. If `events.length === 0`, show EvergreenPanel.
 
+### Event display by schedule type
+
+| scheduleType | Card eyebrow | Calendar page |
+|---|---|---|
+| `dated` | `JUN 15` | Full date + description |
+| `multi_day` | `THU–SUN` | Weekday span + date range + description |
+| `weekly` | `MONDAYS` | "Every Week" section + season range |
+
+Helpers: `formatSpecificDateLabel`, `formatWeekdayRange`, `formatWeeklyDayLabel`, `formatDateRange` in `constants/eventSchedule.ts`.
+
+### CalendarPage
+
+Dedicated full schedule at `/calendar`. Uses `EventCalendarList` for detailed rows. Empty state reuses `EvergreenPanel`.
+
 ### EvergreenPanel
 
-Three pillars, always true: "Every Game On", "Cold Pints, Always", "Open 7 Days".
-Plus a soft nudge to follow for updates.
-See `barry-os-event-states.html` for the exact look — copy it faithfully.
+Three pillars: "Every Game On", "Cold Pints, Always", "Open 7 Days".
+Plus CTAs to follow for updates and open contact/hours.
 
 ### ChristmasCTA
 
-```tsx
-// Renders null when disabled
-export function ChristmasCTA({ settings }: { settings: SiteSettings }) {
-  if (!settings.christmasParty.enabled) return null;
-  const { title, date, note, ticketUrl } = settings.christmasParty;
-  // ... render the green gradient Christmas banner with ticket CTA
-}
-```
+Renders `null` when `settings.christmasParty.enabled` is false. Links to `/christmas-party` for tickets.
 
-### SubmitPhotoForm
+### SubmitPage
 
-Consent is required both in UI and on the server. The form should:
-1. Show the consent text in full (copy from spec)
-2. Disable the Submit button until checkbox is checked
-3. Accept one image file (JPEG/PNG/WebP, show preview)
+Consent is required both in UI and on the server:
+
+1. Show consent text in full
+2. Disable Submit until checkbox is checked
+3. Accept one image (JPEG/PNG/WebP, preview, max 8 MB)
 4. POST multipart to `/api/submissions`
 5. On success → redirect to `/thank-you`
-6. On error → show the error message in plain English
 
 ```tsx
 const CONSENT_TEXT = `I took this photo (or have permission to share it),
@@ -140,46 +144,11 @@ permission to use it on their website and social media.`;
 
 ---
 
-## Custom Hook: useEvents
+## Custom Hooks
 
 ```typescript
-// src/hooks/useEvents.ts
-import { useEffect, useState } from 'react';
-import { getEvents } from '../services/events';
-
-export function useEvents() {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    getEvents()
-      .then(setEvents)
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { events, loading, error };
-}
-```
-
-## Custom Hook: useSiteSettings
-
-```typescript
-// src/hooks/useSiteSettings.ts
-import { useEffect, useState } from 'react';
-import { getSiteSettings } from '../services/settings';
-
-export function useSiteSettings() {
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getSiteSettings().then(setSettings).finally(() => setLoading(false));
-  }, []);
-
-  return { settings, loading };
-}
+useEvents()        → GET /api/events (upcoming only, all schedule types)
+useSiteSettings()  → GET /api/site
 ```
 
 ---
@@ -187,24 +156,17 @@ export function useSiteSettings() {
 ## Public API Services
 
 ```typescript
-// src/services/api.ts — base client (no auth, public reads)
-const BASE = import.meta.env.VITE_API_URL;
-
-async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`);
-  if (!res.ok) throw new Error(await res.text());
-  const json = await res.json();
-  return json.data;
-}
-
 // src/services/events.ts
-export const getEvents = () => get<Event[]>('/events');
+export async function getEvents(): Promise<Event[]>
 
-// src/services/settings.ts
-export const getSiteSettings = () => get<SiteSettings>('/site');
+// src/services/settings.ts — via useSiteSettings
+GET /api/site
 
 // src/services/gallery.ts
-export const getGallery = () => get<Submission[]>('/gallery');
+GET /api/gallery
+
+// src/services/submissions.ts
+POST /api/submissions  (multipart, no auth)
 ```
 
 ---
@@ -213,9 +175,7 @@ export const getGallery = () => get<Submission[]>('/gallery');
 
 - Mobile: < 560px (single column, stacked sections)
 - Tablet: 560–900px (2-col events, 3-col gallery)
-- Desktop: > 900px (full layout as per mockup)
-
-The nav hides links on mobile; burger menu is a v2 enhancement.
+- Desktop: > 900px (full layout)
 
 ---
 
@@ -226,3 +186,4 @@ The nav hides links on mobile; burger menu is a v2 enhancement.
 - Show an empty AnnouncementBar shell. Render null.
 - Use hardcoded content — everything comes from the API.
 - Use inline styles for brand colors — always CSS variables.
+- Link "View Full Calendar" to `#events` — it goes to `/calendar`.

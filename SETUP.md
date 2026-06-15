@@ -1,283 +1,208 @@
-# MERN Starter Setup Instructions
+# Setup Guide — Barry O's Old Market Tavern
 
-## For Cursor IDE + Claude Opus 4.5
-
-Follow these steps to set up your development environment and connect with GitHub.
+Local development setup for the Barry O's MERN application.
 
 ---
 
-## Step 1: Prerequisites
-
-Ensure you have the following installed:
+## Prerequisites
 
 ```bash
-# Check Node.js (need v18+)
-node --version
-
-# Check npm
+node --version   # v18+
 npm --version
-
-# Check Git
 git --version
 ```
 
-**Install if missing:**
-- Node.js: https://nodejs.org (recommend LTS version)
-- Git: https://git-scm.com
+You will also need accounts for:
+
+- [MongoDB Atlas](https://www.mongodb.com/atlas) (database)
+- [Auth0](https://auth0.com) (staff authentication)
+- [Cloudinary](https://cloudinary.com) (image/video storage)
 
 ---
 
-## Step 2: Create GitHub Repository
-
-### Option A: GitHub Web Interface
-1. Go to https://github.com/new
-2. Name your repository (e.g., `my-mern-app`)
-3. Keep it private or public as preferred
-4. **Do NOT** initialize with README, .gitignore, or license (we have these)
-5. Click "Create repository"
-6. Copy the repository URL
-
-### Option B: GitHub CLI
-```bash
-# Install GitHub CLI if needed: https://cli.github.com
-gh repo create my-mern-app --private --source=. --remote=origin
-```
-
----
-
-## Step 3: Initialize Project in Cursor
-
-### Open Cursor IDE and create project folder:
+## 1. Clone and install
 
 ```bash
-# Create and navigate to your project directory
-mkdir my-mern-app
-cd my-mern-app
-```
-
-### Copy all starter files into this directory
-
-You can either:
-1. Download and extract the starter template
-2. Or have Claude generate the files directly in Cursor
-
-### Initialize Git and connect to GitHub:
-
-```bash
-# Initialize git repository
-git init
-
-# Add all files
-git add .
-
-# Create initial commit
-git commit -m "Initial commit: MERN starter template"
-
-# Add remote (replace with your repo URL)
-git remote add origin https://github.com/YOUR_USERNAME/my-mern-app.git
-
-# Push to GitHub
-git push -u origin main
-```
-
----
-
-## Step 4: Install Dependencies
-
-```bash
-# Install all dependencies (root, client, and server)
+git clone <repo-url>
+cd "Barry O's Tavern"
 npm run install:all
 ```
 
-This runs `npm install` in the root, client, and server directories.
-
 ---
 
-## Step 5: Configure Environment Variables
+## 2. Environment files
 
-### Copy example files:
 ```bash
 cp .env.example .env
 cp client/.env.example client/.env
 cp server/.env.example server/.env
 ```
 
-### Configure MongoDB Atlas:
+---
 
-1. Go to https://www.mongodb.com/atlas
-2. Sign up or log in
-3. Create a new project
-4. Build a Database → Choose FREE tier
-5. Create a cluster (default settings are fine)
-6. Set up database access:
-   - Security → Database Access → Add New Database User
-   - Choose Password authentication
-   - Save the username and password
-7. Set up network access:
-   - Security → Network Access → Add IP Address
-   - Click "Allow Access from Anywhere" (for development)
-8. Get connection string:
-   - Deployment → Database → Connect → Connect your application
-   - Copy the connection string
-9. Add to `server/.env`:
-   ```
-   MONGODB_URI=mongodb+srv://USERNAME:PASSWORD@cluster.mongodb.net/baseapp?retryWrites=true&w=majority
-   ```
-   Replace USERNAME and PASSWORD with your database user credentials.
+## 3. MongoDB Atlas
 
-### Configure Auth0:
+1. Create a free cluster in MongoDB Atlas
+2. Create a database user (Database Access → Add New Database User)
+3. Whitelist your IP (Network Access → Add IP Address → Allow Access from Anywhere for dev)
+4. Copy the connection string (Connect → Drivers)
+5. Add to `server/.env`:
 
-1. Go to https://auth0.com and sign up/log in
-2. Create a new Application:
-   - Applications → Create Application
-   - Name: "MERN Starter" (or your app name)
-   - Type: Single Page Application
-   - Click Create
-3. Configure application settings:
-   - Allowed Callback URLs: `http://localhost:5173`
-   - Allowed Logout URLs: `http://localhost:5173`
-   - Allowed Web Origins: `http://localhost:5173`
-   - Save Changes
-4. Create an API:
-   - Applications → APIs → Create API
-   - Name: "MERN Starter API"
-   - Identifier: `http://localhost:3001/api`
-   - Click Create
-5. Update environment files:
-
-   **client/.env:**
-   ```
-   VITE_API_URL=http://localhost:3001/api
-   VITE_AUTH0_DOMAIN=your-tenant.auth0.com
-   VITE_AUTH0_CLIENT_ID=your-client-id-from-application-settings
-   VITE_AUTH0_AUDIENCE=http://localhost:3001/api
-   ```
-
-   **server/.env:**
-   ```
-   PORT=3001
-   NODE_ENV=development
-   MONGODB_URI=your-mongodb-connection-string
-   AUTH0_DOMAIN=your-tenant.auth0.com
-   AUTH0_AUDIENCE=http://localhost:3001/api
-   ```
+```env
+MONGODB_URI=mongodb+srv://USERNAME:PASSWORD@cluster.mongodb.net/barryos?retryWrites=true&w=majority
+```
 
 ---
 
-## Step 6: Start Development
+## 4. Auth0
 
-From the **repository root** (same folder as the root `package.json`):
+1. Create an Auth0 tenant
+2. Create a **Single Page Application** (Applications → Create Application)
+3. Configure the SPA:
+   - Allowed Callback URLs: `http://localhost:5173`
+   - Allowed Logout URLs: `http://localhost:5173`
+   - Allowed Web Origins: `http://localhost:5173`
+4. Create an **API** (Applications → APIs → Create API):
+   - Name: `Barry O's API`
+   - Identifier: `http://localhost:3001/api` (this is the audience)
+5. Add credentials:
+
+**client/.env:**
+```env
+VITE_API_URL=http://localhost:3001/api
+VITE_AUTH0_DOMAIN=your-tenant.auth0.com
+VITE_AUTH0_CLIENT_ID=your-spa-client-id
+VITE_AUTH0_AUDIENCE=http://localhost:3001/api
+```
+
+**server/.env:**
+```env
+AUTH0_DOMAIN=your-tenant.auth0.com
+AUTH0_AUDIENCE=http://localhost:3001/api
+```
+
+See [docs/SETUP_AUTH0.md](docs/SETUP_AUTH0.md) for additional Auth0 details.
+
+---
+
+## 5. Cloudinary
+
+1. Create a Cloudinary account
+2. Copy your `CLOUDINARY_URL` from the dashboard
+3. Add to `server/.env`:
+
+```env
+CLOUDINARY_URL=cloudinary://api_key:api_secret@cloud_name
+CLOUDINARY_PENDING_FOLDER=barryos/pending
+CLOUDINARY_PUBLIC_FOLDER=barryos/gallery
+MAX_UPLOAD_BYTES=8000000
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_SUBMISSIONS=10
+```
+
+Pending uploads go to `barryos/pending/`; approved photos move to `barryos/gallery/`. Hero video uploads use the hero folder via the admin media page.
+
+---
+
+## 6. Seed an admin user
+
+After your first Auth0 login, seed your user record so the dashboard recognizes you:
+
+1. Log in at http://localhost:5173/admin/login
+2. Copy your Auth0 `sub` from the Auth0 dashboard or JWT
+3. Add to `server/.env`:
+
+```env
+ADMIN_AUTH0_SUB=auth0|your-sub-here
+ADMIN_EMAIL=you@example.com
+ADMIN_NAME=Your Name
+```
+
+4. Run the seed script:
+
+```bash
+cd server && npx ts-node src/scripts/seedAdmin.ts
+```
+
+---
+
+## 7. Start development
+
+From the **repository root**:
 
 ```bash
 npm run dev
 ```
 
-This single command starts both the client and server (requires `npm run install:all` or at least `npm install` at the root so `concurrently` is available).
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:5173 |
+| API | http://localhost:3001 |
+| Health check | http://localhost:3001/api/health |
 
-This will start:
-- Frontend: http://localhost:5173
-- Backend: http://localhost:3001
+Optional — run one side only:
 
----
-
-## Step 7: Verify Setup
-
-1. Open http://localhost:5173 in your browser
-2. You should see the MERN Starter home page
-3. Click "Get Started" to test Auth0 login
-4. After logging in, you should be redirected to the Dashboard
-5. Try adding an item to verify MongoDB is working
-
----
-
-## Step 8: Configure Cursor AI
-
-### Enable Claude in Cursor:
-1. Open Cursor Settings (Cmd/Ctrl + ,)
-2. Go to AI → Models
-3. Select Claude as your preferred model
-
-### Project rules and docs
-The project includes `.cursorrules`, `.cursor/rules/`, `AGENTS.md`, and `docs/architecture/ARCHITECTURE.md` so tools share the same context about:
-- Project structure
-- Code conventions
-- Common patterns
-- How to add new features
-
-When asking Claude to help with code, it will follow these patterns automatically.
-
-### Example prompts for Cursor AI:
-
-**Add a new feature:**
-```
-Add a new "Notes" feature with:
-- A Note model (title, content, user reference)
-- CRUD API routes at /api/notes
-- A Notes page with list view and create form
-```
-
-**Create a new component:**
-```
-Create a reusable Card component with:
-- Title, subtitle, and children props
-- Hover effect
-- Optional action button
-```
-
-**Debug an issue:**
-```
-The items aren't loading on the Dashboard. 
-Check the API call and auth token handling.
+```bash
+npm run dev:client   # port 5173
+npm run dev:server   # port 3001
 ```
 
 ---
 
-## Common Issues & Solutions
+## 8. Verify setup
 
-### "Cannot connect to MongoDB"
-- Verify your IP is whitelisted in MongoDB Atlas Network Access
-- Check the connection string has correct username/password
-- Ensure the database user has read/write permissions
+1. **Public home** — http://localhost:5173 loads hero, events section (EvergreenPanel if no events), footer
+2. **Calendar** — http://localhost:5173/calendar shows full event list or EvergreenPanel
+3. **Admin login** — http://localhost:5173/admin/login → Auth0 → redirects to `/admin` overview
+4. **Add an event** — `/admin/events` → try all three schedule types (Specific date, Multiple days, Weekly)
+5. **Photo submit** — `/submit` → upload with consent → lands on `/thank-you`; photo appears in `/admin/submissions` as pending (not on public gallery until approved)
 
-### "Auth0 login redirects to error"
-- Verify callback URLs match exactly (including trailing slashes)
-- Check that your Auth0 domain doesn't include `https://`
-- Ensure the audience in client matches the API identifier
+---
 
-### "API returns 401 Unauthorized"
-- Make sure you're logged in
-- Check that the token is being sent in requests
-- Verify AUTH0_AUDIENCE matches on both client and server
+## Troubleshooting
+
+### MongoDB connection failed
+- Verify IP whitelist in Atlas
+- Check username/password in connection string
+- Ensure cluster is running
+
+### Auth0 login error
+- Callback URLs must match exactly (no trailing slash mismatch)
+- Domain in `.env` should not include `https://`
+- `VITE_AUTH0_AUDIENCE` must match `AUTH0_AUDIENCE` and the Auth0 API identifier
+
+### API returns 401 on admin routes
+- Confirm you are logged in
+- Check Auth0 audience matches on client and server
+- Verify admin user was seeded with correct `auth0Sub`
+
+### Photo upload fails
+- Confirm `CLOUDINARY_URL` is set
+- Check file is JPEG/PNG/WebP and under 8 MB
+- Consent checkbox must be checked (also enforced server-side)
 
 ### Port already in use
-- Kill the process: `lsof -ti:3001 | xargs kill` (macOS/Linux)
-- Or change ports in the respective .env files
+```bash
+lsof -ti:3001 | xargs kill   # macOS/Linux
+lsof -ti:5173 | xargs kill
+```
 
 ---
 
-## Next Steps
+## Next steps
 
-1. **Customize the UI**: Edit Tailwind classes and components
-2. **Add new features**: Use the patterns in `.cursorrules`
-3. **Deploy**: See README.md for deployment instructions
-4. **Shopify integration**: See [docs/SHOPIFY_AUTH.md](docs/SHOPIFY_AUTH.md)
+- [README.md](README.md) — features, scripts, API overview
+- [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md) — system design
+- [docs/DEPLOY.md](docs/DEPLOY.md) — production deployment
+- [.cursorrules](.cursorrules) — coding conventions
 
 ---
 
-## Useful Commands
+## Useful commands
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start development (client + server) |
-| `npm run dev:client` | Start only frontend |
-| `npm run dev:server` | Start only backend |
-| `npm run build` | Build for production |
-| `npm run lint` | Run ESLint |
-| `npm run format` | Format code with Prettier |
-| `npm run install:all` | Install all dependencies |
-
----
-
-## Project Conventions
-
-See `.cursorrules` for detailed coding conventions and patterns to follow when extending this project.
+| `npm run dev` | Start client + server |
+| `npm run build` | Production build |
+| `npm run lint` | ESLint |
+| `npm run format` | Prettier |

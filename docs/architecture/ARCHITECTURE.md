@@ -48,8 +48,10 @@ Browser → Auth0 (login) → JWT → Express (checkJwt middleware) → /api/adm
 
 ```
 /                    → HomePage (public)
-/submit              → SubmitPhotoPage (public)
+/calendar            → CalendarPage (public — full event schedule)
+/submit              → SubmitPage (public — photo submission)
 /thank-you           → ThankYouPage (public)
+/christmas-party     → ChristmasTicketsPage (public)
 /admin/login         → LoginPage (unauthenticated)
 /admin               → Overview (protected)
 /admin/submissions   → SubmissionsPage (protected)
@@ -66,16 +68,20 @@ All `/admin/*` routes wrap with `<RequireAuth>` which checks Auth0 `isAuthentica
 
 ```
 HomePage
-├── <Nav />
+├── <Nav />                    Events link → /calendar
 ├── <Hero />                   looping video + fallback gradient
 ├── <AnnouncementBar />        renders null when disabled
 ├── <EventsSection />
-│   ├── <EventsGrid />         when upcoming events exist
+│   ├── <EventsGrid />         when upcoming events exist; "View Full Calendar" → /calendar
 │   └── <EvergreenPanel />     when calendar is empty
 ├── <ChristmasCTA />           renders null when disabled
 ├── <Gallery />                approved submissions only
-├── <SubmitPhotoForm />        link / modal trigger
 └── <Footer />                 hours, address, phone, about
+
+CalendarPage
+├── <Nav />
+├── <EventCalendarList />      dated, multi-day, and weekly events with full detail
+└── <EvergreenPanel />         when no upcoming events
 ```
 
 ### Component Tree (Admin Dashboard)
@@ -88,8 +94,8 @@ AdminLayout
     ├── SubmissionsPage
     │   └── <ModerationQueue tabs="pending|approved|rejected" />
     ├── EventsPage
-    │   ├── <EventForm />      add event
-    │   └── <EventList />      all events, past greyed
+    │   ├── Event form          add/edit with schedule type picker
+    │   └── Event list          all events, past greyed
     ├── AnnouncementPage
     │   ├── <ToggleField />
     │   ├── <MessageField />
@@ -114,6 +120,20 @@ useSiteSettings()    → GET /api/admin/site   (admin) or /api/site (public)
 ```
 
 Custom hooks handle loading/error/refetch. All mutations call service functions, then invalidate (refetch) their hook. No optimistic updates in v1 — correctness over speed.
+
+### Event schedule types
+
+Events support three `scheduleType` values. "Upcoming" is always computed at query time — never stored as a status field.
+
+| scheduleType | Staff label | Key fields | Active when |
+|---|---|---|---|
+| `dated` | Specific date | `date` | Event date ≥ today |
+| `multi_day` | Multiple days | `startDate`, `endDate` | End date ≥ today |
+| `weekly` | Weekly | `dayOfWeek`, `startDate`, `endDate` | Within season and next occurrence exists |
+
+Schedule logic: `server/src/utils/eventSchedule.ts` (mirrored in `client/src/constants/eventSchedule.ts`).
+
+Public `GET /api/events` returns only active upcoming events, sorted by next occurrence/start date.
 
 ---
 

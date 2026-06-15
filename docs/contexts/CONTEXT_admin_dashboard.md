@@ -7,173 +7,159 @@ Paste at the start of a Cursor session when building staff dashboard pages or ed
 ## What the Dashboard Is
 
 A staff-only SPA for managing all site content. Non-technical users (owner, bartenders, a trusted regular).
-Every editable element has a live preview matching the public site.
+Every editable element has a live preview matching the public site where applicable.
 Language is plain: "Showing on site" / "Hidden" — never "enabled" / "disabled".
 
 ## Auth
 
-All dashboard routes require Auth0 authentication. Use `useAuth0()` for the token; inject it into all API calls via the admin API service.
+All dashboard routes require Auth0 authentication. Use `useAdminApi()` hook for authenticated fetch:
 
 ```typescript
-// src/services/adminApi.ts
-import { useAuth0 } from '@auth0/auth0-react';
-
-// Hook version — use inside components
-export function useAdminApi() {
-  const { getAccessTokenSilently } = useAuth0();
-
-  async function adminFetch<T>(path: string, options?: RequestInit): Promise<T> {
-    const token = await getAccessTokenSilently();
-    const res = await fetch(`${import.meta.env.VITE_API_URL}${path}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        ...options?.headers,
-      },
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const json = await res.json();
-    return json.data;
-  }
-
-  return { adminFetch };
-}
+// src/hooks/useAdminApi.ts
+const { adminFetch } = useAdminApi();
+const data = await adminFetch<Event[]>('/admin/events');
 ```
 
 ## Route Map
 
 ```
-/admin              → Overview (default redirect)
+/admin              → Overview (default)
 /admin/submissions  → ModerationQueue
-/admin/events       → EventManager
-/admin/announcement → AnnouncementEditor
-/admin/christmas    → ChristmasEditor
-/admin/hours        → HoursEditor
-/admin/media        → MediaEditor
+/admin/events       → EventsPage
+/admin/announcement → AnnouncementPage
+/admin/christmas    → ChristmasPage
+/admin/hours        → HoursPage
+/admin/media        → MediaPage
+/admin/login        → LoginPage (unauthenticated)
 ```
 
 ## Admin Layout Shell
 
 ```tsx
-// Sidebar navigation items (in order)
 const NAV_ITEMS = [
-  { path: '/admin',              label: 'Overview',          icon: 'grid' },
-  { path: '/admin/submissions',  label: 'Photo Submissions', icon: 'camera', badgeKey: 'pendingCount' },
-  { path: '/admin/events',       label: 'Events',            icon: 'calendar' },
-  { path: '/admin/announcement', label: 'Announcement Bar',  icon: 'megaphone' },
-  { path: '/admin/christmas',    label: 'Christmas Party',   icon: 'star' },
-  { path: '/admin/hours',        label: 'Hours & Info',      icon: 'clock' },
-  { path: '/admin/media',        label: 'Media & Social',    icon: 'image' },
+  { path: '/admin',              label: 'Overview' },
+  { path: '/admin/submissions',  label: 'Photo Submissions', badgeKey: 'pendingCount' },
+  { path: '/admin/events',       label: 'Events' },
+  { path: '/admin/announcement', label: 'Announcement Bar' },
+  { path: '/admin/christmas',    label: 'Christmas Party' },
+  { path: '/admin/hours',        label: 'Hours & Info' },
+  { path: '/admin/media',        label: 'Media & Social' },
 ];
 ```
 
-The pending submission count badge appears on "Photo Submissions". Fetch it with `GET /api/admin/submissions?status=pending` and use the count from the response meta.
+Pending submission count badge on "Photo Submissions". Fetched via overview or submissions endpoint.
 
 ## Overview Page
 
-Four stat cards (clickable, link to sub-page):
-1. Photos to review (pending count) — amber color when > 0
-2. Upcoming events (count) — green
+Four stat cards:
+1. Photos to review (pending count)
+2. Upcoming events (count)
 3. Announcement bar (On/Off)
 4. Days to Christmas party (or "Off")
 
-Below: "Needs your attention" — pending submissions needing review.
-Below: "Live on the site" — what's currently active (announcement, events count, Christmas CTA).
+Plus "Needs your attention" and "Live on the site" sections.
 
 ## Events Page
 
 Two sections:
-1. **Add Event form** — type (dropdown), date, time, title, description. Submit creates via POST /api/admin/events.
-2. **Event list** — all events sorted by date. Past events shown at 55% opacity with a "Past · hidden" pill. Delete button on each.
 
-```tsx
-const EVENT_TYPES = [
-  { value: 'sports',    label: 'Sports / Watch party' },
-  { value: 'holiday',   label: 'Holiday' },
-  { value: 'shuttle',   label: 'Game-day shuttle' },
-  { value: 'community', label: 'Community / Potluck' },
-];
-```
+1. **Add / Edit event form** — schedule type picker + fields + submit
+2. **All events list** — sorted by date; past events at 55% opacity with "Past · hidden" pill
+
+### Schedule types (staff-facing labels)
+
+| Value | Label | Required fields |
+|---|---|---|
+| `dated` | Specific date | `date` |
+| `multi_day` | Multiple days | `startDate` (First day), `endDate` (Last day) |
+| `weekly` | Weekly | `dayOfWeek`, `startDate`, `endDate` |
+
+Help text for **Multiple days**: "Back-to-back days for one event — like a tournament running Thursday through Sunday."
+
+### Event types (dropdown, grouped)
+
+Watch parties (baseball, football, basketball), Game-day shuttles, Live music, Holiday, Community / Potluck.
+
+See `client/src/constants/eventTypes.ts` for full list.
+
+List pills: type badge, schedule badge ("Weekly" / "Multiple days"), "Starts later", "Live on site", "Past · hidden".
 
 ## Announcement Editor
 
-Two pieces:
 1. Toggle: "Showing on site" / "Hidden"
-2. Message text input (with character count, ~160 char recommended)
+2. Message text input
 3. Link target dropdown: Events / Christmas Party / Menu / Contact
-4. **Live preview** — rendered exactly as the public site announcement bar
-
-The preview updates as the user types. Do NOT debounce the preview — it should feel instant.
+4. Live preview matching public AnnouncementBar
 
 ## Christmas Editor
 
-1. Toggle: "Showing on site" / "Hidden"
-2. Headline text
-3. Date picker
-4. Note text
-5. Ticket URL (validated as URL format)
-6. Computed "X days away" display (read-only)
-7. **Live preview** — Christmas CTA banner exactly as it appears on the site
+1. Toggle, headline, date, note, ticket URL
+2. Computed "X days away"
+3. Live preview of Christmas CTA banner
 
 ## Hours Editor
 
-A list of editable rows: `[Day label] [Hours string] [Remove]` + "+ Add row" button.
-These feed directly into the footer. No fixed slots — the staff can add/remove rows freely.
-
-```tsx
-// Default state
-const DEFAULT_HOURS = [
-  { label: 'Mon – Thu', value: '11AM – 2AM' },
-  { label: 'Fri – Sat', value: '11AM – 2:30AM' },
-  { label: 'Sun',       value: '11AM – 2AM' },
-];
-```
-
-Save button PUTs to /api/admin/site. Show toast on success.
+Editable rows: `[Day label] [Hours string] [Remove]` + "+ Add row".
+Also contact address, phone, about text. Save via PUT `/api/admin/site`.
 
 ## Media Page
 
-1. **Hero video** — current filename (read-only), upload button triggers multipart POST to /api/admin/media/hero.
-2. **Instagram handle** — text input, PUT to /api/admin/site on save.
-3. **Gallery toggle** — "Show approved submissions in gallery" checkbox.
-4. Link to submissions queue.
+1. Hero video upload → POST `/api/admin/media/hero`
+2. Instagram handle
+3. Gallery toggle: "Show approved submissions in gallery"
+
+## Submissions / Moderation
+
+Tabs: Pending | Approved | Rejected.
+
+- **Approve** → moves Cloudinary asset pending → gallery; status `approved`
+- **Reject** → status `rejected`; asset destroyed
+- **Delete** → removes from DB + Cloudinary
+
+No photo reaches the public gallery without explicit Approve click.
 
 ---
 
 ## Admin API Routes Reference
 
 ```typescript
-// GET /api/admin/submissions?status=pending|approved|rejected
-// PATCH /api/admin/submissions/:id  body: { status: 'approved'|'rejected'|'pending' }
-// DELETE /api/admin/submissions/:id
+GET    /api/admin/overview
+GET    /api/admin/submissions?status=pending|approved|rejected
+PATCH  /api/admin/submissions/:id   body: { status }
+DELETE /api/admin/submissions/:id
 
-// GET /api/admin/events              (all, incl. past)
-// POST /api/admin/events             body: EventInput
-// PATCH /api/admin/events/:id        body: Partial<EventInput>
-// DELETE /api/admin/events/:id
+GET    /api/admin/events
+POST   /api/admin/events            body: EventInput (includes scheduleType)
+PATCH  /api/admin/events/:id
+DELETE /api/admin/events/:id
 
-// GET /api/admin/site                (full SiteSettings)
-// PUT /api/admin/site                body: Partial<SiteSettings>
+GET    /api/admin/site
+PUT    /api/admin/site
 
-// POST /api/admin/media/hero         multipart: video file
+POST   /api/admin/media/hero        multipart video
+```
+
+### EventInput schedule examples
+
+```json
+// Specific date
+{ "scheduleType": "dated", "date": "2026-06-15", "type": "watch_party_baseball", "title": "...", "timeLabel": "6:30 PM" }
+
+// Multiple days
+{ "scheduleType": "multi_day", "startDate": "2026-06-12", "endDate": "2026-06-15", "type": "watch_party_baseball", "title": "College World Series", "timeLabel": "All day" }
+
+// Weekly
+{ "scheduleType": "weekly", "dayOfWeek": 1, "startDate": "2026-09-01", "endDate": "2026-12-31", "type": "watch_party_football", "title": "Monday Night Football", "timeLabel": "7:00 PM" }
 ```
 
 ## Toast Notifications
 
-All save/approve/reject actions show a brief toast. Use a simple context-based toast:
-
-```tsx
-function toast(msg: string, type: 'success' | 'error' = 'success') { ... }
-```
-
-Toasts appear bottom-center, green for success, red for error, auto-dismiss after 1.8s.
+All save/approve/reject actions show a brief toast via `useToast()`. Success = green, error = red, auto-dismiss ~1.8s.
 
 ## Design Rules for Dashboard
 
-- Same CSS variables as public site — same dark palette, same fonts
+- Same CSS variables as public site
 - Panels: `background: var(--panel); border: 1px solid var(--line); border-radius: 12px;`
-- Success green: `var(--green-bright)`, destructive red: `var(--red)`
-- Pill badges for status: pending=amber, approved=green, rejected=red
-- Buttons: Oswald font, uppercase, letter-spacing 0.08em
-- All form labels: Oswald, uppercase, 11.5px, muted color
+- Pill badges: pending=amber, approved=green, rejected=red, live=green
+- Buttons: Oswald font, uppercase
+- Form labels: Oswald, uppercase, muted color

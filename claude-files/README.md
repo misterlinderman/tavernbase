@@ -4,16 +4,46 @@
 **Stack:** MongoDB Atlas · Express · React (Vite) · Node.js · TypeScript  
 **Services:** Vercel · Railway · Auth0 · Cloudinary
 
+> **Canonical docs live in [`docs/`](../docs/) and [`README.md`](../README.md).** This file is a quick reference for AI-assisted sessions.
+
 ---
 
 ## What This Repo Is
 
 A custom MERN application replacing the existing WordPress site. Two experiences:
 
-1. **Public site** — Marketing page for the tavern. Hero, events, gallery, footer.
-2. **Staff dashboard** — Auth-gated content management: events, announcement bar, Christmas party CTA, photo moderation.
+1. **Public site** — Home, full event calendar, photo gallery, Christmas tickets, contact
+2. **Staff dashboard** — Auth-gated content management: events, announcement bar, Christmas party, photo moderation, hours, media
 
-The owner is non-technical. The dashboard must use plain language, not CMS jargon.
+The owner is non-technical. The dashboard uses plain language, not CMS jargon.
+
+---
+
+## Current Features (shipped)
+
+### Public site
+- Home with hero video, announcement bar, events preview, Christmas CTA, gallery, footer
+- `/calendar` — full upcoming event schedule with descriptions
+- `/submit` — consent-gated photo upload with rate limiting
+- `/christmas-party` — ticket page when Christmas party is enabled
+- EvergreenPanel when no upcoming events (never an error state)
+
+### Events (three schedule types)
+- **Specific date** — one-time event
+- **Multiple days** — consecutive back-to-back days (e.g. Thu–Sun tournament)
+- **Weekly** — repeats weekly during a season
+
+### Admin dashboard
+- Overview stats, photo moderation (approve/reject/delete)
+- Event manager with all schedule types
+- Announcement, Christmas, hours, and media editors
+- Live previews on announcement and Christmas editors
+
+### Safety
+- No photo public without staff approval
+- Consent enforced server-side
+- EXIF stripped via sharp before Cloudinary upload
+- All `/api/admin/*` routes require Auth0 JWT
 
 ---
 
@@ -21,73 +51,50 @@ The owner is non-technical. The dashboard must use plain language, not CMS jargo
 
 | File | Purpose |
 |---|---|
-| `.cursorrules` | Cursor IDE rules — read before every session |
-| `docs/architecture/ARCHITECTURE.md` | System design, data flow, service topology |
-| `docs/contexts/CONTEXT_server_models.md` | Mongoose schemas (paste into session when working on models) |
-| `docs/contexts/CONTEXT_image_pipeline.md` | Photo upload + EXIF pipeline (paste into session) |
-| `docs/contexts/CONTEXT_public_site.md` | Public React components (paste into session) |
-| `docs/contexts/CONTEXT_admin_dashboard.md` | Admin dashboard (paste into session) |
-| `docs/prompts/BUILD_PROMPTS.md` | Phased build prompts — the development playbook |
-| `docs/GIT_CONVENTIONS.md` | Commit format, branching, PR process |
-| `docs/barry-os-project-spec.md` | Full product spec + acceptance criteria |
-
-### Design Reference (static mockups — DO NOT deploy)
-| File | Shows |
-|---|---|
-| `barry-os-tavern.html` | Complete public site design |
-| `barry-os-event-states.html` | Events populated vs. empty states |
-| `barry-os-admin-dashboard.html` | Full staff dashboard + moderation queue |
+| [README.md](../README.md) | Project overview, API, quick start |
+| [SETUP.md](../SETUP.md) | Local development setup |
+| [AGENTS.md](../AGENTS.md) | AI agent quick orientation |
+| [docs/README.md](../docs/README.md) | Full documentation index |
+| [docs/architecture/ARCHITECTURE.md](../docs/architecture/ARCHITECTURE.md) | System design, data flow |
+| [docs/contexts/](../docs/contexts/) | Feature-specific AI session context |
+| [docs/DEPLOY.md](../docs/DEPLOY.md) | Vercel + Railway deployment |
+| [docs/GIT_CONVENTIONS.md](../docs/GIT_CONVENTIONS.md) | Commits, branches, PRs |
+| [.cursorrules](../.cursorrules) | Cursor IDE rules — read before every session |
 
 ---
 
 ## Quick Start
 
 ```bash
-git clone https://github.com/barryostavern/barryostavern.git
-cd barryostavern
 npm run install:all
 
 cp .env.example .env
 cp client/.env.example client/.env
 cp server/.env.example server/.env
 
-# Fill in env vars (see docs/architecture/ARCHITECTURE.md)
+# Fill in MongoDB, Auth0, Cloudinary (see SETUP.md)
 npm run dev
 ```
 
----
-
-## Build Roadmap
-
-| Phase | Branch | What Gets Built | Prompt(s) |
-|---|---|---|---|
-| **0 — Foundation** | `feat/phase-0-foundation` | Models, DB, Auth0, route scaffold | 0.1, 0.2 |
-| **1 — Public Site** | `feat/phase-1-public-site` | Hero, events (dual state), footer, Christmas | 1.1–1.5 |
-| **2 — Dashboard** | `feat/phase-2-admin-dashboard` | All content editors, live previews | 2.1–2.4 |
-| **3 — UGC** | `feat/phase-3-ugc-moderation` | Photo submission, EXIF pipeline, moderation | 3.1–3.3 |
-| **4 — Launch** | `feat/phase-4-polish` | a11y, responsive QA, deploy config | 4.1–4.2 |
-
-Each phase has acceptance criteria in `docs/prompts/BUILD_PROMPTS.md`. A phase is done when all AC pass.
+Frontend: http://localhost:5173 · API: http://localhost:3001
 
 ---
 
-## Critical Rules (read once, remember always)
+## Critical Rules
 
-1. **No photo goes public without explicit staff approval.** `status: 'pending'` by default. Always.
+1. **No photo goes public without explicit staff approval.** `status: 'pending'` by default.
 2. **Consent is enforced server-side.** The UI checkbox is UX; the server rejects without it.
 3. **EXIF is stripped before storage.** `sharp` processes every uploaded image.
-4. **Empty events calendar = EvergreenPanel, not an error.** Never show "no events scheduled."
-5. **All `/api/admin/*` routes require Auth0 JWT.** No exceptions.
+4. **Empty events calendar = EvergreenPanel, not an error.**
+5. **All `/api/admin/*` routes require Auth0 JWT.**
 6. **Secrets live in `.env` files.** Never in source code.
 
 ---
 
-## Services Setup Checklist
+## Services Checklist
 
-Before starting Phase 0:
-
-- [ ] **MongoDB Atlas** — create cluster, database user, get connection string
-- [ ] **Auth0** — create tenant, SPA application, API (see `docs/architecture/ARCHITECTURE.md`)
-- [ ] **Cloudinary** — create account, note `CLOUDINARY_URL`, create folders: `barryos/pending`, `barryos/gallery`, `barryos/hero`
-- [ ] **Vercel** — connect GitHub repo, configure for client deployment
-- [ ] **Railway** — connect GitHub repo, configure for server deployment
+- [ ] **MongoDB Atlas** — cluster, database user, connection string
+- [ ] **Auth0** — SPA application + API (see `docs/SETUP_AUTH0.md`)
+- [ ] **Cloudinary** — `CLOUDINARY_URL`, folders: `barryos/pending`, `barryos/gallery`, `barryos/hero`
+- [ ] **Vercel** — client deploy, root directory `client/`
+- [ ] **Railway** — server deploy, health check `/api/health`
