@@ -16,6 +16,7 @@
     "lint": "cd client && npm run lint && cd ../server && npm run lint",
     "test": "npm run test:server",
     "test:server": "npm run test --prefix server",
+    "seed:leagues-demo": "cd server && npx ts-node src/scripts/seedLeaguesDemo.ts",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "rm -rf client/dist server/dist client/node_modules server/node_modules node_modules"
   },
