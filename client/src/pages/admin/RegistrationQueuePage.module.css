@@ -1,0 +1,245 @@
+.registrationQueuePage {
+  max-width: 1200px;
+}
+
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  margin: 0 0 0.5rem;
+  font-family: 'Anton', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text);
+}
+
+.intro {
+  margin: 0;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 1rem;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green-bright);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.filterLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.filterSelect {
+  min-width: 11rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.875rem;
+}
+
+.bulkActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.selectionNote {
+  margin: 0 0 0.75rem;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.875rem;
+}
+
+.table th,
+.table td {
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--panel-2);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.leagueLink {
+  color: var(--green-bright);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.leagueLink:hover {
+  text-decoration: underline;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+.statusPendingApproval {
+  background: rgba(224, 169, 60, 0.15);
+  color: var(--amber);
+}
+
+.statusPendingPayment {
+  background: rgba(201, 164, 76, 0.15);
+  color: var(--gold);
+}
+
+.statusWaitlisted {
+  background: rgba(139, 152, 141, 0.2);
+  color: var(--muted);
+}
+
+.rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.rejectBtn {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(226, 85, 85, 0.35);
+  border-radius: var(--radius-card);
+  background: rgba(226, 85, 85, 0.1);
+  color: var(--red);
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.rejectBtn:hover:not(:disabled) {
+  border-color: var(--red);
+  background: rgba(226, 85, 85, 0.15);
+}
+
+.rejectBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading,
+.empty {
+  margin: 0;
+  padding: 1.5rem 0;
+  font-family: 'Barlow', sans-serif;
+  color: var(--muted);
+}
+
+.emailPreview {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.emailPreview summary {
+  cursor: pointer;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--green-bright);
+}
+
+.emailBody {
+  margin: 0.75rem 0 0;
+  padding: 0.85rem;
+  border-radius: 8px;
+  background: var(--panel-2);
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  color: var(--text);
+}
+
+.checkboxCell {
+  width: 2.5rem;
+}
+
+.checkboxCell input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--green-bright);
+}

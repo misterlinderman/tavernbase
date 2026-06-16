@@ -1,4 +1,10 @@
-import type { MatchStatus, ScoresheetSide, Sport } from '../constants/leagues';
+import type {
+  LeagueStatus,
+  MatchStatus,
+  RegistrationStatus,
+  ScoresheetSide,
+  Sport,
+} from '../constants/leagues';
 
 export interface PoolScoresheetPayload {
   homeRaceWins: number;
@@ -73,12 +79,107 @@ export interface CaptainMatch {
   };
 }
 
+export interface CaptainTeamRegistration {
+  isOpen: boolean;
+  enabled: boolean;
+  opensAt?: string;
+  closesAt?: string;
+  entryFeeDisplay: string;
+  requiresApproval: boolean;
+  registrationId?: string;
+  registrationStatus?: RegistrationStatus;
+}
+
+export interface CaptainTeamSummary {
+  teamId: string;
+  teamName: string;
+  leagueId: string;
+  leagueName: string;
+  sport: Sport;
+  status: LeagueStatus;
+  registration: CaptainTeamRegistration;
+}
+
+export interface CaptainTeamRosterView {
+  teamId: string;
+  teamName: string;
+  leagueId: string;
+  leagueName: string;
+  sport: Sport;
+  leagueStatus: LeagueStatus;
+  canEdit: boolean;
+  editBlockedReason?: string;
+  rosterMin: number;
+  rosterMax: number;
+  captainPlayerId: string;
+  players: CaptainRosterPlayerEntry[];
+}
+
+export interface CaptainRosterPlayerEntry {
+  playerId: string;
+  name: string;
+  email?: string;
+  isCaptain: boolean;
+  loginLinked: boolean;
+}
+
+export interface CaptainAddRosterPlayerResult {
+  roster: CaptainTeamRosterView;
+  inviteSent: boolean;
+  inviteNote?: string;
+}
+
+export interface CaptainReturningSeasonOption {
+  priorTeamId: string;
+  priorTeamName: string;
+  priorLeagueId: string;
+  priorLeagueName: string;
+  targetLeagueId: string;
+  targetLeagueName: string;
+  entryFeeDisplay: string;
+  requiresApproval: boolean;
+  isOpen: boolean;
+  registrationId?: string;
+  registrationStatus?: RegistrationStatus;
+}
+
+export interface ReturningRosterPlayerPreview {
+  playerId: string;
+  name: string;
+  email: string;
+  isCaptain: boolean;
+}
+
+export interface ReturningTeamRegistrationPreview {
+  priorTeamId: string;
+  priorTeamName: string;
+  priorLeagueId: string;
+  priorLeagueName: string;
+  targetLeagueId: string;
+  targetLeagueName: string;
+  teamName: string;
+  roster: ReturningRosterPlayerPreview[];
+  registration: {
+    isOpen: boolean;
+    entryFeeDisplay: string;
+    requiresApproval: boolean;
+    waiverText?: string;
+    opensAt?: string;
+    closesAt?: string;
+  };
+  rosterMin: number;
+  rosterMax: number;
+  divisions: Array<{ _id: string; name: string; order: number }>;
+}
+
 export interface CaptainProfile {
   name: string;
   email: string;
   playerId: string;
   playerName: string;
-  teams: Array<{ _id: string; name: string; leagueId: string }>;
+  teams: CaptainTeamSummary[];
+  pastTeams: CaptainTeamSummary[];
+  returningSeasonOptions: CaptainReturningSeasonOption[];
 }
 
 export interface DisputedMatch {

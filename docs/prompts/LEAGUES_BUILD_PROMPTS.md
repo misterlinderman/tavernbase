@@ -1,7 +1,8 @@
 # Multi-Sport Leagues — Phased Build Prompt Sequences
 
 **Module:** Leagues (pool · darts · volleyball) + tournaments  
-**Status:** Phases **L0–L7 shipped** — prompts below include reference (L0–L7) and **Phase L8** (tournaments / individual entrants)  
+**Status:** Phases **L0–L8 shipped** — prompts below include reference (L0–L8) and **Phase L8** (tournaments / individual entrants)  
+**Next expansion:** **L9–L12** — registration, payments, admin identity hub → [LEAGUES_BUILD_PROMPTS_L9_L12.md](./LEAGUES_BUILD_PROMPTS_L9_L12.md)  
 **Last updated:** June 2026
 
 Paste the relevant prompt into Cursor chat with **`docs/contexts/CONTEXT_leagues.md`** attached (and `.cursorrules` / `AGENTS.md` as usual).
@@ -43,8 +44,9 @@ Each prompt is self-contained: what to build, which files to touch, acceptance c
 | **L8** | L8.6 | Tournament placement standings |
 | **L8** | L8.7 | **Pool 9-ball singles** tournament |
 | **L8** | L8.8 | Public tournament page + docs |
+| **L9–L12** | — | Registration, payments, admin people hub → **[L9–L12 doc](./LEAGUES_BUILD_PROMPTS_L9_L12.md)** |
 
-**Recommended order:** L0–L7 complete. Next: **L8.1 → L8.5** (darts singles pilot), then L8.7 (pool singles).
+**Recommended order:** L0–L8 complete. Next: **L9.1 → L9.2 → L10.1 → L10.3 → L11.1 → L12.1** (see L9–L12 doc).
 
 **Branch convention:** `feat/leagues-l{N}-{short-name}`
 
@@ -994,6 +996,8 @@ flowchart TD
 | 7 | ~~Pool singles: fixed raceTo per bracket vs per round?~~ | — | Single raceTo per division (default 5) *(shipped L8.7)* |
 | 8 | Doubles pair entrant (`entrantType: 'pair'`)? | Post-L8 | Defer — document in SCHEMAS.md as @planned |
 | 9 | ~~8-ball team race vs 9-ball singles tournament?~~ | — | **Both** — 8-ball team race = `kind: 'league'`; 9-ball singles = `kind: 'tournament'` *(shipped L8.8)* |
+
+**L9–L12 open decisions:** see [LEAGUES_BUILD_PROMPTS_L9_L12.md](./LEAGUES_BUILD_PROMPTS_L9_L12.md#open-decisions-resolve-before-corresponding-prompt).
 
 ---
 

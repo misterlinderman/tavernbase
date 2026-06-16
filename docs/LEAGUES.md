@@ -42,6 +42,8 @@ Tavern Base distinguishes **ongoing season leagues** from **one-off knockout tou
 | Standings | W-L season engines (`standingsType: 'season'`) | Bracket placement 1..N (`TournamentPlacementEngine`) |
 | Public UX | Standings + schedule tabs | Bracket columns + Placements tab; empty bracket → friendly panel |
 
+Public touchpoints: `/leagues` list, homepage `LeaguesSection`, and `/leagues/:id` detail all label tournaments; season leagues use the default card layout without a badge.
+
 ### Sport defaults (resolved)
 
 | Sport | Season league example | Tournament example |
@@ -51,6 +53,10 @@ Tavern Base distinguishes **ongoing season leagues** from **one-off knockout tou
 | **Volleyball** | Best-of-3 team season | *(tournament presets deferred)* |
 
 **Deferred post-L8:** online registration, entry fees, check-in desk, doubles pair entrant (`entrantType: 'pair'`).
+
+**Planned (L9–L12):** See [prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md](prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md) — admin people hub, Auth0 self-service registration, Stripe entry fees, captain re-registration.
+
+**@planned — Stripe Connect (multi-venue):** Today entry fees use a single platform Stripe account (`STRIPE_SECRET_KEY` on the API). For white-label deployments where each venue collects its own registration revenue, migrate to [Stripe Connect](https://stripe.com/connect) (Express or Standard accounts per establishment). Connect would replace direct `checkout.sessions.create` with destination charges or separate connected accounts; webhook handling and the admin payment ledger would stay the same shape. Document env split (`STRIPE_CONNECT_CLIENT_ID`, connected account id in `establishment.json`) when pitching multi-venue operators — not required for the first Barry O's deployment.
 
 ---
 
@@ -424,15 +430,16 @@ All Phase 1 steps shipped. See [prompts/LEAGUES_BUILD_PROMPTS.md](prompts/LEAGUE
 
 ---
 
-## Open decisions (resolve before Phase 1 code)
+## Open decisions
 
-| # | Question | Impact |
+| # | Question | Status |
 |---|----------|--------|
-| 1 | **Pilot bar** — which pool format first? (8-ball team race vs 9-ball singles) | Scoresheet `payload` shape |
-| 2 | **Captain onboarding** — Auth0 invite flow acceptable for pilot captains? | Auth UX |
-| 3 | **CompuSport CSV sample** — can we get a real export from a pilot bar? | Import column mapping |
-| 4 | **Pricing tier** — per-sport flags in `establishment.json`? | Sales / deployment config |
-| 5 | **Multi-venue leagues** — defer `homeEstablishment` to Phase 4? | Team model scope |
+| 1 | **Pool format** — 8-ball team race vs 9-ball singles? | **Resolved (L8.8)** — both shipped: 8-ball team race = `kind: 'league'`; 9-ball singles = `kind: 'tournament'` |
+| 2 | **Captain onboarding** — Auth0 invite flow acceptable? | In progress — L9 invite + optional Auth0 Management API |
+| 3 | **CompuSport CSV sample** — real export from a pilot bar? | Open — blocks final column mapping |
+| 4 | **Pricing tier** — per-sport flags in `establishment.json`? | Shipped via `modules.leagues` licensing |
+| 5 | **Multi-venue leagues** — defer `homeEstablishment`? | Deferred to Phase 4 |
+| 6 | **Online registration / entry fees** | Deferred — L10–L11 in [prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md](prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md) |
 
 ---
 
@@ -453,7 +460,7 @@ Ongoing maintenance:
 | Document | Purpose |
 |----------|---------|
 | [LEAGUES.md](./LEAGUES.md) | Product plan and phased rollout |
-| [prompts/LEAGUES_BUILD_PROMPTS.md](./prompts/LEAGUES_BUILD_PROMPTS.md) | Build history (L0–L7.1 shipped; L7.3 tests remain) |
+| [prompts/LEAGUES_BUILD_PROMPTS.md](./prompts/LEAGUES_BUILD_PROMPTS.md) | Build history (L0–L8.8 shipped; L7.3 tests remain) |
 | [leagues/SCHEMAS.md](./leagues/SCHEMAS.md) | TypeScript schema reference |
 | [architecture/ARCHITECTURE.md](./architecture/ARCHITECTURE.md) | Current system design |
 | [SETUP_AUTH0.md](./SETUP_AUTH0.md) | Auth0 setup — extend for captain/league_admin roles |

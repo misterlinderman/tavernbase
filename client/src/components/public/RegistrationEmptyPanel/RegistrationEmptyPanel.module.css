@@ -1,0 +1,38 @@
+.panel {
+  position: relative;
+  overflow: hidden;
+  padding: 2.5rem 2rem;
+  border-radius: var(--radius-panel);
+  border: var(--border-container) solid var(--green-line);
+  background: linear-gradient(145deg, rgba(15, 92, 46, 0.18), rgba(15, 20, 15, 0.9));
+  text-align: center;
+}
+
+.kicker {
+  margin: 0 0 0.75rem;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.headline {
+  margin: 0 0 1rem;
+  font-family: 'Anton', sans-serif;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text);
+}
+
+.lead {
+  margin: 0 auto;
+  max-width: 36rem;
+  font-family: 'Barlow', sans-serif;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--muted);
+}

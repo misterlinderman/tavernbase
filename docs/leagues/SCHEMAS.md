@@ -61,18 +61,60 @@ interface ILeague {
   format: LeagueFormat;            // default 'round_robin'; tournaments require 'bracket'
   status: LeagueStatus;            // default 'draft'
   poolFormat?: '8_ball' | '9_ball'; // @implemented — L2.1 pool leagues only
+  /** @implemented — L10.1 self-service registration settings */
+  registration: LeagueRegistrationSettings;
   createdAt: Date;
   updatedAt: Date;
 }
 
-/** @planned — admin notes, fee tracking */
+/** @implemented — L10.1 */
+interface LeagueRegistrationSettings {
+  enabled: boolean;                // default false
+  opensAt?: Date;
+  closesAt?: Date;
+  entryFeeCents?: number;          // default 0 — payment in L11
+  currency: 'usd';                 // default 'usd'
+  maxEntrants?: number;            // teams OR players depending on entrantType
+  requiresApproval: boolean;       // default false
+  waiverText?: string;
+}
+
+/** @planned — admin notes, legacy flags */
 interface ILeaguePlanned {
   description?: string;
-  registrationOpen?: boolean;
   maxTeamsPerDivision?: number;
   createdBy?: ObjectId;            // ref User
 }
 ```
+
+Remove registrationOpen from planned - it was replaced.
+
+Also add Registration model to SCHEMAS.md
+
+```typescript
+/** @implemented — L10.1 */
+interface IRegistration {
+  _id: ObjectId;
+  leagueId: ObjectId;
+  divisionId?: ObjectId;
+  entrantType: 'team' | 'player';
+  status: RegistrationStatus;
+  submittedByPlayerId: ObjectId;
+  teamId?: ObjectId;
+  playerIds?: ObjectId[];
+  teamName?: string;
+  waiverAccepted: boolean;
+  waiverTextSnapshot: string;
+  paymentId?: ObjectId;            // L11
+  reviewedBy?: ObjectId;
+  reviewedAt?: Date;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+Replace the old ILeaguePlanned section in SCHEMAS.md
 
 **Indexes (implemented):** `{ sport, status }`, `{ seasonStart, seasonEnd }`
 
@@ -133,6 +175,47 @@ interface ITeamPlanned {
 ```
 
 **Indexes (implemented):** `{ leagueId, divisionId, name }`
+
+---
+
+## Registration
+
+Self-service signup records (L10.1 model; public submit in L10.3/L10.4).
+
+```typescript
+/** @implemented — L10.1 */
+type RegistrationStatus =
+  | 'draft'
+  | 'pending_payment'
+  | 'pending_approval'
+  | 'approved'
+  | 'waitlisted'
+  | 'rejected'
+  | 'cancelled';
+
+/** @implemented — L10.1 */
+interface IRegistration {
+  _id: ObjectId;
+  leagueId: ObjectId;              // ref League
+  divisionId?: ObjectId;           // ref Division
+  entrantType: 'team' | 'player';
+  status: RegistrationStatus;      // default 'draft'
+  submittedByPlayerId: ObjectId;   // ref Player — captain or self
+  teamId?: ObjectId;               // set on approve (team flow)
+  playerIds?: ObjectId[];          // roster snapshot at submit
+  teamName?: string;
+  waiverAccepted: boolean;
+  waiverTextSnapshot: string;
+  paymentId?: ObjectId;            // @planned L11
+  reviewedBy?: ObjectId;           // ref User
+  reviewedAt?: Date;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Indexes (implemented):** `{ leagueId, status }`, `{ submittedByPlayerId }`
 
 ---
 
@@ -383,6 +466,67 @@ interface MatchListItem extends IMatch {
   scheduledAt: string;             // ISO
 }
 ```
+
+### People directory (L9.1)
+
+No new Mongoose models — aggregates `Player`, `Team`, `Division`, `League`, and `User`.
+
+```typescript
+/** @implemented — GET /api/admin/leagues/people */
+type PeopleLoginStatus = 'linked' | 'invited' | 'unlinked';
+type PeopleRole = 'captain' | 'player' | 'none';
+
+interface PeopleDirectoryQuery {
+  q?: string;                      // name or email search
+  role?: 'captain' | 'player' | 'unlinked';
+  loginStatus?: PeopleLoginStatus;
+  sport?: Sport;
+  page?: number;                   // default 1
+  limit?: number;                  // default 25, max 100
+}
+
+interface PeopleTeamEntry {
+  teamId: string;
+  teamName: string;
+  leagueId: string;
+  leagueName: string;
+  sport: Sport;
+  isCaptain: boolean;
+}
+
+interface PeopleDirectoryEntry {
+  _id: string;                     // Player id
+  name: string;
+  email?: string;
+  auth0Sub?: string;
+  establishmentSlug: string;
+  role: PeopleRole;
+  teams: PeopleTeamEntry[];
+  loginStatus: PeopleLoginStatus;
+  lastInvitedAt?: string;          // ISO — from Player.captainInvitedAt
+}
+
+interface PeopleDirectoryResponse {
+  data: PeopleDirectoryEntry[];
+  meta: { page: number; limit: number; total: number; totalPages: number };
+}
+```
+
+**Login status rules:** `linked` = `Player.auth0Sub` or captain/player `User` exists · `invited` = `PendingInvite` or `captainInvitedAt` set · else `unlinked`.
+
+```typescript
+/** @implemented — L9.2 pending login invites before Auth0 account exists */
+interface IPendingInvite {
+  _id: ObjectId;
+  playerId: ObjectId;
+  email: string;
+  role: 'captain' | 'player';
+  invitedBy?: ObjectId;
+  invitedAt: Date;
+}
+```
+
+**Indexes:** `{ playerId, role }` unique · `{ email, role }`
 
 ---
 

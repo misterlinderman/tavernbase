@@ -13,14 +13,32 @@ import type {
   Team,
   CsvImportResult,
   CsvImportType,
+  PeopleDirectoryEntry,
+  PeopleDirectoryMeta,
+  PeopleDirectoryQuery,
+  PeopleLoginStatus,
+  PlayerLoginInviteResult,
+  LinkPlayerLoginPayload,
+  RegistrationRecord,
+  RegistrationQueueEntry,
+  RegistrationEmailNotification,
+  RegistrationActionResult,
+  PublicRegistrationInfo,
+  LeagueRegistrationSettings,
 } from '../types/leagues';
+import type { PaymentLedgerEntry } from '../types/payments';
+import type { RegistrationStatus } from '../constants/leagues';
 import type { DisputedMatch, SportScoresheetPayload } from '../types/captain';
 
 type AdminFetch = <T>(path: string, options?: RequestInit) => Promise<T>;
+type AdminFetchEnvelope = <T>(
+  path: string,
+  options?: RequestInit
+) => Promise<{ data: T; notification?: RegistrationEmailNotification; meta?: Record<string, unknown> }>;
 type AdminFetchList = <T>(
   path: string,
   options?: RequestInit
-) => Promise<{ data: T; count: number }>;
+) => Promise<{ data: T; count: number; meta?: Record<string, unknown> }>;
 
 export async function listLeagues(
   adminFetchList: AdminFetchList,
@@ -58,6 +76,164 @@ export async function updateLeague(
     method: 'PATCH',
     body: JSON.stringify(payload),
   });
+}
+
+export async function listRegistrations(
+  adminFetchList: AdminFetchList,
+  leagueId: string,
+  status?: RegistrationStatus
+): Promise<RegistrationRecord[]> {
+  const query = status ? `?status=${status}` : '';
+  const { data } = await adminFetchList<RegistrationRecord[]>(
+    `/admin/leagues/${leagueId}/registrations${query}`
+  );
+  return data;
+}
+
+export async function listRegistrationQueue(
+  adminFetchList: AdminFetchList,
+  status?: RegistrationStatus
+): Promise<RegistrationQueueEntry[]> {
+  const query = status ? `?status=${status}` : '';
+  const { data } = await adminFetchList<RegistrationQueueEntry[]>(
+    `/admin/leagues/registrations${query}`
+  );
+  return data;
+}
+
+export async function approveQueueRegistration(
+  adminFetchEnvelope: AdminFetchEnvelope,
+  registrationId: string
+): Promise<RegistrationActionResult> {
+  const response = await adminFetchEnvelope<RegistrationRecord>(
+    `/admin/leagues/registrations/${registrationId}/approve`,
+    { method: 'POST' }
+  );
+
+  return {
+    registration: response.data,
+    notification: response.notification ?? null,
+  };
+}
+
+export async function rejectQueueRegistration(
+  adminFetchEnvelope: AdminFetchEnvelope,
+  registrationId: string,
+  reason?: string
+): Promise<RegistrationActionResult> {
+  const response = await adminFetchEnvelope<RegistrationRecord>(
+    `/admin/leagues/registrations/${registrationId}/reject`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    }
+  );
+
+  return {
+    registration: response.data,
+    notification: response.notification ?? null,
+  };
+}
+
+export async function promoteQueueRegistration(
+  adminFetchEnvelope: AdminFetchEnvelope,
+  registrationId: string
+): Promise<RegistrationActionResult> {
+  const response = await adminFetchEnvelope<RegistrationRecord>(
+    `/admin/leagues/registrations/${registrationId}/promote`,
+    { method: 'POST' }
+  );
+
+  return {
+    registration: response.data,
+    notification: response.notification ?? null,
+  };
+}
+
+export async function approveRegistration(
+  adminFetchEnvelope: AdminFetchEnvelope,
+  leagueId: string,
+  registrationId: string
+): Promise<RegistrationActionResult> {
+  const response = await adminFetchEnvelope<RegistrationRecord>(
+    `/admin/leagues/${leagueId}/registrations/${registrationId}/approve`,
+    { method: 'POST' }
+  );
+
+  return {
+    registration: response.data,
+    notification: response.notification ?? null,
+  };
+}
+
+export async function rejectRegistration(
+  adminFetchEnvelope: AdminFetchEnvelope,
+  leagueId: string,
+  registrationId: string,
+  reason?: string
+): Promise<RegistrationActionResult> {
+  const response = await adminFetchEnvelope<RegistrationRecord>(
+    `/admin/leagues/${leagueId}/registrations/${registrationId}/reject`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    }
+  );
+
+  return {
+    registration: response.data,
+    notification: response.notification ?? null,
+  };
+}
+
+export async function promoteRegistration(
+  adminFetchEnvelope: AdminFetchEnvelope,
+  leagueId: string,
+  registrationId: string
+): Promise<RegistrationActionResult> {
+  const response = await adminFetchEnvelope<RegistrationRecord>(
+    `/admin/leagues/${leagueId}/registrations/${registrationId}/promote`,
+    { method: 'POST' }
+  );
+
+  return {
+    registration: response.data,
+    notification: response.notification ?? null,
+  };
+}
+
+export async function listLeaguePayments(
+  adminFetchList: AdminFetchList,
+  leagueId: string
+): Promise<PaymentLedgerEntry[]> {
+  const { data } = await adminFetchList<PaymentLedgerEntry[]>(`/admin/leagues/${leagueId}/payments`);
+  return data;
+}
+
+export async function waiveRegistrationFee(
+  adminFetch: AdminFetch,
+  leagueId: string,
+  registrationId: string
+): Promise<PaymentLedgerEntry> {
+  return adminFetch<PaymentLedgerEntry>(
+    `/admin/leagues/${leagueId}/registrations/${registrationId}/waive-fee`,
+    { method: 'POST' }
+  );
+}
+
+export async function refundRegistrationPayment(
+  adminFetch: AdminFetch,
+  leagueId: string,
+  registrationId: string,
+  reason?: string
+): Promise<PaymentLedgerEntry> {
+  return adminFetch<PaymentLedgerEntry>(
+    `/admin/leagues/${leagueId}/registrations/${registrationId}/refund`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    }
+  );
 }
 
 export async function deleteLeague(adminFetch: AdminFetch, leagueId: string): Promise<void> {
@@ -169,6 +345,46 @@ export async function deleteTeam(
   teamId: string
 ): Promise<void> {
   await adminFetch(`/admin/leagues/${leagueId}/teams/${teamId}`, { method: 'DELETE' });
+}
+
+export async function transferTeamCaptain(
+  adminFetch: AdminFetch,
+  leagueId: string,
+  teamId: string,
+  newCaptainPlayerId: string
+): Promise<Team> {
+  return adminFetch<Team>(`/admin/leagues/${leagueId}/teams/${teamId}/transfer-captain`, {
+    method: 'PATCH',
+    body: JSON.stringify({ newCaptainPlayerId }),
+  });
+}
+
+export async function addTeamPlayer(
+  adminFetch: AdminFetch,
+  leagueId: string,
+  teamId: string,
+  payload: { playerId?: string; name?: string; email?: string }
+): Promise<Team> {
+  const result = await adminFetch<{ team: Team; player: Player }>(
+    `/admin/leagues/${leagueId}/teams/${teamId}/players`,
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }
+  );
+
+  return result.team;
+}
+
+export async function removeTeamPlayer(
+  adminFetch: AdminFetch,
+  leagueId: string,
+  teamId: string,
+  playerId: string
+): Promise<Team> {
+  return adminFetch<Team>(`/admin/leagues/${leagueId}/teams/${teamId}/players/${playerId}`, {
+    method: 'DELETE',
+  });
 }
 
 export async function listPlayers(adminFetchList: AdminFetchList): Promise<Player[]> {
@@ -316,4 +532,76 @@ export async function importLeagueCsv(
     method: 'POST',
     body: JSON.stringify(payload),
   });
+}
+
+export async function listPeopleDirectory(
+  adminFetchList: AdminFetchList,
+  query: PeopleDirectoryQuery = {}
+): Promise<{ entries: PeopleDirectoryEntry[]; meta: PeopleDirectoryMeta }> {
+  const params = new URLSearchParams();
+
+  if (query.q?.trim()) params.set('q', query.q.trim());
+  if (query.role) params.set('role', query.role);
+  if (query.loginStatus) params.set('loginStatus', query.loginStatus);
+  if (query.sport) params.set('sport', query.sport);
+  if (query.page) params.set('page', String(query.page));
+
+  const suffix = params.toString() ? `?${params.toString()}` : '';
+  const { data, meta } = await adminFetchList<PeopleDirectoryEntry[]>(
+    `/admin/leagues/people${suffix}`
+  );
+
+  const parsedMeta = meta as PeopleDirectoryMeta | undefined;
+
+  return {
+    entries: data,
+    meta: parsedMeta ?? {
+      page: query.page ?? 1,
+      limit: 25,
+      total: data.length,
+      totalPages: 1,
+    },
+  };
+}
+
+export async function invitePlayerLogin(
+  adminFetch: AdminFetch,
+  playerId: string,
+  payload: LinkPlayerLoginPayload
+): Promise<PlayerLoginInviteResult> {
+  return adminFetch<PlayerLoginInviteResult>(`/admin/leagues/people/${playerId}/link-login`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function linkPlayerLoginManual(
+  adminFetch: AdminFetch,
+  playerId: string,
+  payload: LinkPlayerLoginPayload
+): Promise<void> {
+  await adminFetch(`/admin/leagues/people/${playerId}/link-login`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function unlinkPlayerLogin(adminFetch: AdminFetch, playerId: string): Promise<void> {
+  await adminFetch(`/admin/leagues/people/${playerId}/link-login`, {
+    method: 'DELETE',
+  });
+}
+
+export async function resendPlayerLoginInvite(
+  adminFetch: AdminFetch,
+  playerId: string,
+  payload: { role: 'captain' | 'player' }
+): Promise<PlayerLoginInviteResult> {
+  return adminFetch<PlayerLoginInviteResult>(
+    `/admin/leagues/people/${playerId}/resend-invite`,
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }
+  );
 }

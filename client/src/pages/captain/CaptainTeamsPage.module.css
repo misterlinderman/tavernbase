@@ -1,0 +1,130 @@
+.pageTitle {
+  margin: 0 0 0.35rem;
+  font-family: 'Anton', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pageLead {
+  margin: 0 0 1.5rem;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--muted);
+  max-width: 42rem;
+}
+
+.sectionTitle {
+  margin: 0 0 0.75rem;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.teamCard {
+  padding: 1rem 1.125rem;
+  border-radius: var(--radius-card);
+  border: var(--border-container) solid var(--line);
+  background: var(--panel-2);
+}
+
+.teamHeader {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.teamName {
+  margin: 0;
+  font-family: 'Anton', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.leagueMeta {
+  margin: 0;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.statusActive {
+  color: var(--green-bright);
+  background: rgba(39, 184, 92, 0.12);
+  border: 1px solid rgba(39, 184, 92, 0.35);
+}
+
+.statusDraft {
+  color: var(--amber);
+  background: rgba(224, 169, 60, 0.12);
+  border: 1px solid rgba(224, 169, 60, 0.35);
+}
+
+.statusCompleted {
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+}
+
+.registrationNote {
+  margin: 0.75rem 0 0;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.actions .btn {
+  font-size: 0.6875rem;
+}
+
+.empty {
+  margin: 0;
+  padding: 1.25rem;
+  border-radius: var(--radius-card);
+  border: var(--border-container) dashed var(--line);
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.9375rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.empty a {
+  color: var(--green-bright);
+}

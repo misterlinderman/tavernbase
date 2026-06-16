@@ -64,6 +64,27 @@ export const POOL_HANDICAP_SYSTEM_LABELS: Record<PoolHandicapSystem, string> = {
 export const SCORESHEET_SIDES = ['home', 'away'] as const;
 export type ScoresheetSide = (typeof SCORESHEET_SIDES)[number];
 
+export const REGISTRATION_STATUSES = [
+  'draft',
+  'pending_payment',
+  'pending_approval',
+  'approved',
+  'waitlisted',
+  'rejected',
+  'cancelled',
+] as const;
+export type RegistrationStatus = (typeof REGISTRATION_STATUSES)[number];
+
+export const REGISTRATION_STATUS_LABELS: Record<RegistrationStatus, string> = {
+  draft: 'Draft',
+  pending_payment: 'Pending payment',
+  pending_approval: 'Pending approval',
+  approved: 'Approved',
+  waitlisted: 'Waitlisted',
+  rejected: 'Rejected',
+  cancelled: 'Cancelled',
+};
+
 export const MATCH_STATUSES = [
   'scheduled',
   'in_progress',

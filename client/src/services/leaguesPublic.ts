@@ -1,6 +1,6 @@
 import { API_BASE_URL } from '../config/api';
 import type { ApiListResponse } from '../types';
-import type { League, StandingsView } from '../types/leagues';
+import type { League, OpenRegistrationListing, PublicRegistrationInfo, StandingsView } from '../types/leagues';
 
 export interface PublicLeague extends League {
   divisionCount?: number;
@@ -82,5 +82,27 @@ export async function getPublicMatches(
   }
 
   const json: ApiListResponse<PublicMatch> = await res.json();
+  return json.data;
+}
+
+export async function getPublicRegistration(leagueId: string): Promise<PublicRegistrationInfo> {
+  const res = await fetch(`${API_BASE_URL}/leagues/${leagueId}/registration`);
+
+  if (!res.ok) {
+    throw new Error('Failed to load registration info');
+  }
+
+  const json = await res.json();
+  return json.data as PublicRegistrationInfo;
+}
+
+export async function getOpenRegistrations(): Promise<OpenRegistrationListing[]> {
+  const res = await fetch(`${API_BASE_URL}/leagues/registration-open`);
+
+  if (!res.ok) {
+    throw new Error('Failed to load open registrations');
+  }
+
+  const json: ApiListResponse<OpenRegistrationListing> = await res.json();
   return json.data;
 }

@@ -36,6 +36,28 @@ export const POOL_FORMAT_LABELS: Record<PoolFormat, string> = {
   '9_ball': '9-Ball',
 };
 
+export const REGISTRATION_CURRENCIES = ['usd'] as const;
+export type RegistrationCurrency = (typeof REGISTRATION_CURRENCIES)[number];
+
+export const REGISTRATION_STATUSES = [
+  'draft',
+  'pending_payment',
+  'pending_approval',
+  'approved',
+  'waitlisted',
+  'rejected',
+  'cancelled',
+] as const;
+export type RegistrationStatus = (typeof REGISTRATION_STATUSES)[number];
+
+/** Statuses that consume a registration spot while awaiting or after approval */
+export const REGISTRATION_SPOT_STATUSES: RegistrationStatus[] = [
+  'pending_payment',
+  'pending_approval',
+  'approved',
+  'waitlisted',
+];
+
 /** Default race-to for pool singles (player-entrant) tournament matches */
 export const DEFAULT_POOL_PLAYER_RACE_TO = 5;
 
@@ -61,4 +83,12 @@ export function isLeagueStatus(value: unknown): value is LeagueStatus {
 
 export function isPoolFormat(value: unknown): value is PoolFormat {
   return typeof value === 'string' && POOL_FORMATS.includes(value as PoolFormat);
+}
+
+export function isRegistrationCurrency(value: unknown): value is RegistrationCurrency {
+  return typeof value === 'string' && REGISTRATION_CURRENCIES.includes(value as RegistrationCurrency);
+}
+
+export function isRegistrationStatus(value: unknown): value is RegistrationStatus {
+  return typeof value === 'string' && REGISTRATION_STATUSES.includes(value as RegistrationStatus);
 }

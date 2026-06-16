@@ -1,10 +1,12 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { BRAND_ASSETS } from '../../constants/brandAssets';
 import styles from '../admin/LoginPage.module.css';
 
 function PlayerLoginPage() {
   const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo') || '/player';
 
   if (isLoading) {
     return (
@@ -15,7 +17,7 @@ function PlayerLoginPage() {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/player" replace />;
+    return <Navigate to={returnTo} replace />;
   }
 
   return (
@@ -30,18 +32,21 @@ function PlayerLoginPage() {
         />
         <h1 className={styles.title}>Player Login</h1>
         <p className={styles.lead}>
-          Use the email address on your league roster. View standings for every league you play in.
+          Already on a roster? Sign in with the email on your player record. Entering a singles
+          tournament? Start at <a href="/register">open registrations</a> — create an account, submit
+          your entry, then come back here for standings.
         </p>
         <button
           type="button"
           className={`btn btn-green ${styles.signIn}`}
           onClick={() =>
             loginWithRedirect({
-              appState: { returnTo: '/player' },
+              authorizationParams: { screen_hint: 'signup' },
+              appState: { returnTo },
             })
           }
         >
-          Sign in with Auth0
+          Sign in or create account
         </button>
       </div>
     </div>

@@ -108,6 +108,12 @@ export function intersectSportsWithLicense<T extends Record<Sport, boolean>>(
   };
 }
 
+export function getEstablishmentSlug(): string {
+  const config = loadEstablishmentConfig();
+  const slug = config.slug?.trim();
+  return slug || 'default';
+}
+
 export function getEstablishmentConfigPath(): string | null {
   loadEstablishmentConfig();
   return configPath;

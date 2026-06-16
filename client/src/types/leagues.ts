@@ -5,13 +5,28 @@ import type {
   LeagueStatus,
   MatchStatus,
   PoolFormat,
+  RegistrationStatus,
   Sport,
 } from '../constants/leagues';
+import type { PaymentStatus } from './payments';
 
 export interface SportsEnabled {
   pool: boolean;
   darts: boolean;
   volleyball: boolean;
+}
+
+export interface LeagueRegistrationSettings {
+  enabled: boolean;
+  opensAt?: string;
+  closesAt?: string;
+  entryFeeCents?: number;
+  currency: 'usd';
+  maxEntrants?: number | null;
+  requiresApproval: boolean;
+  captainRosterEdits?: boolean;
+  priorLeagueId?: string;
+  waiverText?: string;
 }
 
 export interface League {
@@ -25,6 +40,7 @@ export interface League {
   format: LeagueFormat;
   status: LeagueStatus;
   poolFormat?: PoolFormat;
+  registration?: LeagueRegistrationSettings;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -104,6 +120,8 @@ export interface CaptainInviteResult {
   instructions: string[];
   emailSubject: string;
   emailBody: string;
+  delivery: 'auth0_email' | 'manual_copy';
+  auth0EmailSent?: boolean;
 }
 
 export interface LeagueFormState {
@@ -204,4 +222,145 @@ export interface CsvImportResult {
   updated: number;
   skipped: number;
   errors: string[];
+}
+
+export type PeopleLoginStatus = 'linked' | 'invited' | 'unlinked';
+export type PeopleRole = 'captain' | 'player' | 'none';
+
+export interface PeopleTeamEntry {
+  teamId: string;
+  teamName: string;
+  leagueId: string;
+  leagueName: string;
+  sport: Sport;
+  isCaptain: boolean;
+}
+
+export interface PeopleDirectoryEntry {
+  _id: string;
+  name: string;
+  email?: string;
+  auth0Sub?: string;
+  establishmentSlug: string;
+  role: PeopleRole;
+  teams: PeopleTeamEntry[];
+  loginStatus: PeopleLoginStatus;
+  lastInvitedAt?: string;
+}
+
+export interface PeopleDirectoryMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PeopleDirectoryQuery {
+  q?: string;
+  role?: 'captain' | 'player' | 'unlinked';
+  loginStatus?: PeopleLoginStatus;
+  sport?: Sport;
+  page?: number;
+}
+
+export interface PlayerLoginInviteResult {
+  playerId: string;
+  playerName: string;
+  playerEmail: string;
+  role: 'captain' | 'player';
+  loginUrl: string;
+  invitedAt: string;
+  alreadyLinked: boolean;
+  emailSubject: string;
+  emailBody: string;
+  delivery: 'auth0_email' | 'manual_copy';
+  auth0EmailSent?: boolean;
+}
+
+export interface LinkPlayerLoginPayload {
+  mode: 'invite' | 'manual';
+  email?: string;
+  auth0Sub?: string;
+  name?: string;
+  role: 'captain' | 'player';
+}
+
+export interface RegistrationRecord {
+  _id: string;
+  leagueId: string;
+  divisionId?: string;
+  entrantType: EntrantType;
+  status: RegistrationStatus;
+  submittedByPlayerId: string;
+  submittedByPlayerName?: string;
+  teamId?: string;
+  teamName?: string;
+  playerIds?: string[];
+  waiverAccepted: boolean;
+  reviewedAt?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  paymentId?: string;
+  paymentStatus?: PaymentStatus | null;
+  amountCents?: number;
+  amountDisplay?: string;
+  paidAt?: string;
+}
+
+export interface RegistrationQueueEntry extends RegistrationRecord {
+  leagueName: string;
+  leagueSport: Sport;
+  divisionName?: string;
+}
+
+export type RegistrationEmailTemplate =
+  | 'registrationReceived'
+  | 'registrationApproved'
+  | 'registrationRejected'
+  | 'paymentReceipt';
+
+export interface RegistrationEmailNotification {
+  template: RegistrationEmailTemplate;
+  registrationId: string;
+  leagueId: string;
+  leagueName: string;
+  recipientName: string;
+  recipientEmail: string;
+  entrantLabel: string;
+  status: RegistrationStatus;
+  emailSubject: string;
+  emailBody: string;
+  delivery: 'manual_copy' | 'resend';
+  emailSent: boolean;
+}
+
+export interface RegistrationActionResult {
+  registration: RegistrationRecord;
+  notification: RegistrationEmailNotification | null;
+}
+
+export interface PublicRegistrationInfo {
+  leagueId: string;
+  leagueName: string;
+  sport: Sport;
+  kind?: LeagueKind;
+  entrantType?: EntrantType;
+  enabled: boolean;
+  opensAt?: string;
+  closesAt?: string;
+  entryFeeCents: number;
+  entryFeeDisplay: string;
+  currency: 'usd';
+  maxEntrants?: number;
+  spotsRemaining: number | null;
+  requiresApproval: boolean;
+  isOpen: boolean;
+  waiverText?: string;
+}
+
+export interface OpenRegistrationListing extends PublicRegistrationInfo {
+  seasonStart: string;
+  seasonEnd: string;
+  format: LeagueFormat;
 }

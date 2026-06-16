@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, NavLink, Outlet } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { BRAND_ASSETS } from '../../../constants/brandAssets';
 import { useCaptainApi } from '../../../hooks/useCaptainApi';
@@ -66,11 +66,38 @@ function CaptainLayout() {
         {profile ? (
           <div className={sidebarStyles.profile}>
             <strong>{profile.playerName}</strong>
-            {profile.teams.map((team) => (
-              <span key={team._id}>{team.name}</span>
-            ))}
+            <span>
+              {profile.teams.length} active team{profile.teams.length === 1 ? '' : 's'}
+              {profile.pastTeams.length > 0
+                ? ` · ${profile.pastTeams.length} past`
+                : ''}
+            </span>
           </div>
         ) : null}
+
+        <nav className={sidebarStyles.nav}>
+          <NavLink
+            to="/captain"
+            end
+            className={({ isActive }) =>
+              isActive
+                ? `${sidebarStyles.navLink} ${sidebarStyles.navLinkActive}`
+                : sidebarStyles.navLink
+            }
+          >
+            Submit scores
+          </NavLink>
+          <NavLink
+            to="/captain/teams"
+            className={({ isActive }) =>
+              isActive
+                ? `${sidebarStyles.navLink} ${sidebarStyles.navLinkActive}`
+                : sidebarStyles.navLink
+            }
+          >
+            My teams
+          </NavLink>
+        </nav>
 
         <button
           type="button"
@@ -85,7 +112,7 @@ function CaptainLayout() {
         </button>
       </aside>
       <main className={layoutStyles.main}>
-        <Outlet />
+        <Outlet context={profile} />
       </main>
     </div>
   );

@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 import { Division, Player, Team, User } from '../../models';
 import type { IUser } from '../../models/User';
+import { getEstablishmentSlug } from '../../config/establishment';
+import {
+  hasOpenPlayerRegistration,
+  resolveRegistrationPlayer,
+} from './registrationPlayer';
 
 export interface ActivatePlayerInput {
   auth0Sub: string;
@@ -15,7 +20,7 @@ export async function activatePlayerFromAuth(input: ActivatePlayerInput): Promis
   const existingBySub = await User.findOne({ auth0Sub });
 
   if (existingBySub) {
-    if (existingBySub.role !== 'player') {
+    if (existingBySub.role !== 'player' && existingBySub.role !== 'captain') {
       throw new Error('This Auth0 account is not registered as a league player');
     }
 
@@ -26,11 +31,24 @@ export async function activatePlayerFromAuth(input: ActivatePlayerInput): Promis
     return existingBySub;
   }
 
-  const player = await Player.findOne({ email });
+  let player = await Player.findOne({ email });
+
+  if (!player) {
+    player = await resolveRegistrationPlayer(email);
+
+    if (!player && (await hasOpenPlayerRegistration())) {
+      player = await Player.create({
+        name: input.name?.trim() || email.split('@')[0] || 'Player',
+        email,
+        establishmentSlug: getEstablishmentSlug(),
+        auth0Sub,
+      });
+    }
+  }
 
   if (!player) {
     throw new Error(
-      'No league roster found for this email. Use the same email your league manager added.'
+      'No league roster found for this email. Use the same email your league manager added, or register for an open tournament session.'
     );
   }
 
@@ -42,8 +60,10 @@ export async function activatePlayerFromAuth(input: ActivatePlayerInput): Promis
 
   const onRoster = await Team.exists({ playerIds: player._id });
   const onDivisionEntrant = await Division.exists({ playerIds: player._id });
+  const isRegistrationPlayer = Boolean(await resolveRegistrationPlayer(email));
+  const openPlayerRegistration = await hasOpenPlayerRegistration();
 
-  if (!onRoster && !onDivisionEntrant) {
+  if (!onRoster && !onDivisionEntrant && !isRegistrationPlayer && !openPlayerRegistration) {
     throw new Error('This player is not entered in any league yet');
   }
 

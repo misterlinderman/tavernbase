@@ -14,6 +14,8 @@ export interface CaptainInviteResult {
   instructions: string[];
   emailSubject: string;
   emailBody: string;
+  delivery: 'auth0_email' | 'manual_copy';
+  auth0EmailSent?: boolean;
 }
 
 function resolveLoginUrl(): string {
@@ -26,6 +28,8 @@ export function buildCaptainInviteResult(options: {
   team: Pick<ITeam, '_id' | 'name' | 'leagueId'>;
   alreadyLinked: boolean;
   invitedAt: Date;
+  delivery?: 'auth0_email' | 'manual_copy';
+  auth0EmailSent?: boolean;
 }): CaptainInviteResult {
   const loginUrl = resolveLoginUrl();
   const playerEmail = options.player.email ?? '';
@@ -66,5 +70,7 @@ export function buildCaptainInviteResult(options: {
     instructions,
     emailSubject,
     emailBody,
+    delivery: options.delivery ?? 'manual_copy',
+    auth0EmailSent: options.auth0EmailSent,
   };
 }

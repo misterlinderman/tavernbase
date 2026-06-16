@@ -57,6 +57,7 @@ Repository layout: **`client/` and `server/` at the repo root** (no wrapper fold
 /admin/submissions   → SubmissionsPage
 /admin/events        → EventsPage
 /admin/leagues       → LeaguesPage (overview + create)
+/admin/leagues/people → LeaguePeoplePage (players & captains directory)
 /admin/leagues/:id   → LeagueDetailPage
 /admin/announcement  → AnnouncementPage
 /admin/christmas     → ChristmasPage
@@ -87,6 +88,9 @@ Repository layout: **`client/` and `server/` at the repo root** (no wrapper fold
 | GET/POST/PATCH/DELETE | `/api/admin/events` | Event CRUD |
 | GET/PATCH/DELETE | `/api/admin/submissions/:id` | Photo moderation |
 | GET/POST/PATCH/DELETE | `/api/admin/leagues` | League CRUD |
+| GET | `/api/admin/leagues/people` | Paginated players/captains directory (L9.1) |
+| POST | `/api/admin/leagues/people/:playerId/link-login` | Invite or manually link captain/player login (L9.2) |
+| DELETE | `/api/admin/leagues/people/:playerId/link-login` | Unlink captain/player login (L9.2) |
 | POST | `/api/admin/leagues/:id/schedule/generate` | Round-robin / ladder / bracket |
 | POST | `/api/admin/leagues/:id/import` | CSV import (teams, players, schedule, results) |
 | POST | `/api/admin/leagues/:id/matches/:matchId/resolve` | Dispute resolution |

@@ -36,6 +36,20 @@ export const extractAuthName = (req: Request): string | null => {
   return typeof name === 'string' && name.trim() ? name.trim() : null;
 };
 
+/**
+ * Email verification flag from JWT when Auth0 adds it (via Action or token settings).
+ * Returns null when the claim is absent — callers should allow for backward compatibility.
+ */
+export const extractEmailVerified = (req: Request): boolean | null => {
+  const claim = req.auth?.payload?.email_verified;
+
+  if (typeof claim === 'boolean') {
+    return claim;
+  }
+
+  return null;
+};
+
 export const optionalAuth = (req: Request, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
 

@@ -1,10 +1,12 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { BRAND_ASSETS } from '../../constants/brandAssets';
 import styles from '../admin/LoginPage.module.css';
 
 function CaptainLoginPage() {
   const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo') || '/captain';
 
   if (isLoading) {
     return (
@@ -15,7 +17,7 @@ function CaptainLoginPage() {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/captain" replace />;
+    return <Navigate to={returnTo} replace />;
   }
 
   return (
@@ -30,15 +32,16 @@ function CaptainLoginPage() {
         />
         <h1 className={styles.title}>Captain Login</h1>
         <p className={styles.lead}>
-          Use the email address your league manager invited. Sign in to submit match scoresheets for
-          your team.
+          Invited captains: sign in with the email your league manager used. Registering a new team
+          for an open season? Browse <a href="/register">open registrations</a> — you can create an
+          account there and return here after your team is approved.
         </p>
         <button
           type="button"
           className={`btn btn-green ${styles.signIn}`}
           onClick={() =>
             loginWithRedirect({
-              appState: { returnTo: '/captain' },
+              appState: { returnTo },
             })
           }
         >

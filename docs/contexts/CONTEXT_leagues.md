@@ -25,11 +25,31 @@
 | Scoresheets | Sport-aware router — pool, darts, volleyball validators |
 | Standings | `PoolStandingsEngine`, `DartsStandingsEngine`, `VolleyballStandingsEngine` |
 | Captain portal | `/captain` — dual-entry scoresheets (team leagues), invite onboarding |
-| Player portal | `/player` — standings; individual-match score entry at `/player/scores` |
+| Player portal | `/player` — standings; `/player/scores` — dual-entry for player-entrant matches |
 | Public pages | `/leagues`, `/leagues/:leagueId`, homepage `LeaguesSection` |
+| Tournaments (L8) | `kind: 'tournament'` + `entrantType: 'player'` — bracket UI, placement standings, public badge |
 | CSV import | Teams, players, schedule, historical results; CompuSport aliases |
-| Pool polish | 8-ball / 9-ball format; APA/VNEA handicap storage (math deferred v1.1) |
+| Pool polish | 8-ball team race (season league); 9-ball singles race-to (tournament) |
 | Roles | `league_admin`, `captain`, `player` enforced on routes |
+
+### Season league vs tournament (L8)
+
+Same `League` model; staff choose **`kind`** and **`entrantType`** at create time:
+
+| | Season league | Knockout tournament |
+|---|---------------|---------------------|
+| `kind` | `league` (default) | `tournament` |
+| `entrantType` | `team` — rosters + captains | `player` — `Division.playerIds` seeds |
+| `format` | `round_robin` or `ladder` | `bracket` (required) |
+| Score entry | `/api/captain/matches/:id/scoresheet` | `/api/player/matches/:id/scoresheet` or admin finalize |
+| Standings | Sport engines (`standingsType: 'season'`) | `TournamentPlacementEngine` (1st, 2nd, …) |
+| Public UX | Standings + Schedule tabs | Bracket columns + Placements tab; empty → `BracketEmptyPanel` |
+
+**Pool split (resolved):** 8-ball team race = season league; 9-ball singles (`raceTo: 5`) = tournament preset.
+
+**Public components:** `LeaguesPage` / `LeaguesSection` show **Tournament** badge when `kind === 'tournament'`; `LeaguePublicPage` uses `BracketVisualization` for bracket draws.
+
+**Deferred post-L8:** online registration, entry fees, check-in desk, `entrantType: 'pair'`.
 
 ### Remaining / deferred
 
@@ -84,7 +104,8 @@ client/src/
 ├── pages/admin/AdminLeaguesPage.tsx, LeagueDetailPage.tsx
 ├── pages/captain/CaptainPage.tsx, CaptainLoginPage.tsx
 ├── pages/public/LeaguesPage.tsx, LeaguePublicPage.tsx
-├── services/leagues.ts, captain.ts
+├── components/public/BracketVisualization/, BracketEmptyPanel/, LeaguesSection/
+├── services/leagues.ts, captain.ts, leaguesPublic.ts
 ├── types/leagues.ts, captain.ts
 └── constants/leagues.ts
 ```
@@ -135,6 +156,8 @@ POST  /api/captain/matches/:matchId/scoresheet
 POST  /api/player/activate
 GET   /api/player/leagues
 GET   /api/player/leagues/:id/standings
+GET   /api/player/matches
+POST  /api/player/matches/:matchId/scoresheet   # player-entrant dual-entry (L8.4)
 ```
 
 ---

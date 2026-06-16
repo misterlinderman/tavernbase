@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 import { Player, Team, User } from '../../models';
 import type { IUser } from '../../models/User';
+import { getEstablishmentSlug } from '../../config/establishment';
+import {
+  hasOpenTeamRegistration,
+  resolveRegistrationCaptain,
+} from './registrationCaptain';
 
 export interface ActivateCaptainInput {
   auth0Sub: string;
@@ -26,17 +31,31 @@ export async function activateCaptainFromAuth(input: ActivateCaptainInput): Prom
     return existingBySub;
   }
 
-  const player = await Player.findOne({ email });
+  let player = await Player.findOne({ email });
+
+  if (!player) {
+    player = await resolveRegistrationCaptain(email);
+
+    if (!player && (await hasOpenTeamRegistration())) {
+      player = await Player.create({
+        name: input.name?.trim() || email.split('@')[0] || 'Captain',
+        email,
+        establishmentSlug: getEstablishmentSlug(),
+        auth0Sub,
+      });
+    }
+  }
 
   if (!player) {
     throw new Error(
-      'No captain invite found for this email. Use the same email your league manager invited.'
+      'No captain invite found for this email. Use the same email your league manager invited, or register for an open league session.'
     );
   }
 
   const isTeamCaptain = await Team.exists({ captainPlayerId: player._id });
+  const isRegistrationCaptain = Boolean(await resolveRegistrationCaptain(email));
 
-  if (!isTeamCaptain) {
+  if (!isTeamCaptain && !isRegistrationCaptain && !(await hasOpenTeamRegistration())) {
     throw new Error('This player is not assigned as a team captain');
   }
 

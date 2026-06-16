@@ -14,6 +14,12 @@ import { getScoresheetValidator } from '../../services/leagues/scoresheets';
 import { submitMatchScoresheet } from '../../services/leagues/submitScoresheet';
 import { resolveVolleyballSetsToWin } from '../../services/leagues/scoresheets/volleyball';
 import { activateCaptainFromAuth } from '../../services/leagues/captainActivation';
+import { buildCaptainProfileTeams, buildReturningSeasonOptions } from '../../services/leagues/captainProfile';
+import {
+  addCaptainTeamRosterPlayer,
+  getCaptainTeamRoster,
+  removeCaptainTeamRosterPlayer,
+} from '../../services/leagues/captainRoster';
 
 const router = Router();
 
@@ -133,7 +139,8 @@ router.get(
   asyncHandler(async (req: CaptainRequest, res: Response) => {
     const user = req.captainUser!;
     const player = await Player.findById(user.playerId).lean();
-    const teams = await getCaptainTeams(user.playerId!);
+    const { teams, pastTeams } = await buildCaptainProfileTeams(user.playerId!);
+    const returningSeasonOptions = await buildReturningSeasonOptions(user.playerId!);
 
     res.json({
       data: {
@@ -141,9 +148,69 @@ router.get(
         email: user.email,
         playerId: user.playerId,
         playerName: player?.name ?? user.name,
-        teams: teams.map((team) => ({ _id: team._id, name: team.name, leagueId: team.leagueId })),
+        teams,
+        pastTeams,
+        returningSeasonOptions,
       },
     });
+  })
+);
+
+router.get(
+  '/teams/:teamId/roster',
+  asyncHandler(async (req: CaptainRequest, res: Response) => {
+    const user = req.captainUser!;
+
+    try {
+      const data = await getCaptainTeamRoster(req.params.teamId, user.playerId!);
+      res.json({ data });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not load roster';
+      const status = message.includes('Forbidden') ? 403 : message.includes('not found') ? 404 : 400;
+      throw createError(message, status);
+    }
+  })
+);
+
+router.post(
+  '/teams/:teamId/roster',
+  asyncHandler(async (req: CaptainRequest, res: Response) => {
+    const user = req.captainUser!;
+    const { name, email } = req.body as { name?: string; email?: string };
+
+    try {
+      const data = await addCaptainTeamRosterPlayer({
+        teamId: req.params.teamId,
+        captainPlayerId: user.playerId!,
+        name: name ?? '',
+        email: email ?? '',
+      });
+      res.status(201).json({ data });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not add player';
+      const status = message.includes('Forbidden') ? 403 : 400;
+      throw createError(message, status);
+    }
+  })
+);
+
+router.delete(
+  '/teams/:teamId/roster/:playerId',
+  asyncHandler(async (req: CaptainRequest, res: Response) => {
+    const user = req.captainUser!;
+
+    try {
+      const data = await removeCaptainTeamRosterPlayer({
+        teamId: req.params.teamId,
+        captainPlayerId: user.playerId!,
+        playerId: req.params.playerId,
+      });
+      res.json({ data });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not remove player';
+      const status = message.includes('Forbidden') ? 403 : 400;
+      throw createError(message, status);
+    }
   })
 );
 

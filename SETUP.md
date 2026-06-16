@@ -159,6 +159,28 @@ npm run dev:server   # port 3001
 
 ---
 
+## 9. League registration email (optional)
+
+Registration notifications use a **two-phase** approach:
+
+| Phase | When | Behavior |
+|-------|------|----------|
+| **Phase 1** (default) | No email provider configured | Server builds plain-text templates. Admin **approve/reject/promote** responses include the email body — the dashboard auto-copies it to your clipboard (same pattern as captain login invites). |
+| **Phase 2** | `RESEND_API_KEY` set in `server/.env` | Same templates are sent automatically via [Resend](https://resend.com). Admin still receives the template in the API response as a fallback. |
+
+**Templates:** registration received, approved, rejected, and payment receipt (includes amount + league name).
+
+**Server env (Phase 2):**
+
+```env
+RESEND_API_KEY=re_...
+RESEND_FROM_EMAIL=Barry O's <noreply@yourdomain.com>
+```
+
+Logs record only `registrationId`, `leagueId`, template name, and delivery status — **no recipient email or body** in server logs.
+
+---
+
 ## Troubleshooting
 
 ### MongoDB connection failed

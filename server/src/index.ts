@@ -18,6 +18,8 @@ import submissionsRouter from './routes/submissions';
 import captainRouter from './routes/leagues/captain';
 import playerRouter from './routes/leagues/player';
 import leaguesPublicRouter from './routes/leagues/public';
+import registerRouter from './routes/leagues/register';
+import stripeWebhookRouter from './routes/webhooks/stripe';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -56,6 +58,10 @@ app.use(
   })
 );
 app.use(morgan('dev'));
+
+// Stripe webhooks require the raw body — mount before express.json()
+app.use('/api/webhooks/stripe', stripeWebhookRouter);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -67,6 +73,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/captain', captainRouter);
 app.use('/api/player', playerRouter);
 app.use('/api/leagues', leaguesPublicRouter);
+app.use('/api/register', registerRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

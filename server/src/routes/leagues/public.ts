@@ -1,7 +1,6 @@
 import { Router, Response } from 'express';
 import mongoose from 'mongoose';
-import { isSport, SPORTS, type Sport } from '../../constants/leagues';
-import { assertSportLicensed, isSportLicensed } from '../../config/establishment';
+import { isSport, type Sport } from '../../constants/leagues';
 import { asyncHandler, createError } from '../../middleware/errorHandler';
 import { Division, League, Match, SiteSettings, Team } from '../../models';
 import {
@@ -10,30 +9,14 @@ import {
   loadParticipantNameMaps,
 } from '../../services/leagues/matchLabels';
 import { poolHandicapBadge } from '../../services/leagues/poolHandicap';
+import { buildPublicRegistrationInfo, listOpenRegistrations } from '../../services/leagues/registration';
+import { assertLeagueIsPublic, getEnabledSports } from '../../services/leagues/publicLeague';
 import { getStandingsViews } from '../../services/leagues/standings';
 
 const router = Router();
 
-function getEnabledSports(settings: { sportsEnabled?: Record<Sport, boolean> }): Sport[] {
-  return SPORTS.filter(
-    (sport) => isSportLicensed(sport) && settings.sportsEnabled?.[sport]
-  );
-}
-
-async function assertLeagueIsPublic(league: { sport: Sport; status: string }): Promise<void> {
-  if (league.status === 'draft') {
-    throw createError('League not found', 404);
-  }
-
-  if (!isSportLicensed(league.sport)) {
-    throw createError('League not found', 404);
-  }
-
-  const settings = await SiteSettings.findOne().lean();
-
-  if (settings && !settings.sportsEnabled?.[league.sport]) {
-    throw createError('League not found', 404);
-  }
+async function assertLeagueIsPublicLeague(league: { sport: Sport; status: string }): Promise<void> {
+  await assertLeagueIsPublic(league);
 }
 
 router.get(
@@ -59,6 +42,14 @@ router.get(
 );
 
 router.get(
+  '/registration-open',
+  asyncHandler(async (_req, res: Response) => {
+    const data = await listOpenRegistrations();
+    res.json({ data, meta: { count: data.length } });
+  })
+);
+
+router.get(
   '/:leagueId',
   asyncHandler(async (req, res: Response) => {
     const { leagueId } = req.params;
@@ -73,7 +64,7 @@ router.get(
       throw createError('League not found', 404);
     }
 
-    await assertLeagueIsPublic(league);
+    await assertLeagueIsPublicLeague(league);
 
     const [divisionCount, teamCount] = await Promise.all([
       Division.countDocuments({ leagueId }),
@@ -87,6 +78,61 @@ router.get(
         teamCount,
       },
     });
+  })
+);
+
+router.get(
+  '/:leagueId/divisions',
+  asyncHandler(async (req, res: Response) => {
+    const { leagueId } = req.params;
+
+    if (!mongoose.isValidObjectId(leagueId)) {
+      throw createError('Invalid league id', 400);
+    }
+
+    const league = await League.findById(leagueId).lean();
+
+    if (!league) {
+      throw createError('League not found', 404);
+    }
+
+    await assertLeagueIsPublicLeague(league);
+
+    const divisions = await Division.find({ leagueId })
+      .sort({ order: 1 })
+      .select('_id name order')
+      .lean();
+
+    res.json({
+      data: divisions.map((division) => ({
+        _id: String(division._id),
+        name: division.name,
+        order: division.order,
+      })),
+      meta: { count: divisions.length },
+    });
+  })
+);
+
+router.get(
+  '/:leagueId/registration',
+  asyncHandler(async (req, res: Response) => {
+    const { leagueId } = req.params;
+
+    if (!mongoose.isValidObjectId(leagueId)) {
+      throw createError('Invalid league id', 400);
+    }
+
+    const league = await League.findById(leagueId).lean();
+
+    if (!league) {
+      throw createError('League not found', 404);
+    }
+
+    await assertLeagueIsPublicLeague(league);
+
+    const data = await buildPublicRegistrationInfo(league);
+    res.json({ data });
   })
 );
 
@@ -110,7 +156,7 @@ router.get(
       throw createError('League not found', 404);
     }
 
-    await assertLeagueIsPublic(league);
+    await assertLeagueIsPublicLeague(league);
 
     const data = await getStandingsViews(leagueId, divisionId);
     res.json({ data, meta: { count: data.length } });
@@ -133,7 +179,7 @@ router.get(
       throw createError('League not found', 404);
     }
 
-    await assertLeagueIsPublic(league);
+    await assertLeagueIsPublicLeague(league);
 
     const filter: Record<string, unknown> = {
       leagueId,

@@ -1,4 +1,10 @@
-import type { CaptainMatch, CaptainProfile, SportScoresheetPayload } from '../types/captain';
+import type {
+  CaptainAddRosterPlayerResult,
+  CaptainMatch,
+  CaptainProfile,
+  CaptainTeamRosterView,
+  SportScoresheetPayload,
+} from '../types/captain';
 
 type CaptainFetch = <T>(path: string, options?: RequestInit) => Promise<T>;
 type CaptainFetchList = <T>(
@@ -37,5 +43,33 @@ export async function submitScoresheet(
   await captainFetch(`/captain/matches/${matchId}/scoresheet`, {
     method: 'POST',
     body: JSON.stringify({ payload }),
+  });
+}
+
+export async function getCaptainTeamRoster(
+  captainFetch: CaptainFetch,
+  teamId: string
+): Promise<CaptainTeamRosterView> {
+  return captainFetch<CaptainTeamRosterView>(`/captain/teams/${teamId}/roster`);
+}
+
+export async function addCaptainTeamRosterPlayer(
+  captainFetch: CaptainFetch,
+  teamId: string,
+  payload: { name: string; email: string }
+): Promise<CaptainAddRosterPlayerResult> {
+  return captainFetch<CaptainAddRosterPlayerResult>(`/captain/teams/${teamId}/roster`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function removeCaptainTeamRosterPlayer(
+  captainFetch: CaptainFetch,
+  teamId: string,
+  playerId: string
+): Promise<CaptainTeamRosterView> {
+  return captainFetch<CaptainTeamRosterView>(`/captain/teams/${teamId}/roster/${playerId}`, {
+    method: 'DELETE',
   });
 }

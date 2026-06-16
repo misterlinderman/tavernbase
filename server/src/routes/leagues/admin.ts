@@ -6,6 +6,7 @@ import {
   isLeagueKind,
   isLeagueStatus,
   isPoolFormat,
+  isRegistrationStatus,
   isSport,
   DEFAULT_POOL_PLAYER_RACE_TO,
   type EntrantType,
@@ -13,6 +14,7 @@ import {
   type LeagueKind,
   type LeagueStatus,
   type PoolFormat,
+  type RegistrationStatus,
   type Sport,
 } from '../../constants/leagues';
 import { assertSportLicensed } from '../../config/establishment';
@@ -27,6 +29,7 @@ import {
   PoolMatch,
   DartsMatch,
   VolleyballMatch,
+  Registration,
   Scoresheet,
   StandingsSnapshot,
   Team,
@@ -52,7 +55,11 @@ import {
 import { generateLadderPairings } from '../../services/leagues/schedule/ladder';
 import { generateBracketPairings } from '../../services/leagues/schedule/bracket';
 import { buildCaptainInviteResult } from '../../services/leagues/captainInvite';
-import { isCaptainPlayerLinked } from '../../services/leagues/captainActivation';
+import {
+  createPlayerLoginInvite,
+  isCaptainPlayerLinked,
+} from '../../services/leagues/playerLoginLink';
+import { InviteRateLimitError } from '../../services/leagues/inviteRateLimit';
 import {
   collectMatchParticipantIds,
   formatMatchSides,
@@ -67,6 +74,32 @@ import {
   validateLeagueFields,
 } from '../../services/leagues/leagueValidation';
 import { getLeaguesOverview } from '../../services/leagues/overview';
+import {
+  addTeamPlayer,
+  deleteTeamWithGuard,
+  removeTeamPlayer,
+  transferTeamCaptain,
+} from '../../services/leagues/teamLifecycle';
+import {
+  applyRegistrationUpdate,
+  listLeagueRegistrations,
+  listRegistrationQueue,
+  parseRegistrationUpdate,
+  resolveRegistrationLeagueId,
+  validateRegistrationSettingsUpdate,
+} from '../../services/leagues/registration';
+import {
+  approveRegistration,
+  promoteWaitlistedRegistration,
+  rejectRegistration,
+} from '../../services/leagues/registrationActions';
+import {
+  listLeaguePayments,
+  refundRegistrationPayment,
+  waiveRegistrationFee,
+} from '../../services/payments/adminPayments';
+import { requireRole } from '../../middleware/requireRole';
+import peopleRouter from './people';
 
 const router = Router();
 
@@ -161,6 +194,7 @@ async function deleteLeagueCascade(leagueId: mongoose.Types.ObjectId): Promise<v
     Scoresheet.deleteMany({ matchId: { $in: matchIds } }),
     Match.deleteMany({ leagueId }),
     StandingsSnapshot.deleteMany({ leagueId }),
+    Registration.deleteMany({ leagueId }),
     Team.deleteMany({ leagueId }),
     Division.deleteMany({ leagueId }),
     League.findByIdAndDelete(leagueId),
@@ -298,6 +332,8 @@ router.post(
   })
 );
 
+router.use('/people', peopleRouter);
+
 // ─── Leagues ─────────────────────────────────────────────────────────────────
 
 router.get(
@@ -305,6 +341,86 @@ router.get(
   asyncHandler(async (_req, res: Response) => {
     const data = await getLeaguesOverview();
     res.json({ data });
+  })
+);
+
+router.get(
+  '/registrations',
+  asyncHandler(async (req, res: Response) => {
+    const status = req.query.status as string | undefined;
+
+    if (status && !isRegistrationStatus(status)) {
+      throw createError('Invalid registration status filter', 400);
+    }
+
+    try {
+      const data = await listRegistrationQueue({
+        status: status as RegistrationStatus | undefined,
+      });
+      res.json({ data, meta: { count: data.length } });
+    } catch (error) {
+      throw createError(
+        error instanceof Error ? error.message : 'Could not load registration queue',
+        400
+      );
+    }
+  })
+);
+
+router.post(
+  '/registrations/:registrationId/approve',
+  asyncHandler(async (req, res: Response) => {
+    try {
+      const { leagueId } = await resolveRegistrationLeagueId(req.params.registrationId);
+      const result = await approveRegistration({
+        leagueId,
+        registrationId: req.params.registrationId,
+      });
+      res.json({ data: result.registration, notification: result.notification ?? undefined });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not approve registration';
+      const status = message === 'Registration not found' ? 404 : 400;
+      throw createError(message, status);
+    }
+  })
+);
+
+router.post(
+  '/registrations/:registrationId/reject',
+  asyncHandler(async (req, res: Response) => {
+    const { reason } = req.body as { reason?: string };
+
+    try {
+      const { leagueId } = await resolveRegistrationLeagueId(req.params.registrationId);
+      const result = await rejectRegistration({
+        leagueId,
+        registrationId: req.params.registrationId,
+        notes: reason,
+      });
+      res.json({ data: result.registration, notification: result.notification ?? undefined });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not reject registration';
+      const status = message === 'Registration not found' ? 404 : 400;
+      throw createError(message, status);
+    }
+  })
+);
+
+router.post(
+  '/registrations/:registrationId/promote',
+  asyncHandler(async (req, res: Response) => {
+    try {
+      const { leagueId } = await resolveRegistrationLeagueId(req.params.registrationId);
+      const result = await promoteWaitlistedRegistration({
+        leagueId,
+        registrationId: req.params.registrationId,
+      });
+      res.json({ data: result.registration, notification: result.notification ?? undefined });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not promote registration';
+      const status = message === 'Registration not found' ? 404 : 400;
+      throw createError(message, status);
+    }
   })
 );
 
@@ -521,8 +637,166 @@ router.patch(
       league.poolFormat = undefined;
     }
 
+    if (body.registration !== undefined) {
+      try {
+        const registrationUpdate = parseRegistrationUpdate(body.registration);
+        await validateRegistrationSettingsUpdate(league, registrationUpdate);
+        applyRegistrationUpdate(league, registrationUpdate);
+      } catch (error) {
+        throw createError(
+          error instanceof Error ? error.message : 'Invalid registration settings',
+          400
+        );
+      }
+    }
+
     await league.save();
     res.json({ data: league.toObject() });
+  })
+);
+
+router.get(
+  '/:leagueId/registrations',
+  asyncHandler(async (req, res: Response) => {
+    await getLeagueOrThrow(req.params.leagueId);
+
+    const status = req.query.status as string | undefined;
+
+    if (status && !isRegistrationStatus(status)) {
+      throw createError('Invalid registration status filter', 400);
+    }
+
+    const data = await listLeagueRegistrations({
+      leagueId: req.params.leagueId,
+      status: status as RegistrationStatus | undefined,
+    });
+
+    res.json({ data, meta: { count: data.length } });
+  })
+);
+
+router.post(
+  '/:leagueId/registrations/:registrationId/approve',
+  asyncHandler(async (req, res: Response) => {
+    await getLeagueOrThrow(req.params.leagueId);
+
+    try {
+      const result = await approveRegistration({
+        leagueId: req.params.leagueId,
+        registrationId: req.params.registrationId,
+      });
+      res.json({ data: result.registration, notification: result.notification ?? undefined });
+    } catch (error) {
+      throw createError(
+        error instanceof Error ? error.message : 'Could not approve registration',
+        400
+      );
+    }
+  })
+);
+
+router.post(
+  '/:leagueId/registrations/:registrationId/reject',
+  asyncHandler(async (req, res: Response) => {
+    await getLeagueOrThrow(req.params.leagueId);
+    const { reason } = req.body as { reason?: string };
+
+    try {
+      const result = await rejectRegistration({
+        leagueId: req.params.leagueId,
+        registrationId: req.params.registrationId,
+        notes: reason,
+      });
+      res.json({ data: result.registration, notification: result.notification ?? undefined });
+    } catch (error) {
+      throw createError(
+        error instanceof Error ? error.message : 'Could not reject registration',
+        400
+      );
+    }
+  })
+);
+
+router.post(
+  '/:leagueId/registrations/:registrationId/promote',
+  asyncHandler(async (req, res: Response) => {
+    await getLeagueOrThrow(req.params.leagueId);
+
+    try {
+      const result = await promoteWaitlistedRegistration({
+        leagueId: req.params.leagueId,
+        registrationId: req.params.registrationId,
+      });
+      res.json({ data: result.registration, notification: result.notification ?? undefined });
+    } catch (error) {
+      throw createError(
+        error instanceof Error ? error.message : 'Could not promote registration',
+        400
+      );
+    }
+  })
+);
+
+router.get(
+  '/:leagueId/payments',
+  asyncHandler(async (req, res: Response) => {
+    await getLeagueOrThrow(req.params.leagueId);
+
+    try {
+      const data = await listLeaguePayments(req.params.leagueId);
+      res.json({ data, meta: { count: data.length } });
+    } catch (error) {
+      throw createError(error instanceof Error ? error.message : 'Could not load payments', 400);
+    }
+  })
+);
+
+router.post(
+  '/:leagueId/registrations/:registrationId/waive-fee',
+  requireRole('manager'),
+  asyncHandler(async (req, res: Response) => {
+    await getLeagueOrThrow(req.params.leagueId);
+    const auth0Sub = extractAuth0Sub(req);
+    const reviewer = auth0Sub ? await User.findOne({ auth0Sub }).select('_id') : null;
+
+    try {
+      const data = await waiveRegistrationFee({
+        leagueId: req.params.leagueId,
+        registrationId: req.params.registrationId,
+        reviewedBy: reviewer?._id,
+      });
+      res.json({ data });
+    } catch (error) {
+      throw createError(
+        error instanceof Error ? error.message : 'Could not waive registration fee',
+        400
+      );
+    }
+  })
+);
+
+router.post(
+  '/:leagueId/registrations/:registrationId/refund',
+  requireRole('manager'),
+  asyncHandler(async (req, res: Response) => {
+    await getLeagueOrThrow(req.params.leagueId);
+    const auth0Sub = extractAuth0Sub(req);
+    const reviewer = auth0Sub ? await User.findOne({ auth0Sub }).select('_id') : null;
+    const { reason } = req.body as { reason?: string };
+
+    try {
+      const data = await refundRegistrationPayment({
+        leagueId: req.params.leagueId,
+        registrationId: req.params.registrationId,
+        reviewedBy: reviewer?._id,
+        notes: reason,
+      });
+      res.json({ data });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not refund registration';
+      const status = message.includes('Stripe is not configured') ? 503 : 400;
+      throw createError(message, status);
+    }
   })
 );
 
@@ -848,21 +1122,125 @@ router.post(
     }
 
     const alreadyLinked = await isCaptainPlayerLinked(player._id);
-    const invitedAt = new Date();
 
-    if (!alreadyLinked) {
-      player.captainInvitedAt = invitedAt;
-      await player.save();
+    const auth0SubClaim = extractAuth0Sub(req);
+    const actor = auth0SubClaim ? await User.findOne({ auth0Sub: auth0SubClaim }) : null;
+
+    let inviteResult: Awaited<ReturnType<typeof createPlayerLoginInvite>> | null = null;
+
+    try {
+      if (!alreadyLinked) {
+        inviteResult = await createPlayerLoginInvite({
+          playerId: player._id,
+          email: player.email ?? '',
+          role: 'captain',
+          invitedBy: actor?._id,
+        });
+      }
+    } catch (error) {
+      if (error instanceof InviteRateLimitError) {
+        throw createError(error.message, 429);
+      }
+
+      throw createError(error instanceof Error ? error.message : 'Could not invite captain', 400);
     }
 
+    const refreshedPlayer = await Player.findById(player._id);
+
     const data = buildCaptainInviteResult({
-      player,
+      player: refreshedPlayer ?? player,
       team,
       alreadyLinked,
-      invitedAt: player.captainInvitedAt ?? invitedAt,
+      invitedAt: refreshedPlayer?.captainInvitedAt ?? new Date(),
+      delivery: inviteResult?.delivery ?? 'manual_copy',
+      auth0EmailSent: inviteResult?.auth0EmailSent,
     });
 
     res.json({ data });
+  })
+);
+
+router.patch(
+  '/:leagueId/teams/:teamId/transfer-captain',
+  asyncHandler(async (req, res: Response) => {
+    await getLeagueOrThrow(req.params.leagueId);
+
+    const { newCaptainPlayerId } = req.body as { newCaptainPlayerId?: string };
+
+    if (!newCaptainPlayerId || !mongoose.isValidObjectId(newCaptainPlayerId)) {
+      throw createError('newCaptainPlayerId is required', 400);
+    }
+
+    try {
+      const team = await transferTeamCaptain({
+        leagueId: req.params.leagueId,
+        teamId: req.params.teamId,
+        newCaptainPlayerId,
+        actorAuth0Sub: extractAuth0Sub(req) ?? undefined,
+      });
+
+      res.json({ data: team.toObject() });
+    } catch (error) {
+      throw createError(
+        error instanceof Error ? error.message : 'Could not transfer captain',
+        400
+      );
+    }
+  })
+);
+
+router.post(
+  '/:leagueId/teams/:teamId/players',
+  asyncHandler(async (req, res: Response) => {
+    await getLeagueOrThrow(req.params.leagueId);
+
+    const { playerId, name, email, phone, establishmentSlug } = req.body as {
+      playerId?: string;
+      name?: string;
+      email?: string;
+      phone?: string;
+      establishmentSlug?: string;
+    };
+
+    try {
+      const result = await addTeamPlayer({
+        leagueId: req.params.leagueId,
+        teamId: req.params.teamId,
+        playerId,
+        name,
+        email,
+        phone,
+        establishmentSlug,
+      });
+
+      res.status(201).json({
+        data: {
+          team: result.team.toObject(),
+          player: result.player.toObject(),
+        },
+      });
+    } catch (error) {
+      throw createError(error instanceof Error ? error.message : 'Could not add player', 400);
+    }
+  })
+);
+
+router.delete(
+  '/:leagueId/teams/:teamId/players/:playerId',
+  asyncHandler(async (req, res: Response) => {
+    await getLeagueOrThrow(req.params.leagueId);
+
+    try {
+      const team = await removeTeamPlayer({
+        leagueId: req.params.leagueId,
+        teamId: req.params.teamId,
+        playerId: req.params.playerId,
+      });
+
+      res.json({ data: team.toObject() });
+    } catch (error) {
+      throw createError(error instanceof Error ? error.message : 'Could not remove player', 400);
+    }
   })
 );
 
@@ -934,16 +1312,17 @@ router.delete(
       throw createError('Invalid team id', 400);
     }
 
-    const team = await Team.findOneAndDelete({
-      _id: req.params.teamId,
-      leagueId: req.params.leagueId,
-    });
+    try {
+      const result = await deleteTeamWithGuard({
+        leagueId: req.params.leagueId,
+        teamId: req.params.teamId,
+        actorAuth0Sub: extractAuth0Sub(req) ?? undefined,
+      });
 
-    if (!team) {
-      throw createError('Team not found', 404);
+      res.json({ data: result });
+    } catch (error) {
+      throw createError(error instanceof Error ? error.message : 'Could not delete team', 400);
     }
-
-    res.json({ data: { id: team._id } });
   })
 );
 

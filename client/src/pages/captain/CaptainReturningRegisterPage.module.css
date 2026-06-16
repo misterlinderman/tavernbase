@@ -1,0 +1,146 @@
+.backLink {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: var(--green-bright);
+}
+
+.title {
+  margin: 0 0 0.35rem;
+  font-family: 'Anton', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.lead {
+  margin: 0 0 1rem;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--muted);
+  max-width: 42rem;
+}
+
+.meta {
+  margin: 0 0 1.25rem;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.panel {
+  max-width: 720px;
+  padding: 1.25rem;
+  border-radius: var(--radius-panel);
+  border: var(--border-container) solid var(--line);
+  background: var(--panel-2);
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.field input,
+.field select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-button);
+  border: var(--border-container) solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+}
+
+.section {
+  margin: 1.25rem 0;
+}
+
+.sectionTitle {
+  margin: 0 0 0.75rem;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.playerList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.playerRow {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.9375rem;
+  color: var(--text);
+}
+
+.playerEmail {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.additionalRow {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .additionalRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.waiverRow {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  margin: 1rem 0;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.summary {
+  margin: 0 0 1rem;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.error {
+  margin: 0 0 1rem;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.875rem;
+  color: var(--red);
+}
