@@ -44,11 +44,18 @@ Repository layout: **`client/` and `server/` at the repo root** (no wrapper fold
 /calendar            → CalendarPage (full event list)
 /leagues             → LeaguesPage (hub when sports enabled)
 /leagues/:leagueId   → LeaguePublicPage (standings + schedule)
+/register            → RegisterPage (open league registrations)
+/register/:leagueId  → RegisterLeaguePage (team or player flow)
+/register/payment/success → RegisterPaymentSuccessPage (Stripe return)
+/register/payment/cancel  → RegisterPaymentCancelPage (retry checkout)
 /submit              → SubmitPage
 /thank-you           → ThankYouPage
 /christmas-party     → ChristmasTicketsPage
 /captain/login       → CaptainLoginPage
 /captain             → CaptainPage (scoresheets)
+/captain/teams       → CaptainTeamsPage (my teams hub)
+/captain/teams/:teamId/roster → CaptainRosterPage (roster edits when allowed)
+/captain/register/:targetLeagueId/:priorTeamId → CaptainReturningRegisterPage (re-register)
 /player/login        → PlayerLoginPage
 /player              → PlayerPage (standings)
 /player/scores       → PlayerScoresPage (dual-entry for player-entrant matches)
@@ -57,8 +64,9 @@ Repository layout: **`client/` and `server/` at the repo root** (no wrapper fold
 /admin/submissions   → SubmissionsPage
 /admin/events        → EventsPage
 /admin/leagues       → LeaguesPage (overview + create)
+/admin/leagues/registrations → RegistrationQueuePage (cross-league approval queue)
 /admin/leagues/people → LeaguePeoplePage (players & captains directory)
-/admin/leagues/:id   → LeagueDetailPage
+/admin/leagues/:id   → LeagueDetailPage (registration settings, payments, per-league queue)
 /admin/announcement  → AnnouncementPage
 /admin/christmas     → ChristmasPage
 /admin/hours         → HoursPage
@@ -79,6 +87,19 @@ Repository layout: **`client/` and `server/` at the repo root** (no wrapper fold
 | GET | `/api/leagues/:id` | League detail |
 | GET | `/api/leagues/:id/standings` | Standings by division |
 | GET | `/api/leagues/:id/matches` | Schedule + final results |
+| GET | `/api/leagues/registration-open` | Leagues with open self-service registration |
+| GET | `/api/leagues/:id/registration` | Public registration info (fee, window, spots) |
+
+### Register — Auth0 JWT (`checkJwt` + email verification for paid leagues)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/api/register/team/:leagueId` | Team registration submit → checkout or approval |
+| POST | `/api/register/player/:leagueId` | Player registration submit |
+| POST | `/api/register/team/:leagueId/returning` | Returning captain re-register from prior season |
+| GET | `/api/register/team/:leagueId/returning/preview` | Pre-fill prior roster for re-registration |
+| GET | `/api/register/registrations/:id` | Registration status (owner) |
+| POST | `/api/register/registrations/:id/checkout` | Retry Stripe checkout |
 
 ### Admin — Auth0 JWT (`checkJwt`)
 
@@ -89,6 +110,14 @@ Repository layout: **`client/` and `server/` at the repo root** (no wrapper fold
 | GET/PATCH/DELETE | `/api/admin/submissions/:id` | Photo moderation |
 | GET/POST/PATCH/DELETE | `/api/admin/leagues` | League CRUD |
 | GET | `/api/admin/leagues/people` | Paginated players/captains directory (L9.1) |
+| GET | `/api/admin/leagues/registrations` | Cross-league registration queue (L12.4) |
+| POST | `/api/admin/leagues/registrations/:id/approve` | Approve registration → create team or add player |
+| POST | `/api/admin/leagues/registrations/:id/reject` | Reject registration |
+| POST | `/api/admin/leagues/registrations/:id/promote` | Promote waitlist (respects `maxEntrants`) |
+| GET | `/api/admin/leagues/:id/registrations` | Per-league registration list |
+| GET | `/api/admin/leagues/:id/payments` | Payment ledger (L11.4) |
+| POST | `/api/admin/leagues/:id/registrations/:id/waive-fee` | Waive entry fee (manager) |
+| POST | `/api/admin/leagues/:id/registrations/:id/refund` | Stripe refund (manager) |
 | POST | `/api/admin/leagues/people/:playerId/link-login` | Invite or manually link captain/player login (L9.2) |
 | DELETE | `/api/admin/leagues/people/:playerId/link-login` | Unlink captain/player login (L9.2) |
 | POST | `/api/admin/leagues/:id/schedule/generate` | Round-robin / ladder / bracket |
@@ -104,8 +133,9 @@ League write routes require `manager` or `league_admin`. Staff can read.
 | Method | Path | Purpose |
 |--------|------|---------|
 | POST | `/api/captain/activate` | Link Auth0 user to captain Player record |
-| GET | `/api/captain/profile` | Captain + team info |
+| GET | `/api/captain/me` | Captain profile, teams, returning-season options (L12.1) |
 | GET | `/api/captain/matches` | Upcoming matches for captain's team |
+| GET/POST/DELETE | `/api/captain/teams/:teamId/roster` | Captain roster management (L12.2) |
 | POST | `/api/captain/matches/:matchId/scoresheet` | Submit scoresheet (team-scoped) |
 
 ### Player — Auth0 JWT + `requirePlayer`
@@ -143,6 +173,9 @@ Homepage: `EventsSection` → `EventsGrid` (with link to `/calendar`) or `Evergr
 - **Public:** `/leagues` lists tournaments with a **Tournament** badge; detail shows bracket columns or `BracketEmptyPanel` when no draw yet
 - **Pool split:** 8-ball team race = season league; 9-ball singles race-to = tournament preset
 - **CSV import:** Teams → players → schedule → historical results; CompuSport column aliases supported
+- **Self-service registration (L10–L12):** Public `/register` when `League.registration.enabled` + date window; team or player flows; optional Stripe entry fee; admin approval queue; waitlist with `maxEntrants`
+- **Payments (L11):** Stripe Checkout on submit; webhook completes registration; admin payment ledger, waive fee, refund on league detail
+- **Captain lifecycle (L12):** `/captain/teams` hub; roster edits when registration open or `captainRosterEdits`; returning-team re-registration via `registration.priorLeagueId`; registration email templates (Resend optional — see SETUP.md §10)
 
 Deep context: [docs/contexts/CONTEXT_leagues.md](docs/contexts/CONTEXT_leagues.md) · [docs/LEAGUES.md](docs/LEAGUES.md)
 
@@ -162,7 +195,9 @@ Announcement bar, Christmas CTA, hero video, hours, contact, Instagram, sports e
 | Task | Location |
 |------|----------|
 | API routes | `server/src/routes/` |
-| League routes | `server/src/routes/leagues/` |
+| League routes | `server/src/routes/leagues/` · `register.ts` (public signup) |
+| Registration / payments | `server/src/services/leagues/registration*.ts` · `server/src/services/payments/` |
+| Registration email | `server/src/services/notifications/registrationEmail.ts` |
 | Event schedule logic | `server/src/utils/eventSchedule.ts` |
 | League standings | `server/src/services/leagues/standings/` |
 | Scoresheet workflow | `server/src/services/leagues/scoresheet.ts` |
@@ -181,7 +216,7 @@ Announcement bar, Christmas CTA, hero video, hours, contact, Instagram, sports e
 
 ## Env setup
 
-Copy examples: `.env.example`, `client/.env.example`, `server/.env.example` → respective `.env` files. Copy `config/establishment.example.json` → `config/establishment.json` for venue identity and league module licensing. Configure MongoDB Atlas, Auth0, and Cloudinary before exercising authenticated or upload flows. See [SETUP.md](SETUP.md) and [docs/PLATFORM.md](docs/PLATFORM.md).
+Copy examples: `.env.example`, `client/.env.example`, `server/.env.example` → respective `.env` files. Copy `config/establishment.example.json` → `config/establishment.json` for venue identity and league module licensing. Configure MongoDB Atlas, Auth0, and Cloudinary before exercising authenticated or upload flows. For league registration: Stripe (`STRIPE_*` in `server/.env`) and optional Resend email — see [SETUP.md](SETUP.md) §9–10 and [docs/SETUP_AUTH0.md](docs/SETUP_AUTH0.md). See also [docs/PLATFORM.md](docs/PLATFORM.md).
 
 ## Critical non-negotiables
 

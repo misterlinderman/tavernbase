@@ -26,12 +26,24 @@ const data = await adminFetch<Event[]>('/admin/events');
 /admin              → Overview (default)
 /admin/submissions  → ModerationQueue
 /admin/events       → EventsPage
+/admin/leagues      → Leagues overview + create
+/admin/leagues/registrations → Registration approval queue (L12.4)
+/admin/leagues/people → People directory — captains & players (L9.1)
+/admin/leagues/:id  → League detail — registration, payments, schedule
 /admin/announcement → AnnouncementPage
 /admin/christmas    → ChristmasPage
 /admin/hours        → HoursPage
 /admin/media        → MediaPage
 /admin/login        → LoginPage (unauthenticated)
 ```
+
+Leagues sidebar items (**Leagues**, **Registrations**, **People**) appear when at least one sport is enabled in site settings.
+
+### Registration queue (L12.4)
+
+`/admin/leagues/registrations` — cross-league list filtered to pending approval, pending payment, and waitlisted. Bulk approve/reject. On approve/reject, API returns an email template; UI auto-copies to clipboard when Resend is not configured (see [SETUP.md](../../SETUP.md) §10).
+
+Per-league registration list and payment ledger live on **League detail** → Registration settings section.
 
 ## Admin Layout Shell
 

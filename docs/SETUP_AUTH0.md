@@ -359,12 +359,19 @@ Verify locally: decode your access token at [jwt.io](https://jwt.io) and confirm
 Add these paths to the SPA **Callback**, **Logout**, and **Web Origins** (same origin is enough — paths are client-side routes):
 
 - `/register`, `/register/:leagueId`, `/register/:leagueId/team`, `/register/:leagueId/player`
-- `/captain/login`, `/captain`
+- `/register/payment/success`, `/register/payment/cancel`
+- `/captain/login`, `/captain`, `/captain/teams`
 - `/player/login`, `/player`
 
 Rate limiting on public registration endpoints is recommended before high-traffic launch (see server route configuration).
 
-### 7. Verify registration auth helpers
+### 7. Registration notification email
+
+After approve/reject/promote, staff receive a plain-text email template (auto-copied to clipboard when no provider is configured). Optional automatic delivery via Resend — see [SETUP.md](../SETUP.md) §10.
+
+Templates also fire on self-service submit and Stripe payment success (received, payment receipt, approved).
+
+### 8. Verify registration auth helpers
 
 ```bash
 # Pure logic assertions (no MongoDB)

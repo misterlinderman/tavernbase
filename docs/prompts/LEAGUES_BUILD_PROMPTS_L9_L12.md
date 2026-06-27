@@ -2,7 +2,7 @@
 
 **Prerequisite:** Phases **L0–L8** complete ([LEAGUES_BUILD_PROMPTS.md](./LEAGUES_BUILD_PROMPTS.md))  
 **Module:** Leagues + tournaments  
-**Status:** **Planned** — not started  
+**Status:** **Shipped** (L9.1–L12.5 complete)  
 **Last updated:** June 2026
 
 Paste the relevant prompt into Cursor chat with **`docs/contexts/CONTEXT_leagues.md`** attached (and `.cursorrules` / `AGENTS.md` as usual).

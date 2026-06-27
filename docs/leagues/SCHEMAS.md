@@ -67,15 +67,17 @@ interface ILeague {
   updatedAt: Date;
 }
 
-/** @implemented — L10.1 */
+/** @implemented — L10.1 / L11 / L12 */
 interface LeagueRegistrationSettings {
   enabled: boolean;                // default false
   opensAt?: Date;
   closesAt?: Date;
-  entryFeeCents?: number;          // default 0 — payment in L11
+  entryFeeCents?: number;          // default 0 — Stripe Checkout when > 0 (L11)
   currency: 'usd';                 // default 'usd'
   maxEntrants?: number;            // teams OR players depending on entrantType
   requiresApproval: boolean;       // default false
+  captainRosterEdits?: boolean;    // L12.2 — allow captain roster edits after window closes
+  priorLeagueId?: ObjectId;        // L12.3 — prior season for returning-team registration
   waiverText?: string;
 }
 
@@ -180,7 +182,7 @@ interface ITeamPlanned {
 
 ## Registration
 
-Self-service signup records (L10.1 model; public submit in L10.3/L10.4).
+Self-service signup records (L10–L12).
 
 ```typescript
 /** @implemented — L10.1 */
@@ -193,7 +195,7 @@ type RegistrationStatus =
   | 'rejected'
   | 'cancelled';
 
-/** @implemented — L10.1 */
+/** @implemented — L10.1 / L11 / L12 */
 interface IRegistration {
   _id: ObjectId;
   leagueId: ObjectId;              // ref League
@@ -202,11 +204,12 @@ interface IRegistration {
   status: RegistrationStatus;      // default 'draft'
   submittedByPlayerId: ObjectId;   // ref Player — captain or self
   teamId?: ObjectId;               // set on approve (team flow)
+  returningTeamId?: ObjectId;      // L12.3 — link to prior season Team (not mutated)
   playerIds?: ObjectId[];          // roster snapshot at submit
   teamName?: string;
   waiverAccepted: boolean;
   waiverTextSnapshot: string;
-  paymentId?: ObjectId;            // @planned L11
+  paymentId?: ObjectId;            // ref Payment (L11)
   reviewedBy?: ObjectId;           // ref User
   reviewedAt?: Date;
   notes?: string;
@@ -218,6 +221,31 @@ interface IRegistration {
 **Indexes (implemented):** `{ leagueId, status }`, `{ submittedByPlayerId }`
 
 ---
+
+## Payment
+
+Stripe entry-fee records linked to registrations (L11).
+
+```typescript
+/** @implemented — L11 */
+type PaymentStatus = 'pending' | 'paid' | 'waived' | 'refunded' | 'failed';
+
+/** @implemented — L11 */
+interface IPayment {
+  _id: ObjectId;
+  registrationId: ObjectId;        // ref Registration
+  leagueId: ObjectId;
+  provider: 'stripe';
+  stripeSessionId?: string;
+  stripePaymentIntentId?: string;
+  amountCents: number;
+  currency: 'usd';
+  status: PaymentStatus;
+  paidAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
 
 ## Player
 

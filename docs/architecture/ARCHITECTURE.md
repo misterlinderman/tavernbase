@@ -254,8 +254,18 @@ Staff opens /admin/login
 Captain opens /captain/login → Auth0 → /captain
 → POST /api/captain/activate (links auth0Sub to Player via email)
 → requireCaptain on subsequent requests
+→ GET /api/captain/me (teams, returning-season options)
 → GET /api/captain/matches (team-scoped)
 → POST /api/captain/matches/:id/scoresheet
+```
+
+**Registration flow (L10–L12):**
+```
+Registrant opens /register → Auth0 → team or player form
+→ POST /api/register/team|player/:leagueId
+→ pending_payment → Stripe Checkout → webhook → pending_approval or approved
+→ Admin queue /admin/leagues/registrations → approve → Team created or player added to division
+→ Email template returned to admin (or sent via Resend if configured)
 ```
 
 ### Cloudinary

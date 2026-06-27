@@ -11,7 +11,8 @@ Guides for developers, deployers, and AI-assisted sessions.
 | [LEAGUES.md](LEAGUES.md) | Multi-sport league module — product plan, data model, phased rollout |
 | [leagues/SCHEMAS.md](leagues/SCHEMAS.md) | League Mongoose schemas — TypeScript interfaces for review |
 | [leagues/CSV_IMPORT.md](leagues/CSV_IMPORT.md) | CSV migration format for CompuSport / spreadsheets |
-| [prompts/LEAGUES_BUILD_PROMPTS.md](prompts/LEAGUES_BUILD_PROMPTS.md) | Phased league build prompts (L0–L7.1 shipped; L7.3 tests remain) |
+| [prompts/LEAGUES_BUILD_PROMPTS.md](prompts/LEAGUES_BUILD_PROMPTS.md) | Phased league build prompts (L0–L8 shipped; L7.3 tests remain) |
+| [prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md](prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md) | Registration, payments, captain lifecycle (L9–L12 shipped) |
 | [../SETUP.md](../SETUP.md) | Local development setup |
 | [architecture/ARCHITECTURE.md](architecture/ARCHITECTURE.md) | System design, routing, middleware, data flows |
 | [DEPLOY.md](DEPLOY.md) | Vercel + Railway production deployment |
@@ -28,14 +29,15 @@ These files give focused context when working on a specific area:
 | [contexts/CONTEXT_admin_dashboard.md](contexts/CONTEXT_admin_dashboard.md) | Building staff dashboard pages or editors |
 | [contexts/CONTEXT_server_models.md](contexts/CONTEXT_server_models.md) | Creating or editing Mongoose models |
 | [contexts/CONTEXT_image_pipeline.md](contexts/CONTEXT_image_pipeline.md) | Photo upload, EXIF stripping, Cloudinary |
-| [contexts/CONTEXT_leagues.md](contexts/CONTEXT_leagues.md) | League models, standings, captain portal, public `/leagues` |
+| [contexts/CONTEXT_leagues.md](contexts/CONTEXT_leagues.md) | League models, standings, captain portal, registration, payments, public `/leagues` |
 
 ## Build history
 
 | Document | Description |
 |----------|-------------|
 | [prompts/BUILD_PROMPTS.md](prompts/BUILD_PROMPTS.md) | Phased build prompts and acceptance criteria |
-| [prompts/LEAGUES_BUILD_PROMPTS.md](prompts/LEAGUES_BUILD_PROMPTS.md) | League module build prompts (L0–L7.1 shipped; L7.3 tests remain) |
+| [prompts/LEAGUES_BUILD_PROMPTS.md](prompts/LEAGUES_BUILD_PROMPTS.md) | League module build prompts (L0–L8 shipped; L7.3 tests remain) |
+| [prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md](prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md) | Registration, payments, captain lifecycle (L9–L12 shipped) |
 
 ## Other
 
@@ -51,8 +53,8 @@ These files give focused context when working on a specific area:
 
 **Events:** Three schedule types — specific date, multiple consecutive days, and weekly recurring. Empty calendar shows EvergreenPanel.
 
-**Admin:** Overview stats, photo moderation queue, event manager, announcement/Christmas/hours/media editors with live previews where applicable. Leagues dashboard at `/admin/leagues`.
+**Admin:** Overview stats, photo moderation queue, event manager, announcement/Christmas/hours/media editors with live previews where applicable. Leagues dashboard at `/admin/leagues`, people directory at `/admin/leagues/people`, registration queue at `/admin/leagues/registrations`.
 
-**Leagues (shipped):** Native multi-sport leagues (pool, darts, volleyball) — admin CRUD, round-robin/ladder/bracket schedules, captain dual-entry scoresheets, auto standings, CSV import (incl. CompuSport aliases + historical results), captain and player portals, establishment licensing. Server tests: `npm run test:server`. See [LEAGUES.md](LEAGUES.md) and [contexts/CONTEXT_leagues.md](contexts/CONTEXT_leagues.md).
+**Leagues (shipped):** Native multi-sport leagues (pool, darts, volleyball) — admin CRUD, round-robin/ladder/bracket schedules, captain dual-entry scoresheets, auto standings, CSV import (incl. CompuSport aliases + historical results), captain and player portals, establishment licensing. **L9–L12:** self-service registration at `/register`, Stripe entry fees, admin payment ledger, captain my-teams/roster/re-register, registration email templates (optional Resend). Server tests: `npm run test:server`. See [LEAGUES.md](LEAGUES.md) and [contexts/CONTEXT_leagues.md](contexts/CONTEXT_leagues.md).
 
 **Infrastructure:** MongoDB Atlas, Auth0, Cloudinary (pending/gallery/hero), Vercel, Railway.

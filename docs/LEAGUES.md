@@ -4,7 +4,7 @@
 **Sports:** Pool · Darts · Volleyball  
 **Stack:** Same MERN platform — Vite/React client, Express/TypeScript API, MongoDB, Auth0, deployed on Vercel/Railway  
 **Status:** **Shipped** (pool, darts, volleyball) — optional per-sport module via `config/establishment.json`  
-**Build history:** [prompts/LEAGUES_BUILD_PROMPTS.md](prompts/LEAGUES_BUILD_PROMPTS.md) (L0–L8.8 complete; L7.3 integration tests remain)  
+**Build history:** [prompts/LEAGUES_BUILD_PROMPTS.md](prompts/LEAGUES_BUILD_PROMPTS.md) (L0–L8 complete) · [prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md](prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md) (L9–L12 complete; L7.3 integration tests remain)  
 **Last updated:** June 2026
 
 ---
@@ -23,7 +23,11 @@ The league module is **in the repo and production-ready** for all three sports. 
 | CSV import | Teams, players, schedule, historical results; CompuSport alias mapping |
 | Pool polish | 8-ball team race (season league); 9-ball singles race-to (tournament) |
 | Licensing | `modules.leagues` in `establishment.json` enforced server-side (L7.1) |
-| Remaining | L7.3 automated standings/scoresheet tests; online registration (deferred) |
+| Admin people hub | `/admin/leagues/people` — search, login status, invite/resend (L9) |
+| Self-service registration | `/register` — team + player signup, waiver, waitlist (L10) |
+| Stripe entry fees | Checkout on submit; webhook; payment ledger, waive, refund (L11) |
+| Captain lifecycle | My teams, roster edits, returning-season re-register, approval queue, email templates (L12) |
+| Remaining | L7.3 automated standings/scoresheet tests; Stripe Connect for multi-venue payouts |
 
 For AI session context see [contexts/CONTEXT_leagues.md](contexts/CONTEXT_leagues.md). For schemas see [leagues/SCHEMAS.md](leagues/SCHEMAS.md).
 
@@ -52,9 +56,9 @@ Public touchpoints: `/leagues` list, homepage `LeaguesSection`, and `/leagues/:i
 | **Darts** | Team legs format | 501 singles knockout — `legsToWin: 2` |
 | **Volleyball** | Best-of-3 team season | *(tournament presets deferred)* |
 
-**Deferred post-L8:** online registration, entry fees, check-in desk, doubles pair entrant (`entrantType: 'pair'`).
+**Deferred post-L8:** check-in desk, doubles pair entrant (`entrantType: 'pair'`).
 
-**Planned (L9–L12):** See [prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md](prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md) — admin people hub, Auth0 self-service registration, Stripe entry fees, captain re-registration.
+**Shipped (L9–L12):** See [prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md](prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md) — people directory, Auth0 self-service registration, Stripe entry fees, captain my-teams/roster/re-register, cross-league approval queue, registration email (Resend optional).
 
 **@planned — Stripe Connect (multi-venue):** Today entry fees use a single platform Stripe account (`STRIPE_SECRET_KEY` on the API). For white-label deployments where each venue collects its own registration revenue, migrate to [Stripe Connect](https://stripe.com/connect) (Express or Standard accounts per establishment). Connect would replace direct `checkout.sessions.create` with destination charges or separate connected accounts; webhook handling and the admin payment ledger would stay the same shape. Document env split (`STRIPE_CONNECT_CLIENT_ID`, connected account id in `establishment.json`) when pitching multi-venue operators — not required for the first Barry O's deployment.
 
@@ -349,9 +353,11 @@ Mount in `server/src/index.ts` (implemented):
 
 ```
 /api/leagues              → public read (list, detail, standings, matches)
-/api/admin/leagues        → staff / league_admin CRUD, import, disputes
-/api/captain              → captain profile, matches, scoresheet submit
+/api/admin/leagues        → staff / league_admin CRUD, import, disputes, registrations, payments
+/api/register             → self-service team/player signup (Auth0 JWT)
+/api/captain              → captain profile, teams, roster, matches, scoresheet submit
 /api/player               → player activation, read-only league standings
+POST /api/webhooks/stripe → Stripe checkout completion → registration payment
 ```
 
 Sport-specific validation uses `getScoresheetValidator(sport)` inside shared routes — not separate `/api/leagues/pool` namespaces.
@@ -365,11 +371,24 @@ Public
 
 Admin (Auth0 — manager / league_admin / staff read)
   /admin/leagues                → overview, sports toggles, create league
-  /admin/leagues/:id            → divisions, teams, schedule, import, disputes
+  /admin/leagues/registrations  → cross-league approval queue (L12.4)
+  /admin/leagues/people         → players & captains directory (L9.1)
+  /admin/leagues/:id            → divisions, teams, registration settings, payments, import, disputes
+
+Public registration (Auth0 — same SPA as captain/player)
+  /register                     → open registrations list
+  /register/:leagueId           → league signup landing
+  /register/:leagueId/team      → team registration form
+  /register/:leagueId/player    → player registration form
+  /register/payment/success     → post-Stripe confirmation polling
+  /register/payment/cancel      → retry checkout
 
 Captain (Auth0 — captain role, team-scoped)
   /captain/login                → Auth0 login
   /captain                      → scoresheet inbox for upcoming matches
+  /captain/teams                → my teams hub (L12.1)
+  /captain/teams/:id/roster     → roster management when allowed (L12.2)
+  /captain/register/:target/:prior → returning-season re-register (L12.3)
 
 Player (Auth0 — player role, read-only)
   /player/login                 → Auth0 login
@@ -439,7 +458,7 @@ All Phase 1 steps shipped. See [prompts/LEAGUES_BUILD_PROMPTS.md](prompts/LEAGUE
 | 3 | **CompuSport CSV sample** — real export from a pilot bar? | Open — blocks final column mapping |
 | 4 | **Pricing tier** — per-sport flags in `establishment.json`? | Shipped via `modules.leagues` licensing |
 | 5 | **Multi-venue leagues** — defer `homeEstablishment`? | Deferred to Phase 4 |
-| 6 | **Online registration / entry fees** | Deferred — L10–L11 in [prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md](prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md) |
+| 6 | **Online registration / entry fees** | **Shipped (L10–L12)** — `/register`, Stripe Checkout, admin queue at `/admin/leagues/registrations` |
 
 ---
 
@@ -451,7 +470,7 @@ Ongoing maintenance:
 
 - [leagues/SCHEMAS.md](./leagues/SCHEMAS.md) — canonical TypeScript schema reference
 - [contexts/CONTEXT_leagues.md](./contexts/CONTEXT_leagues.md) — AI session context
-- [prompts/LEAGUES_BUILD_PROMPTS.md](./prompts/LEAGUES_BUILD_PROMPTS.md) — build history; L7.3 tests remain
+- [prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md](./prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md) — L9–L12 build history (registration, payments, captain lifecycle)
 
 ---
 

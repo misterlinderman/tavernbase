@@ -4,7 +4,7 @@
 
 **Parent plan:** [LEAGUES.md](../LEAGUES.md)  
 **Schema reference:** [leagues/SCHEMAS.md](../leagues/SCHEMAS.md)  
-**Build prompts:** [prompts/LEAGUES_BUILD_PROMPTS.md](../prompts/LEAGUES_BUILD_PROMPTS.md)  
+**Build prompts (L9–L12):** [prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md](../prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md)  
 **CSV migration:** [leagues/CSV_IMPORT.md](../leagues/CSV_IMPORT.md)
 
 ---
@@ -49,7 +49,30 @@ Same `League` model; staff choose **`kind`** and **`entrantType`** at create tim
 
 **Public components:** `LeaguesPage` / `LeaguesSection` show **Tournament** badge when `kind === 'tournament'`; `LeaguePublicPage` uses `BracketVisualization` for bracket draws.
 
-**Deferred post-L8:** online registration, entry fees, check-in desk, `entrantType: 'pair'`.
+### Shipped (L9–L12)
+
+| Area | Notes |
+|------|-------|
+| People directory (L9) | `/admin/leagues/people` — search, login status, invite/resend |
+| Registration (L10) | `Registration` model; `/register` team + player flows; waiver server-side |
+| Payments (L11) | Stripe Checkout; `Payment` model; webhook; ledger, waive, refund on league detail |
+| Captain lifecycle (L12) | `/captain/teams`, roster API, returning re-register, approval queue, email templates |
+
+### Registration & payments (L10–L12)
+
+| Concept | Behavior |
+|---------|----------|
+| Registration window | `League.registration.enabled` + `opensAt` / `closesAt` + `maxEntrants` |
+| Status flow | `pending_payment` → (Stripe) → `pending_approval` or `approved`; waitlist when full |
+| Team approve | Creates new `Team` in division — **never mutates** prior season team (`returningTeamId` links only) |
+| Player approve | Appends `submittedByPlayerId` to `Division.playerIds` |
+| Entry fee | `entryFeeCents` on league; block fee changes while `pending_payment` registrations exist |
+| Admin queue | `/admin/leagues/registrations` — filter pending approval / payment / waitlist; bulk approve/reject |
+| Returning teams | `registration.priorLeagueId` on new season → captains see re-register on `/captain/teams` |
+| Captain roster | Edits allowed in draft, open registration, or when `captainRosterEdits` enabled |
+| Email | `server/src/services/notifications/registrationEmail.ts` — received, approved, rejected, payment receipt; Resend optional ([SETUP.md](../../SETUP.md) §10) |
+
+**Deferred post-L8:** check-in desk, `entrantType: 'pair'`.
 
 ### Remaining / deferred
 
@@ -58,6 +81,7 @@ Same `League` model; staff choose **`kind`** and **`entrantType`** at create tim
 | APA/VNEA handicap math | Storage only — apply in standings v1.1 |
 | Bracket winner advancement | Schedule placeholders; auto-advance on final not yet built |
 | L7.3 integration tests | Standings + scoresheet automated tests — `npm run test:server` |
+| Stripe Connect | Multi-venue payout routing — platform Checkout today |
 
 ---
 
@@ -81,14 +105,19 @@ Same `League` model; staff choose **`kind`** and **`entrantType`** at create tim
 server/src/
 ├── models/leagues/
 │   ├── League.ts, Division.ts, Team.ts, Player.ts
+│   ├── Registration.ts, Payment.ts
 │   ├── Match.ts              # PoolMatch discriminator only
 │   ├── Scoresheet.ts, StandingsSnapshot.ts
 ├── constants/leagues.ts
 ├── routes/leagues/
-│   ├── admin.ts              # CRUD, schedule, import, disputes
-│   ├── captain.ts            # Profile, matches, submit
-│   └── public.ts             # List, detail, standings, matches
+│   ├── admin.ts              # CRUD, schedule, import, disputes, registrations, payments
+│   ├── register.ts           # Self-service signup (Auth0 JWT)
+│   ├── captain.ts            # Profile, teams, roster, matches, submit
+│   ├── public.ts             # List, detail, standings, matches, registration info
+│   └── people.ts             # Admin people directory
 ├── services/leagues/
+│   ├── registration.ts, registrationActions.ts, teamRegistration.ts, playerRegistration.ts
+│   ├── returningTeamRegistration.ts, captainRoster.ts, captainProfile.ts
 │   ├── scoresheet.ts         # Workflow orchestration
 │   ├── scoresheets/          # Sport validators (pool; darts/volleyball L3/L4)
 │   ├── standings/
@@ -97,15 +126,20 @@ server/src/
 │   │   └── index.ts          # getEngineForSport, recompute
 │   ├── schedule/roundRobin.ts
 │   └── import/csvImport.ts
-├── middleware/requireCaptain.ts
+├── services/notifications/
+│   └── registrationEmail.ts  # L12.5 templates + optional Resend
+├── services/payments/
+│   ├── stripeCheckout.ts, stripeWebhook.ts, adminPayments.ts
+├── middleware/requireCaptain.ts, requireEmailVerified.ts
 └── scripts/seedCaptain.ts
 
 client/src/
-├── pages/admin/AdminLeaguesPage.tsx, LeagueDetailPage.tsx
-├── pages/captain/CaptainPage.tsx, CaptainLoginPage.tsx
+├── pages/admin/AdminLeaguesPage.tsx, LeagueDetailPage.tsx, LeaguePeoplePage.tsx, RegistrationQueuePage.tsx
+├── pages/captain/CaptainPage.tsx, CaptainTeamsPage.tsx, CaptainRosterPage.tsx, CaptainReturningRegisterPage.tsx
+├── pages/public/RegisterPage.tsx, RegisterLeaguePage.tsx, RegisterTeamPage.tsx, RegisterPlayerPage.tsx
 ├── pages/public/LeaguesPage.tsx, LeaguePublicPage.tsx
 ├── components/public/BracketVisualization/, BracketEmptyPanel/, LeaguesSection/
-├── services/leagues.ts, captain.ts, leaguesPublic.ts
+├── services/leagues.ts, register.ts, captain.ts, leaguesPublic.ts
 ├── types/leagues.ts, captain.ts
 └── constants/leagues.ts
 ```
@@ -118,16 +152,35 @@ client/src/
 
 ```
 GET  /api/leagues                    → active/completed leagues (sport-gated)
+GET  /api/leagues/registration-open  → leagues accepting sign-ups
 GET  /api/leagues/:id                → league detail
+GET  /api/leagues/:id/registration   → public registration info (fee, window, spots)
 GET  /api/leagues/:id/standings      → standings by division
 GET  /api/leagues/:id/matches        → schedule + results
 ```
 
-### Admin — `checkJwt` (manager/staff)
+### Register — Auth0 JWT
+
+```
+POST /api/register/team/:leagueId
+POST /api/register/player/:leagueId
+GET  /api/register/team/:leagueId/returning/preview?priorTeamId=
+POST /api/register/team/:leagueId/returning
+GET  /api/register/registrations/:id
+POST /api/register/registrations/:id/checkout
+```
+
+### Admin — `checkJwt` (manager/staff/league_admin)
 
 ```
 GET/POST        /api/admin/leagues
+GET             /api/admin/leagues/registrations          → cross-league queue
+POST            /api/admin/leagues/registrations/:id/approve|reject|promote
 GET/PATCH/DELETE /api/admin/leagues/:leagueId
+GET             /api/admin/leagues/:leagueId/registrations
+GET             /api/admin/leagues/:leagueId/payments
+POST            /api/admin/leagues/:leagueId/registrations/:id/waive-fee|refund
+GET             /api/admin/leagues/people
 POST            /api/admin/leagues/:leagueId/divisions
 PATCH/DELETE    /api/admin/leagues/:leagueId/divisions/:divisionId
 POST            /api/admin/leagues/:leagueId/teams
@@ -144,10 +197,13 @@ POST            /api/admin/leagues/:leagueId/import
 ### Captain — `checkJwt` + `requireCaptain`
 
 ```
-POST  /api/captain/activate
-GET   /api/captain/profile
-GET   /api/captain/matches
-POST  /api/captain/matches/:matchId/scoresheet
+POST   /api/captain/activate
+GET    /api/captain/me                    → teams, pastTeams, returningSeasonOptions
+GET    /api/captain/teams/:teamId/roster
+POST   /api/captain/teams/:teamId/roster
+DELETE /api/captain/teams/:teamId/roster/:playerId
+GET    /api/captain/matches
+POST   /api/captain/matches/:matchId/scoresheet
 ```
 
 ### Player — `checkJwt` + `requirePlayer`

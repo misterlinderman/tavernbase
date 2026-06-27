@@ -1,5 +1,7 @@
 # League Module — AI Session Context
 
+> **Canonical copy:** [`docs/contexts/CONTEXT_leagues.md`](../docs/contexts/CONTEXT_leagues.md) — including L9–L12 (registration, payments, captain lifecycle). Prefer that file; this copy may lag.
+
 **Use when:** Building or editing league models, routes, standings engines, captain portal, public `/leagues` pages, or admin league management.
 
 **Parent plan:** [LEAGUES.md](../docs/LEAGUES.md)  

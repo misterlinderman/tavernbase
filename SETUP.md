@@ -159,7 +159,34 @@ npm run dev:server   # port 3001
 
 ---
 
-## 9. League registration email (optional)
+## 9. League registration payments (optional)
+
+Paid league sign-ups use **Stripe Checkout** (test mode for local dev). See [SETUP_AUTH0.md](docs/SETUP_AUTH0.md) for Auth0 registration flows.
+
+1. Create a [Stripe](https://stripe.com) account and enable test mode
+2. Add to `server/.env`:
+
+```env
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_SUCCESS_URL=http://localhost:5173/register/payment/success?session_id={CHECKOUT_SESSION_ID}
+STRIPE_CANCEL_URL=http://localhost:5173/register
+CLIENT_URL=http://localhost:5173
+```
+
+3. Forward webhooks locally:
+
+```bash
+stripe listen --forward-to localhost:3001/api/webhooks/stripe
+```
+
+4. On league detail → **Registration settings**, set entry fee and open the window. Submit at `/register/:leagueId/team` redirects to Stripe when fee > 0.
+
+Admin **payment ledger**, **waive fee**, and **refund** are on league detail. Cross-league approval queue: `/admin/leagues/registrations`.
+
+---
+
+## 10. League registration email (optional)
 
 Registration notifications use a **two-phase** approach:
 
