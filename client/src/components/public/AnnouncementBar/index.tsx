@@ -11,7 +11,7 @@ export interface AnnouncementBarProps {
 function linkTargetToHash(linkTarget: string): string {
   const anchors: Record<string, string> = {
     Events: 'events',
-    'Christmas Party': 'christmas',
+    Featured: 'featured',
     Menu: 'contact',
     Contact: 'contact',
   };

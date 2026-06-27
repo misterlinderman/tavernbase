@@ -1,7 +1,11 @@
 import { Router, Response } from 'express';
 import { Event, SiteSettings, Submission } from '../models';
 import type { ISiteSettings } from '../models/SiteSettings';
-import { intersectSportsWithLicense } from '../config/establishment';
+import {
+  getEstablishmentName,
+  getPhotoConsentText,
+  intersectSportsWithLicense,
+} from '../config/establishment';
 import { asyncHandler, createError } from '../middleware/errorHandler';
 import {
   filterActiveEventsForDisplay,
@@ -15,23 +19,26 @@ function toPublicSiteSettings(doc: ISiteSettings) {
   const hours = [...doc.hours].sort((a, b) => a.order - b.order);
 
   return {
+    venueName: getEstablishmentName(),
+    photoConsentText: getPhotoConsentText(),
     announcement: {
       enabled: doc.announcement.enabled,
       message: doc.announcement.message,
       linkTarget: doc.announcement.linkTarget,
     },
-    christmasParty: {
-      enabled: doc.christmasParty.enabled,
-      title: doc.christmasParty.title,
-      date: doc.christmasParty.date,
-      note: doc.christmasParty.note,
-      ticketUrl: doc.christmasParty.ticketUrl,
+    featuredBanner: {
+      enabled: doc.featuredBanner.enabled,
+      title: doc.featuredBanner.title,
+      subtitle: doc.featuredBanner.subtitle,
+      note: doc.featuredBanner.note,
+      buttonLabel: doc.featuredBanner.buttonLabel,
+      buttonUrl: doc.featuredBanner.buttonUrl,
     },
     hero: {
       videoUrl: doc.hero?.videoUrl,
       posterUrl: doc.hero?.posterUrl,
       headline: doc.hero?.headline ?? 'A Neighborhood Tradition',
-      subheadline: doc.hero?.subheadline ?? 'Old Market Tavern',
+      subheadline: doc.hero?.subheadline ?? 'Your Local Tavern',
     },
     hours: hours.map(({ label, value, order }) => ({ label, value, order })),
     contact: {

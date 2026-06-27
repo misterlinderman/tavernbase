@@ -652,6 +652,8 @@ Acceptance criteria:
 
 ### Prompt L7.3 — Standings / scoresheet integration tests
 
+**Status:** **Shipped** — mocked Vitest suite in `server/src/__tests__/leagues/` (no MongoDB required).
+
 ```
 Add automated tests for critical league math and workflow.
 

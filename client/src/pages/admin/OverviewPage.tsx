@@ -5,14 +5,6 @@ import type { OverviewStats, PendingSubmission } from '../../types';
 import formStyles from '../../components/admin/shared/adminForm.module.css';
 import styles from './OverviewPage.module.css';
 
-function formatChristmasLabel(christmas: OverviewStats['christmas']): string {
-  if (!christmas.enabled) return 'Off';
-  if (christmas.daysUntil === null) return 'On';
-  if (christmas.daysUntil === 0) return 'Today';
-  if (christmas.daysUntil < 0) return 'Past';
-  return `${christmas.daysUntil} days`;
-}
-
 function OverviewSkeleton() {
   return (
     <div aria-busy="true">
@@ -92,9 +84,9 @@ function OverviewPage() {
           <span className={styles.statLabel}>Announcement bar</span>
         </Link>
 
-        <Link to="/admin/christmas" className={styles.statCard}>
-          <span className={styles.statValue}>{formatChristmasLabel(stats.christmas)}</span>
-          <span className={styles.statLabel}>Christmas CTA</span>
+        <Link to="/admin/featured-banner" className={styles.statCard}>
+          <span className={styles.statValue}>{stats.featuredBanner.enabled ? 'On' : 'Off'}</span>
+          <span className={styles.statLabel}>Featured banner</span>
         </Link>
       </div>
 
@@ -144,8 +136,8 @@ function OverviewPage() {
             <strong>{stats.upcomingEvents}</strong>
           </li>
           <li>
-            <span>Christmas party CTA</span>
-            <strong>{stats.christmas.enabled ? formatChristmasLabel(stats.christmas) : 'Hidden'}</strong>
+            <span>Featured banner</span>
+            <strong>{stats.featuredBanner.enabled ? 'Showing on site' : 'Hidden'}</strong>
           </li>
         </ul>
       </section>

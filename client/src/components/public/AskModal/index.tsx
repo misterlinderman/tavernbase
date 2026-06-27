@@ -81,7 +81,7 @@ function AskModal({ isOpen, onClose, contact }: AskModalProps) {
 
         <p className={styles.kicker}>You found it</p>
         <h2 id={titleId} className={styles.title}>
-          Ask Barry
+          Ask Us
         </h2>
         <p className={styles.lead}>
           Got a question about hours, events, or booking the bar? Give us a ring or swing by —

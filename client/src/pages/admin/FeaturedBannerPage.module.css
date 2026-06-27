@@ -1,0 +1,41 @@
+.intro {
+  margin: -0.5rem 0 1.5rem;
+  font-family: 'Barlow', sans-serif;
+  color: var(--muted);
+  max-width: 42rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.loading,
+.hiddenNote {
+  font-family: 'Barlow', sans-serif;
+  color: var(--muted);
+}
+
+.previewFrame {
+  border: var(--border-container) solid var(--line);
+  background: var(--bg);
+  padding: 1rem 0;
+}
+
+.previewFrame :global(#featured) {
+  padding-bottom: 0;
+}
+
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

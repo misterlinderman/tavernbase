@@ -25,8 +25,6 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 const allowedOrigins = [
-  'https://barryostavern.com',
-  'https://www.barryostavern.com',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
 ];

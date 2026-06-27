@@ -8,6 +8,9 @@ export type LicensedLeagueSports = Record<Sport, boolean>;
 export interface EstablishmentConfig {
   slug?: string;
   name?: string;
+  consent?: {
+    photoSubmissionText?: string;
+  };
   modules?: {
     leagues?: Partial<LicensedLeagueSports>;
   };
@@ -117,4 +120,21 @@ export function getEstablishmentSlug(): string {
 export function getEstablishmentConfigPath(): string | null {
   loadEstablishmentConfig();
   return configPath;
+}
+
+export function getEstablishmentName(): string {
+  const name = loadEstablishmentConfig().name?.trim();
+  return name || 'Your Tavern';
+}
+
+export function getPhotoConsentText(): string {
+  const config = loadEstablishmentConfig();
+  const venueName = getEstablishmentName();
+  const template = config.consent?.photoSubmissionText?.trim();
+
+  if (template) {
+    return template.replace(/\{venueName\}/g, venueName);
+  }
+
+  return `I took this photo (or have permission to share it), everyone pictured is okay with it being posted, and I give ${venueName} permission to use it on their website and social media.`;
 }

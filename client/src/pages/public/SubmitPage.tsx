@@ -3,16 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import Footer from '../../components/public/Footer';
 import Nav from '../../components/public/Nav';
 import { useSiteSettings } from '../../hooks/useSiteSettings';
-import {
-  CONSENT_TEXT,
-  MAX_UPLOAD_BYTES,
-  postSubmission,
-} from '../../services/submissions';
+import { MAX_UPLOAD_BYTES, postSubmission } from '../../services/submissions';
 import homeStyles from './HomePage.module.css';
 import styles from './SubmitPage.module.css';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const CAPTION_MAX = 280;
+const DEFAULT_CONSENT_TEXT =
+  'I took this photo (or have permission to share it), everyone pictured is okay with it being posted, and I give this venue permission to use it on their website and social media.';
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) {
@@ -38,6 +36,8 @@ function SubmitPage() {
   const navigate = useNavigate();
   const { settings, loading } = useSiteSettings();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const venueName = settings?.venueName ?? 'Your Tavern';
+  const consentText = settings?.photoConsentText ?? DEFAULT_CONSENT_TEXT;
 
   const nameId = useId();
   const captionId = useId();
@@ -141,7 +141,7 @@ function SubmitPage() {
       <main id="main" className={`section ${styles.main}`}>
         <div className="wrap">
           <header className={styles.header}>
-            <h1 className={styles.title}>Share a photo of Barry O&apos;s</h1>
+            <h1 className={styles.title}>Share a photo of {venueName}</h1>
             <p className={styles.subtitle}>
               Got a great shot from the bar? Send it our way and a staff member will review it before
               anything goes live.
@@ -263,7 +263,7 @@ function SubmitPage() {
                 onChange={(event) => setConsent(event.target.checked)}
               />
               <label className={styles.consentLabel} htmlFor={consentId}>
-                {CONSENT_TEXT}
+                {consentText}
               </label>
             </div>
 

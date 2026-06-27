@@ -4,14 +4,15 @@ export interface ISiteSettings extends Document {
   announcement: {
     enabled: boolean;
     message: string;
-    linkTarget: 'Events' | 'Christmas Party' | 'Menu' | 'Contact';
+    linkTarget: 'Events' | 'Featured' | 'Menu' | 'Contact';
   };
-  christmasParty: {
+  featuredBanner: {
     enabled: boolean;
     title: string;
-    date?: Date;
+    subtitle: string;
     note: string;
-    ticketUrl: string;
+    buttonLabel: string;
+    buttonUrl: string;
   };
   hero: {
     videoUrl?: string;
@@ -38,22 +39,23 @@ const SiteSettingsSchema = new Schema<ISiteSettings>(
       message: { type: String, default: '' },
       linkTarget: {
         type: String,
-        enum: ['Events', 'Christmas Party', 'Menu', 'Contact'],
+        enum: ['Events', 'Featured', 'Menu', 'Contact'],
         default: 'Events',
       },
     },
-    christmasParty: {
+    featuredBanner: {
       enabled: { type: Boolean, default: false },
-      title: { type: String, default: 'Annual Christmas Party' },
-      date: { type: Date },
-      note: { type: String, default: '' },
-      ticketUrl: { type: String, default: '' },
+      title: { type: String, default: 'Featured Event' },
+      subtitle: { type: String, default: '', maxlength: 120 },
+      note: { type: String, default: '', maxlength: 400 },
+      buttonLabel: { type: String, default: 'Learn More', maxlength: 40 },
+      buttonUrl: { type: String, default: '' },
     },
     hero: {
       videoUrl: String,
       posterUrl: String,
       headline: { type: String, default: 'A Neighborhood Tradition', maxlength: 120 },
-      subheadline: { type: String, default: 'Old Market Tavern', maxlength: 80 },
+      subheadline: { type: String, default: 'Your Local Tavern', maxlength: 80 },
     },
     hours: [{ label: String, value: String, order: Number }],
     contact: { address: String, phone: String },

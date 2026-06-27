@@ -2,7 +2,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(7, 10, 7, 0.92);
+  background: rgba(15, 24, 20, 0.92);
   backdrop-filter: blur(10px);
   border-bottom: var(--border-container) solid var(--line);
 }

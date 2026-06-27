@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import AdminLayout from './components/admin/AdminLayout';
 import { ToastProvider } from './components/admin/shared/Toast';
@@ -7,14 +7,13 @@ import { useApiAuth } from './hooks/useApiAuth';
 import HomePage from './pages/public/HomePage';
 import SubmitPage from './pages/public/SubmitPage';
 import ThankYouPage from './pages/public/ThankYouPage';
-import ChristmasTicketsPage from './pages/public/ChristmasTicketsPage';
 import CalendarPage from './pages/public/CalendarPage';
 import LoginPage from './pages/admin/LoginPage';
 import OverviewPage from './pages/admin/OverviewPage';
 import SubmissionsPage from './pages/admin/SubmissionsPage';
 import EventsPage from './pages/admin/EventsPage';
 import AnnouncementPage from './pages/admin/AnnouncementPage';
-import ChristmasPage from './pages/admin/ChristmasPage';
+import FeaturedBannerPage from './pages/admin/FeaturedBannerPage';
 import HoursPage from './pages/admin/HoursPage';
 import MediaPage from './pages/admin/MediaPage';
 import AdminLeaguesPage from './pages/admin/LeaguesPage';
@@ -59,7 +58,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/submit" element={<SubmitPage />} />
           <Route path="/thank-you" element={<ThankYouPage />} />
-          <Route path="/christmas-party" element={<ChristmasTicketsPage />} />
+          <Route path="/christmas-party" element={<Navigate to="/" replace />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/leagues" element={<LeaguesPage />} />
           <Route path="/leagues/:leagueId" element={<LeaguePublicPage />} />
@@ -90,7 +89,8 @@ function App() {
             <Route path="submissions" element={<SubmissionsPage />} />
             <Route path="events" element={<EventsPage />} />
             <Route path="announcement" element={<AnnouncementPage />} />
-            <Route path="christmas" element={<ChristmasPage />} />
+            <Route path="featured-banner" element={<FeaturedBannerPage />} />
+            <Route path="christmas" element={<Navigate to="/admin/featured-banner" replace />} />
             <Route path="hours" element={<HoursPage />} />
             <Route path="media" element={<MediaPage />} />
             <Route path="leagues" element={<AdminLeaguesPage />} />

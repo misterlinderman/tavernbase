@@ -4,7 +4,7 @@
 **Sports:** Pool · Darts · Volleyball  
 **Stack:** Same MERN platform — Vite/React client, Express/TypeScript API, MongoDB, Auth0, deployed on Vercel/Railway  
 **Status:** **Shipped** (pool, darts, volleyball) — optional per-sport module via `config/establishment.json`  
-**Build history:** [prompts/LEAGUES_BUILD_PROMPTS.md](prompts/LEAGUES_BUILD_PROMPTS.md) (L0–L8 complete) · [prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md](prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md) (L9–L12 complete; L7.3 integration tests remain)  
+**Build history:** [prompts/LEAGUES_BUILD_PROMPTS.md](prompts/LEAGUES_BUILD_PROMPTS.md) (L0–L8 complete, L7.3 tests shipped) · [prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md](prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md) (L9–L12 complete)  
 **Last updated:** June 2026
 
 ---
@@ -27,7 +27,7 @@ The league module is **in the repo and production-ready** for all three sports. 
 | Self-service registration | `/register` — team + player signup, waiver, waitlist (L10) |
 | Stripe entry fees | Checkout on submit; webhook; payment ledger, waive, refund (L11) |
 | Captain lifecycle | My teams, roster edits, returning-season re-register, approval queue, email templates (L12) |
-| Remaining | L7.3 automated standings/scoresheet tests; Stripe Connect for multi-venue payouts |
+| Remaining | Stripe Connect for multi-venue payouts; bracket auto-advance; APA/VNEA handicap math |
 
 For AI session context see [contexts/CONTEXT_leagues.md](contexts/CONTEXT_leagues.md). For schemas see [leagues/SCHEMAS.md](leagues/SCHEMAS.md).
 
@@ -445,7 +445,7 @@ All Phase 1 steps shipped. See [prompts/LEAGUES_BUILD_PROMPTS.md](prompts/LEAGUE
 
 **Also shipped (L2–L7):** Darts and volleyball modules, cross-sport dashboard, captain/player portals, homepage preview, ladder/bracket schedules, CompuSport CSV aliases, historical results import, establishment licensing enforcement.
 
-**Deferred:** APA/VNEA handicap math in standings (storage only today); L7.3 integration tests.
+**Deferred:** APA/VNEA handicap math in standings (storage only today); bracket winner auto-advance.
 
 ---
 
@@ -479,7 +479,7 @@ Ongoing maintenance:
 | Document | Purpose |
 |----------|---------|
 | [LEAGUES.md](./LEAGUES.md) | Product plan and phased rollout |
-| [prompts/LEAGUES_BUILD_PROMPTS.md](./prompts/LEAGUES_BUILD_PROMPTS.md) | Build history (L0–L8.8 shipped; L7.3 tests remain) |
+| [prompts/LEAGUES_BUILD_PROMPTS.md](./prompts/LEAGUES_BUILD_PROMPTS.md) | Build history (L0–L8.8 + L7.3 shipped) |
 | [leagues/SCHEMAS.md](./leagues/SCHEMAS.md) | TypeScript schema reference |
 | [architecture/ARCHITECTURE.md](./architecture/ARCHITECTURE.md) | Current system design |
 | [SETUP_AUTH0.md](./SETUP_AUTH0.md) | Auth0 setup — extend for captain/league_admin roles |

@@ -1,7 +1,5 @@
 import { API_BASE_URL } from '../config/api';
 
-export const CONSENT_TEXT = `I took this photo (or have permission to share it), everyone pictured is okay with it being posted, and I give Barry O's permission to use it on their website and social media.`;
-
 export const MAX_UPLOAD_BYTES = 8_000_000;
 
 export async function postSubmission(formData: FormData): Promise<void> {

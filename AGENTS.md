@@ -8,7 +8,7 @@ Use this file for fast orientation when editing this repository in an AI-assiste
 
 Each venue gets:
 
-- **Public site** — marketing pages (read-mostly): home, event calendar, photo submit, Christmas tickets, leagues
+- **Public site** — marketing pages (read-mostly): home, event calendar, photo submit, featured banner, leagues
 - **Staff dashboard** — Auth0-gated SPA for all content management
 - **Captain portal** — Auth0-gated scoresheet workflow for team captains
 - **Player portal** — Auth0-gated read-only standings for rostered players
@@ -50,7 +50,6 @@ Repository layout: **`client/` and `server/` at the repo root** (no wrapper fold
 /register/payment/cancel  → RegisterPaymentCancelPage (retry checkout)
 /submit              → SubmitPage
 /thank-you           → ThankYouPage
-/christmas-party     → ChristmasTicketsPage
 /captain/login       → CaptainLoginPage
 /captain             → CaptainPage (scoresheets)
 /captain/teams       → CaptainTeamsPage (my teams hub)
@@ -68,7 +67,7 @@ Repository layout: **`client/` and `server/` at the repo root** (no wrapper fold
 /admin/leagues/people → LeaguePeoplePage (players & captains directory)
 /admin/leagues/:id   → LeagueDetailPage (registration settings, payments, per-league queue)
 /admin/announcement  → AnnouncementPage
-/admin/christmas     → ChristmasPage
+/admin/featured-banner → FeaturedBannerPage
 /admin/hours         → HoursPage
 /admin/media         → MediaPage
 ```
@@ -182,13 +181,13 @@ Deep context: [docs/contexts/CONTEXT_leagues.md](docs/contexts/CONTEXT_leagues.m
 ### Photo submissions
 
 - `POST /api/submissions` — multipart, rate-limited, consent required server-side
-- EXIF stripped via `sharp` before Cloudinary upload to `barryos/pending/`
-- Approval moves asset to `barryos/gallery/`; only `status: 'approved'` appears in public gallery
+- EXIF stripped via `sharp` before Cloudinary upload to venue pending folder
+- Approval moves asset to venue gallery folder; only `status: 'approved'` appears in public gallery
 - **Never auto-publish**
 
 ### Site settings (singleton)
 
-Announcement bar, Christmas CTA, hero video, hours, contact, Instagram, sports enabled — all toggled via `SiteSettings` in MongoDB. Disabled components render `null` on the public site.
+Announcement bar, featured banner, hero video, hours, contact, Instagram, sports enabled — all toggled via `SiteSettings` in MongoDB. Disabled components render `null` on the public site.
 
 ## Where to look
 

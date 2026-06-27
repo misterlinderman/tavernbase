@@ -9,7 +9,7 @@ import styles from './AnnouncementPage.module.css';
 
 const LINK_TARGETS: SiteSettings['announcement']['linkTarget'][] = [
   'Events',
-  'Christmas Party',
+  'Featured',
   'Menu',
   'Contact',
 ];

@@ -46,3 +46,6 @@ coverage/
 *.local
 .cache/
 .temp/
+
+# Local audit / smoke-test packs (not canonical repo docs)
+project_audit/

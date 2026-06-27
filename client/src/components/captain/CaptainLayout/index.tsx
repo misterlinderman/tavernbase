@@ -56,7 +56,7 @@ function CaptainLayout() {
         <div>
           <img
             src={BRAND_ASSETS.headerLogo}
-            alt="Barry O's Old Market Tavern"
+            alt="Your Tavern"
             width={180}
             height={56}
           />

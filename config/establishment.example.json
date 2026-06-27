@@ -25,8 +25,9 @@
     "photoSubmissionText": "I took this photo (or have permission to share it), everyone pictured is okay with it being posted, and I give {venueName} permission to use it on their website and social media."
   },
   "theme": {
-    "primaryGreen": "#2d5016",
-    "accentGold": "#c9a227"
+    "primaryGreen": "#1e382b",
+    "accentGold": "#dba135",
+    "light": "#f5e3ca"
   },
   "modules": {
     "leagues": {

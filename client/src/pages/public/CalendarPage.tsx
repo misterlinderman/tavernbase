@@ -42,7 +42,8 @@ function CalendarPage() {
             </Link>
             <h1 className={styles.title}>Event Calendar</h1>
             <p className={styles.subtitle}>
-              Watch parties, shuttles, live music, and everything else coming up at Barry O&apos;s.
+              Watch parties, shuttles, live music, and everything else coming up at{' '}
+              {settings?.venueName ?? 'the tavern'}.
             </p>
           </header>
 

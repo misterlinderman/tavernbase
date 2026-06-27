@@ -4,11 +4,10 @@ import { asyncHandler, createError } from '../middleware/errorHandler';
 import { uploadMiddleware } from '../middleware/upload';
 import { submissionRateLimit } from '../middleware/rateLimit';
 import { processAndUpload } from '../services/imagePipeline';
+import { getPhotoConsentText } from '../config/establishment';
 import { Submission } from '../models';
 
 const router = Router();
-
-const CONSENT_TEXT = `I took this photo (or have permission to share it), everyone pictured is okay with it being posted, and I give Barry O's permission to use it on their website and social media.`;
 
 function hashIp(ip: string): string {
   return crypto.createHash('sha256').update(ip).digest('hex').slice(0, 16);
@@ -62,7 +61,7 @@ router.post(
       cloudinaryFolder: 'pending',
       status: 'pending',
       consent: true,
-      consentText: CONSENT_TEXT,
+      consentText: getPhotoConsentText(),
       exifStripped: true,
       submitterIpHash: hashIp(req.ip || ''),
     });

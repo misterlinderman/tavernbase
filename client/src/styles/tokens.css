@@ -1,20 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700&family=Kaushan+Script&family=Oswald:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg: #070a07;
-  --side: #0a0e0a;
-  --panel: #0f140f;
-  --panel-2: #131913;
-  --green: #1f9c4d;
-  --green-bright: #27b85c;
-  --green-deep: #0f5c2e;
-  --gold: #c9a44c;
-  --amber: #e0a93c;
+  --green: #1e382b;
+  --green-bright: #2a5240;
+  --green-deep: #152a21;
+  --gold: #dba135;
+  --amber: #e5b04a;
+  --light: #f5e3ca;
   --red: #e25555;
-  --text: #f1f4f0;
-  --muted: #8b988d;
-  --line: rgba(255, 255, 255, 0.08);
-  --green-line: rgba(39, 184, 92, 0.3);
+  --bg: #0f1814;
+  --side: #141f1a;
+  --panel: #182822;
+  --panel-2: #1e382b;
+  --text: #f5e3ca;
+  --muted: rgba(245, 227, 202, 0.62);
+  --line: rgba(245, 227, 202, 0.08);
+  --green-line: rgba(219, 161, 53, 0.35);
   --radius-card: 0;
   --radius-panel: 0;
   --radius-button: 0;

@@ -31,6 +31,7 @@
 | CSV import | Teams, players, schedule, historical results; CompuSport aliases |
 | Pool polish | 8-ball team race (season league); 9-ball singles race-to (tournament) |
 | Roles | `league_admin`, `captain`, `player` enforced on routes |
+| Automated tests (L7.3) | `server/src/__tests__/leagues/` — standings, scoresheet, round-robin, registration approval; `npm run test` |
 
 ### Season league vs tournament (L8)
 
@@ -80,7 +81,6 @@ Same `League` model; staff choose **`kind`** and **`entrantType`** at create tim
 |------|-------|
 | APA/VNEA handicap math | Storage only — apply in standings v1.1 |
 | Bracket winner advancement | Schedule placeholders; auto-advance on final not yet built |
-| L7.3 integration tests | Standings + scoresheet automated tests — `npm run test:server` |
 | Stripe Connect | Multi-venue payout routing — platform Checkout today |
 
 ---

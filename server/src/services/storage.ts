@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 import { cloudinary } from '../config/cloudinary';
 
-const HERO_FOLDER = 'barryos/hero';
+const HERO_FOLDER = process.env.CLOUDINARY_HERO_FOLDER || 'tavern/hero';
 
 function bufferToStream(buffer: Buffer): Readable {
   const stream = new Readable();

@@ -11,7 +11,7 @@ Guides for developers, deployers, and AI-assisted sessions.
 | [LEAGUES.md](LEAGUES.md) | Multi-sport league module — product plan, data model, phased rollout |
 | [leagues/SCHEMAS.md](leagues/SCHEMAS.md) | League Mongoose schemas — TypeScript interfaces for review |
 | [leagues/CSV_IMPORT.md](leagues/CSV_IMPORT.md) | CSV migration format for CompuSport / spreadsheets |
-| [prompts/LEAGUES_BUILD_PROMPTS.md](prompts/LEAGUES_BUILD_PROMPTS.md) | Phased league build prompts (L0–L8 shipped; L7.3 tests remain) |
+| [prompts/LEAGUES_BUILD_PROMPTS.md](prompts/LEAGUES_BUILD_PROMPTS.md) | Phased league build prompts (L0–L8 + L7.3 shipped) |
 | [prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md](prompts/LEAGUES_BUILD_PROMPTS_L9_L12.md) | Registration, payments, captain lifecycle (L9–L12 shipped) |
 | [../SETUP.md](../SETUP.md) | Local development setup |
 | [architecture/ARCHITECTURE.md](architecture/ARCHITECTURE.md) | System design, routing, middleware, data flows |

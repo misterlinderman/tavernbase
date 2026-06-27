@@ -1,5 +1,5 @@
 import AnnouncementBar from '../../components/public/AnnouncementBar';
-import ChristmasCTA from '../../components/public/ChristmasCTA';
+import FeaturedBanner from '../../components/public/FeaturedBanner';
 import EventsSection from '../../components/public/EventsSection';
 import LeaguesSection from '../../components/public/LeaguesSection';
 import Footer from '../../components/public/Footer';
@@ -23,13 +23,14 @@ function HomePageSkeleton() {
           </div>
         </div>
       </main>
-      <p className="sr-only">Loading Barry O&apos;s…</p>
+      <p className="sr-only">Loading site…</p>
     </>
   );
 }
 
 function HomePage() {
   const { settings, loading, error, refetch } = useSiteSettings();
+  const venueName = settings?.venueName ?? 'Your Tavern';
 
   if (loading) {
     return <HomePageSkeleton />;
@@ -41,10 +42,10 @@ function HomePage() {
         <Nav />
         <main id="main" className={styles.errorMain}>
           <div className={styles.errorPanel} role="alert">
-            <h1 className={styles.errorTitle}>Barry O&apos;s Old Market Tavern</h1>
+            <h1 className={styles.errorTitle}>{venueName}</h1>
             <p className={styles.errorText}>
-              We couldn&apos;t load the latest site info right now, but the bar is still open.
-              Check back in a moment or give us a call.
+              We couldn&apos;t load the latest site info right now. Check back in a moment or give
+              us a call.
             </p>
             {error ? (
               <button type="button" className="btn btn-green" onClick={() => refetch()}>
@@ -54,7 +55,9 @@ function HomePage() {
           </div>
         </main>
         <footer className={styles.minimalFooter}>
-          <p>&copy; {new Date().getFullYear()} Barry O&apos;s Old Market Tavern · Royal Oak, MI</p>
+          <p>
+            &copy; {new Date().getFullYear()} {venueName}
+          </p>
         </footer>
       </>
     );
@@ -69,11 +72,12 @@ function HomePage() {
           posterUrl={settings.hero?.posterUrl}
           headline={settings.hero.headline}
           subheadline={settings.hero.subheadline}
+          venueName={settings.venueName}
         />
         <AnnouncementBar {...settings.announcement} />
         <EventsSection />
         <LeaguesSection />
-        <ChristmasCTA christmasParty={settings.christmasParty} />
+        <FeaturedBanner featuredBanner={settings.featuredBanner} />
         <Gallery
           instagramHandle={settings.instagram?.handle}
           enabled={settings.instagram?.showApprovedInGallery !== false}

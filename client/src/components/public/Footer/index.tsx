@@ -27,6 +27,7 @@ function PhoneIcon() {
 function Footer({ settings }: FooterProps) {
   const sortedHours = [...settings.hours].sort((a, b) => a.order - b.order);
   const phoneHref = settings.contact.phone.replace(/[^\d+]/g, '');
+  const venueName = settings.venueName || 'Your Tavern';
 
   return (
     <footer id="contact" className={styles.footer}>
@@ -34,8 +35,8 @@ function Footer({ settings }: FooterProps) {
         <div className={styles.grid}>
           <div id="about" className={styles.col}>
             <img
-              src={BRAND_ASSETS.headerLogo}
-              alt="Barry O's Old Market Tavern"
+              src={BRAND_ASSETS.footerLogo}
+              alt={venueName}
               className={styles.logo}
               width={220}
               height={72}
@@ -82,7 +83,7 @@ function Footer({ settings }: FooterProps) {
             <span className={styles.bottomSep} aria-hidden="true">
               ·
             </span>
-            &copy; {new Date().getFullYear()} Barry O&apos;s Old Market Tavern. All rights reserved.
+            &copy; {new Date().getFullYear()} {venueName}. All rights reserved.
           </p>
         </div>
       </div>

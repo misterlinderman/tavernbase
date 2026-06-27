@@ -52,7 +52,7 @@ These are the next features to build for multi-venue pitches:
 | Menu & specials module | Daily food/drink board managed from dashboard |
 | Private events inquiry | Lead capture for parties and buyouts |
 | Email notifications | Staff alerts on new photo submissions and contact messages |
-| Leagues integration tests | Automated standings/scoresheet test suite (L7.3) |
+| Leagues integration tests | **Shipped** — standings, scoresheet, round-robin, registration approval (`npm run test`) |
 
 ## Repository layout
 

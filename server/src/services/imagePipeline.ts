@@ -2,8 +2,8 @@ import { Readable } from 'stream';
 import sharp from 'sharp';
 import { cloudinary } from '../config/cloudinary';
 
-const PENDING_FOLDER = process.env.CLOUDINARY_PENDING_FOLDER || 'barryos/pending';
-const GALLERY_FOLDER = process.env.CLOUDINARY_PUBLIC_FOLDER || 'barryos/gallery';
+const PENDING_FOLDER = process.env.CLOUDINARY_PENDING_FOLDER || 'tavern/pending';
+const GALLERY_FOLDER = process.env.CLOUDINARY_PUBLIC_FOLDER || 'tavern/gallery';
 
 function bufferToStream(buffer: Buffer): Readable {
   const stream = new Readable();

@@ -51,8 +51,8 @@
 }
 
 .btn-outline:hover {
-  background: rgba(39, 184, 92, 0.08);
-  border-color: var(--green-bright);
+  background: rgba(219, 161, 53, 0.08);
+  border-color: var(--gold);
 }
 
 .pill {
@@ -76,8 +76,8 @@
 }
 
 .pill.approved {
-  background: rgba(39, 184, 92, 0.12);
-  color: var(--green-bright);
+  background: rgba(30, 56, 43, 0.45);
+  color: var(--light);
   border-color: var(--green-line);
 }
 
@@ -88,9 +88,9 @@
 }
 
 .pill.live {
-  background: rgba(39, 184, 92, 0.2);
-  color: var(--green-bright);
-  border-color: var(--green-bright);
+  background: rgba(219, 161, 53, 0.15);
+  color: var(--gold);
+  border-color: var(--gold);
 }
 
 .pill.off {

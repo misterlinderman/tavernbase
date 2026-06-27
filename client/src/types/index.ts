@@ -17,17 +17,20 @@ export interface Event {
 }
 
 export interface SiteSettings {
+  venueName: string;
+  photoConsentText: string;
   announcement: {
     enabled: boolean;
     message: string;
-    linkTarget: 'Events' | 'Christmas Party' | 'Menu' | 'Contact';
+    linkTarget: 'Events' | 'Featured' | 'Menu' | 'Contact';
   };
-  christmasParty: {
+  featuredBanner: {
     enabled: boolean;
     title: string;
-    date?: string;
+    subtitle: string;
     note: string;
-    ticketUrl: string;
+    buttonLabel: string;
+    buttonUrl: string;
   };
   hero: {
     videoUrl?: string;
@@ -95,9 +98,8 @@ export interface OverviewStats {
     enabled: boolean;
     message: string;
   };
-  christmas: {
+  featuredBanner: {
     enabled: boolean;
-    daysUntil: number | null;
   };
 }
 

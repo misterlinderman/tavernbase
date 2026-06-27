@@ -28,7 +28,7 @@ const router = Router();
 
 router.use(checkJwt);
 
-const LINK_TARGETS = ['Events', 'Christmas Party', 'Menu', 'Contact'] as const;
+const LINK_TARGETS = ['Events', 'Featured', 'Menu', 'Contact'] as const;
 type LinkTarget = (typeof LINK_TARGETS)[number];
 
 function isValidUrl(value: string): boolean {
@@ -40,15 +40,14 @@ function isValidUrl(value: string): boolean {
   }
 }
 
-function getDaysUntil(date?: Date): number | null {
-  if (!date) return null;
+function isValidButtonUrl(value: string): boolean {
+  if (!value.trim()) return true;
 
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  const target = new Date(date);
-  target.setHours(0, 0, 0, 0);
+  if (value.startsWith('/')) {
+    return true;
+  }
 
-  return Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return isValidUrl(value);
 }
 
 async function getSettingsDocument() {
@@ -86,31 +85,22 @@ function mergeSiteSettings(
     Object.assign(settings.announcement, announcement);
   }
 
-  if (body.christmasParty !== undefined) {
-    if (typeof body.christmasParty !== 'object' || body.christmasParty === null) {
-      throw createError('christmasParty must be an object', 400);
+  if (body.featuredBanner !== undefined) {
+    if (typeof body.featuredBanner !== 'object' || body.featuredBanner === null) {
+      throw createError('featuredBanner must be an object', 400);
     }
 
-    const christmasParty = body.christmasParty as Record<string, unknown>;
+    const featuredBanner = body.featuredBanner as Record<string, unknown>;
 
     if (
-      typeof christmasParty.ticketUrl === 'string' &&
-      christmasParty.ticketUrl.trim() !== '' &&
-      !isValidUrl(christmasParty.ticketUrl)
+      typeof featuredBanner.buttonUrl === 'string' &&
+      featuredBanner.buttonUrl.trim() !== '' &&
+      !isValidButtonUrl(featuredBanner.buttonUrl)
     ) {
-      throw createError('Invalid christmasParty.ticketUrl', 400);
+      throw createError('Invalid featuredBanner.buttonUrl', 400);
     }
 
-    if (christmasParty.date !== undefined && christmasParty.date !== null) {
-      const parsed = new Date(String(christmasParty.date));
-      if (Number.isNaN(parsed.getTime())) {
-        throw createError('Invalid christmasParty.date', 400);
-      }
-      settings.christmasParty.date = parsed;
-      delete christmasParty.date;
-    }
-
-    Object.assign(settings.christmasParty, christmasParty);
+    Object.assign(settings.featuredBanner, featuredBanner);
   }
 
   if (body.hero !== undefined) {
@@ -260,9 +250,8 @@ router.get(
           enabled: settings.announcement.enabled,
           message: settings.announcement.message,
         },
-        christmas: {
-          enabled: settings.christmasParty.enabled,
-          daysUntil: getDaysUntil(settings.christmasParty.date),
+        featuredBanner: {
+          enabled: settings.featuredBanner.enabled,
         },
       },
     });

@@ -176,7 +176,7 @@ function MediaPage() {
               id="instagram-handle"
               type="text"
               className={formStyles.input}
-              placeholder="@barryostavern"
+              placeholder="@yourtavern"
               value={handle}
               onChange={(e) => setHandle(e.target.value)}
             />

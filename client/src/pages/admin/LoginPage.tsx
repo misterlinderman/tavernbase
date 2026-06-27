@@ -23,7 +23,7 @@ function LoginPage() {
       <div className={styles.card}>
         <img
           src={BRAND_ASSETS.headerLogo}
-          alt="Barry O's Old Market Tavern"
+          alt="Your Tavern"
           className={styles.logo}
           width={240}
           height={80}

@@ -17,7 +17,7 @@ const ALL_NAV_ITEMS = [
   { path: '/admin/leagues/registrations', label: 'Registrations', roles: ['manager', 'staff', 'league_admin'] as const },
   { path: '/admin/leagues/people', label: 'People', roles: ['manager', 'staff', 'league_admin'] as const },
   { path: '/admin/announcement', label: 'Announcement Bar', roles: ['manager', 'staff'] as const },
-  { path: '/admin/christmas', label: 'Christmas Party', roles: ['manager', 'staff'] as const },
+  { path: '/admin/featured-banner', label: 'Featured Banner', roles: ['manager', 'staff'] as const },
   { path: '/admin/hours', label: 'Hours & Info', roles: ['manager', 'staff'] as const },
   { path: '/admin/media', label: 'Media & Social', roles: ['manager', 'staff'] as const },
 ] as const;
@@ -33,7 +33,7 @@ function Sidebar({ pendingCount, role }: SidebarProps) {
       <div className={styles.brand}>
         <img
           src={BRAND_ASSETS.headerLogo}
-          alt="Barry O's Old Market Tavern"
+          alt="Tavern Base"
           className={styles.logo}
           width={200}
           height={64}

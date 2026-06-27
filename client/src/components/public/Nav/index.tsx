@@ -7,6 +7,7 @@ import styles from './Nav.module.css';
 
 function Nav() {
   const { settings } = useSiteSettings();
+  const venueName = settings?.venueName ?? 'Your Tavern';
   const showLeagues = settings
     ? SPORTS.some((sport) => settings.sportsEnabled[sport])
     : false;
@@ -20,7 +21,7 @@ function Nav() {
         <Link to="/" className={styles.brand}>
           <img
             src={BRAND_ASSETS.headerLogo}
-            alt="Barry O's Old Market Tavern"
+            alt={venueName}
             className={styles.logo}
             width={220}
             height={72}
