@@ -1029,6 +1029,16 @@ function LeagueDetailPage() {
     [divisions]
   );
 
+  const leagueEntrantTypeForPreview = resolveEntrantType(league?.entrantType);
+  const registrationEntryFeePreview = useMemo(
+    () =>
+      formatRegistrationFeePreview(
+        parseEntryFeeDollars(registrationFeeDollars),
+        leagueEntrantTypeForPreview
+      ),
+    [registrationFeeDollars, leagueEntrantTypeForPreview]
+  );
+
   if (loading) {
     return <p className={styles.loading}>Loading league…</p>;
   }
@@ -1160,15 +1170,6 @@ function LeagueDetailPage() {
 
   const registrationEntrantLabel =
     leagueEntrantType === 'player' ? 'players' : 'teams';
-
-  const registrationEntryFeePreview = useMemo(
-    () =>
-      formatRegistrationFeePreview(
-        parseEntryFeeDollars(registrationFeeDollars),
-        leagueEntrantType
-      ),
-    [registrationFeeDollars, leagueEntrantType]
-  );
 
   const hasPendingPaymentRegistrations = registrations.some(
     (registration) => registration.status === 'pending_payment'
